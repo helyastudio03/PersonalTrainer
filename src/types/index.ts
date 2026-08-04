@@ -1,8 +1,30 @@
 // Domaine: musculation
 
+export const MUSCLE_GROUPS = [
+  'Pectoraux',
+  'Dos',
+  'Épaules',
+  'Biceps',
+  'Triceps',
+  'Jambes',
+  'Fessiers',
+  'Abdominaux',
+  'Mollets',
+  'Avant-bras',
+] as const;
+
+export type MuscleGroup = (typeof MUSCLE_GROUPS)[number];
+
+export interface ProgramDay {
+  id: string;
+  name: string; // ex: "Jour 1 - Push"
+}
+
 export interface ProgramExerciseTarget {
   id: string;
+  dayId: string;
   exerciseName: string;
+  muscleGroup: MuscleGroup;
   targetSets: number;
   targetReps: number;
   targetWeight?: number; // kg, optionnel
@@ -14,6 +36,7 @@ export interface Program {
   name: string;
   description?: string;
   createdAt: string; // ISO
+  days: ProgramDay[];
   strengthTargets: ProgramExerciseTarget[];
 }
 

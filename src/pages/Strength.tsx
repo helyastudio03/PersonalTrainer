@@ -133,8 +133,8 @@ export default function Strength({ appData }: { appData: UseAppData }) {
           </div>
 
           {selectedProgram && selectedProgram.strengthTargets.length > 0 && (
-            <div className="border border-indigo-200 dark:border-indigo-900 bg-indigo-50 dark:bg-indigo-950/40 rounded-lg p-3">
-              <div className="flex justify-between items-center mb-2">
+            <div className="border border-indigo-200 dark:border-indigo-900 bg-indigo-50 dark:bg-indigo-950/40 rounded-lg p-3 space-y-3">
+              <div className="flex justify-between items-center">
                 <p className="text-xs font-semibold text-indigo-700 dark:text-indigo-300">
                   Exercices de "{selectedProgram.name}"
                 </p>
@@ -148,19 +148,28 @@ export default function Strength({ appData }: { appData: UseAppData }) {
                   + Tout ajouter
                 </button>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {selectedProgram.strengthTargets.map((t) => (
-                  <button
-                    key={t.id}
-                    type="button"
-                    onClick={() => addExerciseFromTarget(t)}
-                    className="text-xs px-2 py-1 rounded-full border border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900"
-                  >
-                    + {t.exerciseName} ({t.targetSets}×{t.targetReps}
-                    {t.targetWeight ? ` @ ${t.targetWeight}kg` : ''})
-                  </button>
-                ))}
-              </div>
+              {selectedProgram.days.map((day) => {
+                const dayTargets = selectedProgram.strengthTargets.filter((t) => t.dayId === day.id);
+                if (dayTargets.length === 0) return null;
+                return (
+                  <div key={day.id}>
+                    <p className="text-xs text-indigo-600/70 dark:text-indigo-400/70 mb-1">{day.name}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {dayTargets.map((t) => (
+                        <button
+                          key={t.id}
+                          type="button"
+                          onClick={() => addExerciseFromTarget(t)}
+                          className="text-xs px-2 py-1 rounded-full border border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900"
+                        >
+                          + {t.exerciseName} ({t.targetSets}×{t.targetReps}
+                          {t.targetWeight ? ` @ ${t.targetWeight}kg` : ''})
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
 

@@ -1,4 +1,4 @@
-import type { StrengthSession } from '../types';
+import type { MuscleGroup, Program, StrengthSession } from '../types';
 
 // Formule d'Epley pour estimer le 1RM (répétition maximale)
 export function estimate1RM(weightKg: number, reps: number): number {
@@ -82,6 +82,26 @@ export function getStrengthProgressionSeries(
   }
 
   return points.sort((a, b) => a.date.localeCompare(b.date));
+}
+
+// Volume hebdomadaire par groupe musculaire, déduit du programme (chaque jour
+// du programme est supposé réalisé une fois par semaine).
+
+export interface MuscleGroupVolume {
+  muscleGroup: MuscleGroup;
+  weeklySets: number;
+}
+
+export function getWeeklySetsByMuscleGroup(
+  strengthTargets: Program['strengthTargets'],
+): MuscleGroupVolume[] {
+  const totals = new Map<MuscleGroup, number>();
+  for (const target of strengthTargets) {
+    totals.set(target.muscleGroup, (totals.get(target.muscleGroup) ?? 0) + target.targetSets);
+  }
+  return [...totals.entries()]
+    .map(([muscleGroup, weeklySets]) => ({ muscleGroup, weeklySets }))
+    .sort((a, b) => b.weeklySets - a.weeklySets);
 }
 
 export function listStrengthExerciseNames(sessions: StrengthSession[]): string[] {
