@@ -1,7 +1,13 @@
 import { useState } from 'react';
 import { v4 as uuid } from 'uuid';
 import type { UseAppData } from '../lib/useAppData';
-import type { ProgramExerciseTarget, StrengthExerciseEntry, StrengthSession, StrengthSet } from '../types';
+import type {
+  Program,
+  ProgramExerciseTarget,
+  StrengthExerciseEntry,
+  StrengthSession,
+  StrengthSet,
+} from '../types';
 import { Button, Card, EmptyState, IconButton, Input, Label } from '../components/ui';
 import { suggestNextStrength } from '../lib/suggestions';
 import { formatRepRange, formatSetsSummary, getLastPerformance } from '../lib/records';
@@ -31,13 +37,223 @@ function exerciseFromTarget(target: ProgramExerciseTarget): StrengthExerciseEntr
   };
 }
 
+const selectClassName =
+  'px-2 py-1 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 text-xs';
+
+function SessionCard({
+  session,
+  programs,
+  updateStrengthSession,
+  deleteStrengthSession,
+}: {
+  session: StrengthSession;
+  programs: Program[];
+  updateStrengthSession: UseAppData['updateStrengthSession'];
+  deleteStrengthSession: UseAppData['deleteStrengthSession'];
+}) {
+  const [editingMeta, setEditingMeta] = useState(false);
+  const [metaDate, setMetaDate] = useState(session.date);
+  const [metaProgramId, setMetaProgramId] = useState(session.programId ?? '');
+
+  const [editingExerciseId, setEditingExerciseId] = useState<string | null>(null);
+  const [exerciseDraft, setExerciseDraft] = useState<StrengthSet[]>([]);
+
+  function startEditMeta() {
+    setMetaDate(session.date);
+    setMetaProgramId(session.programId ?? '');
+    setEditingMeta(true);
+  }
+
+  function saveMeta() {
+    updateStrengthSession({ ...session, date: metaDate, programId: metaProgramId || undefined });
+    setEditingMeta(false);
+  }
+
+  function startEditExercise(entry: StrengthExerciseEntry) {
+    setEditingExerciseId(entry.id);
+    setExerciseDraft(entry.sets.map((s) => ({ ...s })));
+  }
+
+  function updateDraftSet(setId: string, patch: Partial<StrengthSet>) {
+    setExerciseDraft((sets) => sets.map((s) => (s.id === setId ? { ...s, ...patch } : s)));
+  }
+
+  function addDraftSet() {
+    setExerciseDraft((sets) => [...sets, { id: uuid(), reps: 8, weightKg: 0 }]);
+  }
+
+  function removeDraftSet(setId: string) {
+    setExerciseDraft((sets) => sets.filter((s) => s.id !== setId));
+  }
+
+  function saveExercise() {
+    if (exerciseDraft.length === 0) return;
+    updateStrengthSession({
+      ...session,
+      exercises: session.exercises.map((e) =>
+        e.id === editingExerciseId ? { ...e, sets: exerciseDraft } : e,
+      ),
+    });
+    setEditingExerciseId(null);
+  }
+
+  function removeExerciseFromSession(entryId: string) {
+    if (session.exercises.length <= 1) {
+      deleteStrengthSession(session.id);
+      return;
+    }
+    updateStrengthSession({
+      ...session,
+      exercises: session.exercises.filter((e) => e.id !== entryId),
+    });
+  }
+
+  return (
+    <Card>
+      <div className="flex justify-between items-start gap-2">
+        {editingMeta ? (
+          <div className="flex flex-wrap gap-1.5 items-center">
+            <Input
+              type="date"
+              value={metaDate}
+              onChange={(e) => setMetaDate(e.target.value)}
+              className="w-36"
+            />
+            <select
+              className={selectClassName}
+              value={metaProgramId}
+              onChange={(e) => setMetaProgramId(e.target.value)}
+            >
+              <option value="">Aucun programme</option>
+              {programs.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+            <IconButton variant="secondary" onClick={saveMeta} title="Valider" aria-label="Valider">
+              ✓
+            </IconButton>
+            <IconButton
+              variant="secondary"
+              onClick={() => setEditingMeta(false)}
+              title="Annuler"
+              aria-label="Annuler"
+            >
+              ✕
+            </IconButton>
+          </div>
+        ) : (
+          <h3 className="font-semibold">{session.date}</h3>
+        )}
+        <div className="flex gap-1.5 shrink-0">
+          {!editingMeta && (
+            <IconButton
+              variant="secondary"
+              onClick={startEditMeta}
+              title="Modifier la date / le programme"
+              aria-label="Modifier la date ou le programme"
+            >
+              📅
+            </IconButton>
+          )}
+          <IconButton
+            variant="danger"
+            onClick={() => deleteStrengthSession(session.id)}
+            title="Supprimer la séance"
+            aria-label="Supprimer la séance"
+          >
+            ✕
+          </IconButton>
+        </div>
+      </div>
+
+      <div className="mt-1.5 space-y-1.5">
+        {session.exercises.map((e) =>
+          editingExerciseId === e.id ? (
+            <div
+              key={e.id}
+              className="border border-indigo-200 dark:border-indigo-800 rounded-lg p-2 space-y-1"
+            >
+              <p className="text-sm font-medium">{e.exerciseName}</p>
+              {exerciseDraft.map((s, i) => (
+                <div key={s.id} className="flex items-center gap-2">
+                  <span className="w-5 shrink-0 text-xs text-gray-400">#{i + 1}</span>
+                  <Input
+                    type="number"
+                    min={0}
+                    placeholder="Reps"
+                    value={s.reps}
+                    onChange={(ev) => updateDraftSet(s.id, { reps: Number(ev.target.value) })}
+                  />
+                  <Input
+                    type="number"
+                    min={0}
+                    step={0.5}
+                    placeholder="Poids kg"
+                    value={s.weightKg === 0 ? '' : s.weightKg}
+                    onChange={(ev) =>
+                      updateDraftSet(s.id, {
+                        weightKg: ev.target.value ? Number(ev.target.value) : 0,
+                      })
+                    }
+                  />
+                  <button
+                    className="shrink-0 text-red-500 text-sm"
+                    onClick={() => removeDraftSet(s.id)}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+              <div className="flex gap-1.5 pt-1">
+                <Button variant="secondary" onClick={addDraftSet}>
+                  + Série
+                </Button>
+                <Button onClick={saveExercise}>Valider</Button>
+                <Button variant="secondary" onClick={() => setEditingExerciseId(null)}>
+                  Annuler
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div key={e.id} className="flex justify-between items-start gap-2 text-sm">
+              <div>
+                <span className="font-medium">{e.exerciseName}: </span>
+                {formatSetsSummary(e.sets)}
+              </div>
+              <div className="flex gap-1 shrink-0">
+                <IconButton
+                  variant="secondary"
+                  onClick={() => startEditExercise(e)}
+                  title={`Modifier ${e.exerciseName}`}
+                  aria-label={`Modifier ${e.exerciseName}`}
+                >
+                  ✏️
+                </IconButton>
+                <IconButton
+                  variant="danger"
+                  onClick={() => removeExerciseFromSession(e.id)}
+                  title={`Retirer ${e.exerciseName}`}
+                  aria-label={`Retirer ${e.exerciseName}`}
+                >
+                  ✕
+                </IconButton>
+              </div>
+            </div>
+          ),
+        )}
+      </div>
+    </Card>
+  );
+}
+
 export default function Strength({ appData }: { appData: UseAppData }) {
   const { data, addStrengthSession, updateStrengthSession, deleteStrengthSession } = appData;
   const [date, setDate] = useState(todayIso());
   const [programId, setProgramId] = useState('');
   const [exercises, setExercises] = useState<StrengthExerciseEntry[]>([emptyExercise()]);
   const [showForm, setShowForm] = useState(false);
-  const [editingSession, setEditingSession] = useState<StrengthSession | null>(null);
 
   function addExercise() {
     setExercises((ex) => [...ex, emptyExercise()]);
@@ -90,34 +306,16 @@ export default function Strength({ appData }: { appData: UseAppData }) {
     setExercises([emptyExercise()]);
     setDate(todayIso());
     setProgramId('');
-    setEditingSession(null);
-  }
-
-  function startEdit(session: StrengthSession) {
-    setEditingSession(session);
-    setDate(session.date);
-    setProgramId(session.programId ?? '');
-    setExercises(session.exercises.map((e) => ({ ...e, sets: e.sets.map((s) => ({ ...s })) })));
-    setShowForm(true);
   }
 
   function submit() {
     const validExercises = exercises.filter((e) => e.exerciseName.trim() && e.sets.length > 0);
     if (validExercises.length === 0) return;
-    if (editingSession) {
-      updateStrengthSession({
-        ...editingSession,
-        date,
-        programId: programId || undefined,
-        exercises: validExercises,
-      });
-    } else {
-      addStrengthSession({
-        date,
-        programId: programId || undefined,
-        exercises: validExercises,
-      });
-    }
+    addStrengthSession({
+      date,
+      programId: programId || undefined,
+      exercises: validExercises,
+    });
     resetDraft();
     setShowForm(false);
   }
@@ -139,11 +337,6 @@ export default function Strength({ appData }: { appData: UseAppData }) {
 
       {showForm && (
         <Card className="space-y-3">
-          {editingSession && (
-            <h2 className="text-sm font-semibold text-gray-500">
-              Modifier la séance du {editingSession.date}
-            </h2>
-          )}
           <div className="grid grid-cols-2 gap-2">
             <div>
               <Label>Date</Label>
@@ -285,9 +478,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
             <Button variant="secondary" onClick={addExercise}>
               + Exercice
             </Button>
-            <Button onClick={submit}>
-              {editingSession ? 'Enregistrer les modifications' : 'Enregistrer la séance'}
-            </Button>
+            <Button onClick={submit}>Enregistrer la séance</Button>
           </div>
         </Card>
       )}
@@ -297,37 +488,13 @@ export default function Strength({ appData }: { appData: UseAppData }) {
       ) : (
         <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3 items-start">
           {sortedSessions.map((s) => (
-            <Card key={s.id}>
-              <div className="flex justify-between items-start">
-                <h3 className="font-semibold">{s.date}</h3>
-                <div className="flex gap-1.5 shrink-0">
-                  <IconButton
-                    variant="secondary"
-                    onClick={() => startEdit(s)}
-                    title="Modifier"
-                    aria-label="Modifier"
-                  >
-                    ✏️
-                  </IconButton>
-                  <IconButton
-                    variant="danger"
-                    onClick={() => deleteStrengthSession(s.id)}
-                    title="Supprimer"
-                    aria-label="Supprimer"
-                  >
-                    ✕
-                  </IconButton>
-                </div>
-              </div>
-              <div className="mt-1.5 space-y-0.5">
-                {s.exercises.map((e) => (
-                  <div key={e.id} className="text-sm">
-                    <span className="font-medium">{e.exerciseName}: </span>
-                    {formatSetsSummary(e.sets)}
-                  </div>
-                ))}
-              </div>
-            </Card>
+            <SessionCard
+              key={s.id}
+              session={s}
+              programs={data.programs}
+              updateStrengthSession={updateStrengthSession}
+              deleteStrengthSession={deleteStrengthSession}
+            />
           ))}
         </div>
       )}
