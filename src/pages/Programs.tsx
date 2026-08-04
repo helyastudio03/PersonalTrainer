@@ -19,7 +19,7 @@ function VolumeChart({ strengthTargets }: { strengthTargets: ProgramExerciseTarg
   if (volumes.length === 0) return null;
   return (
     <div>
-      <p className="text-xs font-semibold text-gray-500 mb-1">Séries par semaine et par groupe musculaire</p>
+      <p className="text-xs font-semibold text-gray-500 mb-1.5">Séries par semaine et par groupe musculaire</p>
       <div className="flex flex-wrap gap-1.5">
         {volumes.map((v) => (
           <span

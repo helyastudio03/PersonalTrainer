@@ -163,6 +163,7 @@ export function startOfWeek(dateStr: string): string {
 export interface ProgressionPoint {
   label: string; // date de séance, ou date de début de semaine
   value: number;
+  isRecord: boolean; // nouveau maximum jamais atteint jusqu'à ce point
 }
 
 export function getStrengthMetricSeries(
@@ -173,36 +174,46 @@ export function getStrengthMetricSeries(
 ): ProgressionPoint[] {
   const sessionMetrics = computeSessionSetMetrics(sessions, exerciseName);
 
+  let points: { label: string; value: number }[];
   if (period === 'session') {
-    return sessionMetrics.map((m) => ({ label: m.date, value: pickMetric(m, metric) }));
+    points = sessionMetrics.map((m) => ({ label: m.date, value: pickMetric(m, metric) }));
+  } else {
+    const byWeek = new Map<string, SessionSetMetrics[]>();
+    for (const m of sessionMetrics) {
+      const week = startOfWeek(m.date);
+      const list = byWeek.get(week);
+      if (list) list.push(m);
+      else byWeek.set(week, [m]);
+    }
+
+    points = [...byWeek.entries()]
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([week, list]) => ({
+        label: week,
+        value:
+          metric === 'volume'
+            ? list.reduce((sum, m) => sum + m.volume, 0)
+            : Math.max(...list.map((m) => pickMetric(m, metric))),
+      }));
   }
 
-  const byWeek = new Map<string, SessionSetMetrics[]>();
-  for (const m of sessionMetrics) {
-    const week = startOfWeek(m.date);
-    const list = byWeek.get(week);
-    if (list) list.push(m);
-    else byWeek.set(week, [m]);
-  }
-
-  return [...byWeek.entries()]
-    .sort((a, b) => a[0].localeCompare(b[0]))
-    .map(([week, list]) => ({
-      label: week,
-      value:
-        metric === 'volume'
-          ? list.reduce((sum, m) => sum + m.volume, 0)
-          : Math.max(...list.map((m) => pickMetric(m, metric))),
-    }));
+  let runningMax = -Infinity;
+  return points.map((p) => {
+    const isRecord = p.value > runningMax;
+    if (isRecord) runningMax = p.value;
+    return { ...p, isRecord };
+  });
 }
 
 export interface MultiExerciseProgressionPoint {
   label: string;
-  [exerciseName: string]: string | number;
+  [key: string]: string | number | boolean;
 }
 
 // Fusionne les séries de plusieurs exercices sur un même axe (une clé par
-// exercice), pour afficher plusieurs courbes sur un seul graphique.
+// exercice), pour afficher plusieurs courbes sur un seul graphique. Le
+// record de chaque exercice à un point donné est stocké sous la clé
+// "<exercice>__record" pour marquer les records sur le graphique.
 export function getMultiExerciseMetricSeries(
   sessions: StrengthSession[],
   exerciseNames: string[],
@@ -215,8 +226,16 @@ export function getMultiExerciseMetricSeries(
     const series = getStrengthMetricSeries(sessions, name, metric, period);
     for (const point of series) {
       const existing = byLabel.get(point.label);
-      if (existing) existing[name] = point.value;
-      else byLabel.set(point.label, { label: point.label, [name]: point.value });
+      if (existing) {
+        existing[name] = point.value;
+        existing[`${name}__record`] = point.isRecord;
+      } else {
+        byLabel.set(point.label, {
+          label: point.label,
+          [name]: point.value,
+          [`${name}__record`]: point.isRecord,
+        });
+      }
     }
   }
 

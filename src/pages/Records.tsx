@@ -138,7 +138,7 @@ export default function Records({ appData }: { appData: UseAppData }) {
 
         {availableExerciseNames.length > 0 && (
           <div>
-            <p className="text-xs font-semibold text-gray-500 mb-1">Exercice</p>
+            <p className="text-xs font-semibold text-gray-500 mb-1.5">Exercice</p>
             <div className="space-y-1.5">
               {groupsToShow.map((mg) => {
                 const names = exercisesByGroup.map.get(mg);
@@ -199,7 +199,7 @@ export default function Records({ appData }: { appData: UseAppData }) {
       {filteredRecords.length === 0 ? (
         <EmptyState>Aucun record pour ce filtre.</EmptyState>
       ) : (
-        <div className="grid md:grid-cols-2 gap-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {[...byExercise.entries()].map(([exerciseName, exerciseRecords]) => (
             <Card key={exerciseName}>
               <h2 className="font-semibold mb-2">{exerciseName}</h2>
@@ -207,16 +207,16 @@ export default function Records({ appData }: { appData: UseAppData }) {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="text-left text-gray-500 border-b border-gray-200 dark:border-gray-800">
-                      <th className="py-1 pr-4">Répétitions</th>
-                      <th className="py-1 pr-4">Poids max</th>
-                      <th className="py-1 pr-4">Date</th>
+                      <th className="py-1 pr-3">Répétitions</th>
+                      <th className="py-1 pr-3">Poids</th>
+                      <th className="py-1">Date</th>
                     </tr>
                   </thead>
                   <tbody>
                     {exerciseRecords.map((r) => (
                       <tr key={r.reps} className="border-b border-gray-100 dark:border-gray-900">
-                        <td className="py-1 pr-4 font-medium">{r.reps}</td>
-                        <td className="py-1 pr-4">
+                        <td className="py-1 pr-3 font-medium">{r.reps}</td>
+                        <td className="py-1 pr-3">
                           {r.maxWeight} kg
                           {r.previousMaxWeight !== null && (
                             <span
@@ -227,7 +227,7 @@ export default function Records({ appData }: { appData: UseAppData }) {
                             </span>
                           )}
                         </td>
-                        <td className="py-1 pr-4 text-gray-500">{r.date}</td>
+                        <td className="py-1 text-gray-500">{r.date}</td>
                       </tr>
                     ))}
                   </tbody>

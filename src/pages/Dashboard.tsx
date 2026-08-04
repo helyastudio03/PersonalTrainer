@@ -32,6 +32,8 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
 
   return (
     <div className="space-y-3">
+      <h1 className="text-xl font-bold">Dashboard</h1>
+
       <div className="grid grid-cols-3 gap-3">
         <Card>
           <p className="text-xs text-gray-500">Programmes</p>

@@ -33,6 +33,34 @@ function selectClassName() {
   return 'px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 text-sm';
 }
 
+function renderRecordDot(color: string, exerciseName: string) {
+  return (props: {
+    cx?: number;
+    cy?: number;
+    index?: number;
+    payload?: Record<string, string | number | boolean>;
+  }) => {
+    const { cx, cy, index, payload } = props;
+    if (cx == null || cy == null) return <g key={`dot-${exerciseName}-${index}`} />;
+    const isRecord = payload?.[`${exerciseName}__record`];
+    if (isRecord) {
+      return (
+        <text
+          key={`dot-${exerciseName}-${index}`}
+          x={cx}
+          y={cy}
+          textAnchor="middle"
+          dominantBaseline="central"
+          fontSize={14}
+        >
+          ⭐
+        </text>
+      );
+    }
+    return <circle key={`dot-${exerciseName}-${index}`} cx={cx} cy={cy} r={3} fill={color} stroke={color} />;
+  };
+}
+
 function chipClassName(active: boolean) {
   return `text-xs px-2 py-1 rounded-full border transition-colors ${
     active
@@ -281,18 +309,22 @@ export default function Progression({ appData }: { appData: UseAppData }) {
               <YAxis fontSize={12} allowDecimals={false} />
               <Tooltip />
               <Legend wrapperStyle={{ fontSize: 12 }} />
-              {activeExercises.map((name, i) => (
-                <Line
-                  key={name}
-                  type="monotone"
-                  dataKey={name}
-                  name={name}
-                  stroke={LINE_COLORS[i % LINE_COLORS.length]}
-                  strokeWidth={2}
-                  connectNulls
-                  isAnimationActive={false}
-                />
-              ))}
+              {activeExercises.map((name, i) => {
+                const color = LINE_COLORS[i % LINE_COLORS.length];
+                return (
+                  <Line
+                    key={name}
+                    type="monotone"
+                    dataKey={name}
+                    name={name}
+                    stroke={color}
+                    strokeWidth={2}
+                    connectNulls
+                    isAnimationActive={false}
+                    dot={renderRecordDot(color, name)}
+                  />
+                );
+              })}
             </LineChart>
           </ResponsiveContainer>
         )}
