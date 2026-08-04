@@ -85,6 +85,12 @@ export default function Strength({ appData }: { appData: UseAppData }) {
     );
   }
 
+  function resetDraft() {
+    setExercises([emptyExercise()]);
+    setDate(todayIso());
+    setProgramId('');
+  }
+
   function submit() {
     const validExercises = exercises.filter((e) => e.exerciseName.trim() && e.sets.length > 0);
     if (validExercises.length === 0) return;
@@ -93,9 +99,13 @@ export default function Strength({ appData }: { appData: UseAppData }) {
       programId: programId || undefined,
       exercises: validExercises,
     });
-    setExercises([emptyExercise()]);
-    setDate(todayIso());
+    resetDraft();
     setShowForm(false);
+  }
+
+  function toggleForm() {
+    if (showForm) resetDraft();
+    setShowForm((s) => !s);
   }
 
   const sortedSessions = [...data.strengthSessions].sort((a, b) => b.date.localeCompare(a.date));
@@ -105,9 +115,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
     <div className="space-y-3">
       <div className="flex justify-between items-center">
         <h1 className="text-xl font-bold">Séances</h1>
-        <Button onClick={() => setShowForm((s) => !s)}>
-          {showForm ? 'Annuler' : '+ Nouvelle séance'}
-        </Button>
+        <Button onClick={toggleForm}>{showForm ? 'Annuler' : '+ Nouvelle séance'}</Button>
       </div>
 
       {showForm && (
