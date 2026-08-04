@@ -1,4 +1,4 @@
-import type { MuscleGroup, Program, StrengthSession } from '../types';
+import type { MuscleGroup, Program, StrengthSession, StrengthSet } from '../types';
 
 export function formatRepRange(min: number, max: number): string {
   return min === max ? `${min}` : `${min}-${max}`;
@@ -38,6 +38,28 @@ export function getStrengthPRsByRepWeight(sessions: StrengthSession[]): RepWeigh
     const nameCmp = a.exerciseName.localeCompare(b.exerciseName);
     return nameCmp !== 0 ? nameCmp : a.reps - b.reps;
   });
+}
+
+export interface LastPerformance {
+  date: string;
+  sets: StrengthSet[];
+}
+
+// Dernière séance où l'exercice a été réalisé, pour servir de référence
+// pendant la saisie d'une nouvelle séance ("la dernière fois: ...").
+export function getLastPerformance(
+  sessions: StrengthSession[],
+  exerciseName: string,
+): LastPerformance | null {
+  const relevant = sessions
+    .filter((s) => s.exercises.some((e) => e.exerciseName === exerciseName))
+    .sort((a, b) => b.date.localeCompare(a.date));
+
+  const last = relevant[0];
+  if (!last) return null;
+
+  const entry = last.exercises.find((e) => e.exerciseName === exerciseName)!;
+  return { date: last.date, sets: entry.sets };
 }
 
 // Courbes de progression configurables (poids, reps, poids×reps, volume),

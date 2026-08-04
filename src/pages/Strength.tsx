@@ -4,7 +4,7 @@ import type { UseAppData } from '../lib/useAppData';
 import type { ProgramExerciseTarget, StrengthExerciseEntry, StrengthSet } from '../types';
 import { Button, Card, EmptyState, Input, Label } from '../components/ui';
 import { suggestNextStrength } from '../lib/suggestions';
-import { formatRepRange } from '../lib/records';
+import { formatRepRange, getLastPerformance } from '../lib/records';
 
 function todayIso() {
   return new Date().toISOString().slice(0, 10);
@@ -189,6 +189,9 @@ export default function Strength({ appData }: { appData: UseAppData }) {
               const suggestion = ex.exerciseName
                 ? suggestNextStrength(data.strengthSessions, ex.exerciseName)
                 : null;
+              const lastPerformance = ex.exerciseName
+                ? getLastPerformance(data.strengthSessions, ex.exerciseName)
+                : null;
               return (
                 <div key={ex.id} className="border border-gray-200 dark:border-gray-800 rounded-lg p-2">
                   <div className="flex gap-2 items-center mb-1.5">
@@ -201,6 +204,13 @@ export default function Strength({ appData }: { appData: UseAppData }) {
                       ✕
                     </button>
                   </div>
+
+                  {lastPerformance && (
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                      Dernière fois ({lastPerformance.date}):{' '}
+                      {lastPerformance.sets.map((s) => `${s.reps}×${s.weightKg}kg`).join(', ')}
+                    </p>
+                  )}
 
                   {suggestion && (
                     <p className="text-xs text-indigo-600 dark:text-indigo-400 mb-1.5">
