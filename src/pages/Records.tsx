@@ -182,7 +182,17 @@ export default function Records({ appData }: { appData: UseAppData }) {
                     {exerciseRecords.map((r) => (
                       <tr key={r.reps} className="border-b border-gray-100 dark:border-gray-900">
                         <td className="py-1 pr-4 font-medium">{r.reps}</td>
-                        <td className="py-1 pr-4">{r.maxWeight} kg</td>
+                        <td className="py-1 pr-4">
+                          {r.maxWeight} kg
+                          {r.previousMaxWeight !== null && (
+                            <span
+                              className="ml-1 text-green-600 dark:text-green-400"
+                              title={`Précédent record: ${r.previousMaxWeight} kg`}
+                            >
+                              ↗
+                            </span>
+                          )}
+                        </td>
                         <td className="py-1 pr-4 text-gray-500">{r.date}</td>
                       </tr>
                     ))}

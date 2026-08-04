@@ -4,57 +4,65 @@ export function formatRepRange(min: number, max: number): string {
   return min === max ? `${min}` : `${min}-${max}`;
 }
 
-// Regroupe les séries consécutives identiques (mêmes reps/poids) pour un
-// affichage plus lisible, ex: "2×(7×67.5kg), 8×67.5kg" au lieu de
-// "7×67.5kg, 7×67.5kg, 8×67.5kg".
+// Liste les séries d'une entrée, espacées, avec l'unité "kg" mentionnée
+// une seule fois à la fin (ex: "7×67.5  7×67.5  8×67.5 kg").
 export function formatSetsSummary(sets: StrengthSet[]): string {
-  const groups: { reps: number; weightKg: number; count: number }[] = [];
-
-  for (const set of sets) {
-    const last = groups[groups.length - 1];
-    if (last && last.reps === set.reps && last.weightKg === set.weightKg) {
-      last.count += 1;
-    } else {
-      groups.push({ reps: set.reps, weightKg: set.weightKg, count: 1 });
-    }
-  }
-
-  return groups
-    .map((g) => (g.count > 1 ? `${g.count}×(${g.reps}×${g.weightKg}kg)` : `${g.reps}×${g.weightKg}kg`))
-    .join(', ');
+  if (sets.length === 0) return '';
+  return `${sets.map((s) => `${s.reps}×${s.weightKg}`).join('   ')} kg`;
 }
 
 // Records personnels par couple (répétitions, poids): pour chaque exercice
-// et chaque nombre de répétitions déjà réalisé, le poids maximal soulevé.
+// et chaque nombre de répétitions déjà réalisé, le poids maximal soulevé,
+// ainsi que le précédent record (pour afficher une tendance de progression).
 export interface RepWeightRecord {
   exerciseName: string;
   reps: number;
   maxWeight: number;
   date: string;
+  previousMaxWeight: number | null;
 }
 
 export function getStrengthPRsByRepWeight(sessions: StrengthSession[]): RepWeightRecord[] {
-  const byKey = new Map<string, RepWeightRecord>();
+  const byKey = new Map<string, { exerciseName: string; reps: number; weightKg: number; date: string }[]>();
 
   for (const session of sessions) {
     for (const entry of session.exercises) {
       for (const set of entry.sets) {
         const key = `${entry.exerciseName}__${set.reps}`;
-        const existing = byKey.get(key);
-
-        if (!existing || set.weightKg > existing.maxWeight) {
-          byKey.set(key, {
-            exerciseName: entry.exerciseName,
-            reps: set.reps,
-            maxWeight: set.weightKg,
-            date: session.date,
-          });
-        }
+        const point = { exerciseName: entry.exerciseName, reps: set.reps, weightKg: set.weightKg, date: session.date };
+        const list = byKey.get(key);
+        if (list) list.push(point);
+        else byKey.set(key, [point]);
       }
     }
   }
 
-  return [...byKey.values()].sort((a, b) => {
+  const records: RepWeightRecord[] = [];
+  for (const points of byKey.values()) {
+    const sorted = [...points].sort((a, b) => a.date.localeCompare(b.date));
+
+    let maxWeight = -Infinity;
+    let maxDate = '';
+    let previousMaxWeight: number | null = null;
+
+    for (const p of sorted) {
+      if (p.weightKg > maxWeight) {
+        previousMaxWeight = maxWeight === -Infinity ? null : maxWeight;
+        maxWeight = p.weightKg;
+        maxDate = p.date;
+      }
+    }
+
+    records.push({
+      exerciseName: sorted[0].exerciseName,
+      reps: sorted[0].reps,
+      maxWeight,
+      date: maxDate,
+      previousMaxWeight,
+    });
+  }
+
+  return records.sort((a, b) => {
     const nameCmp = a.exerciseName.localeCompare(b.exerciseName);
     return nameCmp !== 0 ? nameCmp : a.reps - b.reps;
   });
