@@ -180,9 +180,7 @@ export default function Progression({ appData }: { appData: UseAppData }) {
         </div>
 
         <div>
-          <p className="text-xs font-semibold text-ash-300 mb-1.5">
-            Exercices (une courbe par exercice sélectionné)
-          </p>
+          <p className="text-xs font-semibold text-ash-300 mb-1.5">Exercices</p>
           {filteredExerciseNames.length === 0 ? (
             <p className="text-xs text-ash-400">Aucun exercice pour ce filtre.</p>
           ) : (
