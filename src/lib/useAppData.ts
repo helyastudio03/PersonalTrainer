@@ -60,6 +60,10 @@ export function useAppData() {
     }));
   }, []);
 
+  const clearStrengthSessions = useCallback(() => {
+    setData((d) => ({ ...d, strengthSessions: [] }));
+  }, []);
+
   return {
     data,
     addProgram,
@@ -69,6 +73,7 @@ export function useAppData() {
     addStrengthSession,
     updateStrengthSession,
     deleteStrengthSession,
+    clearStrengthSessions,
   };
 }
 

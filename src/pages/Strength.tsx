@@ -255,8 +255,7 @@ function SessionCard({
           ) : (
             <div key={e.id} className="group flex justify-between items-start gap-2 text-sm">
               <div>
-                <span className="font-medium">{e.exerciseName}: </span>
-                {formatSetsSummary(e.sets)}
+                {e.exerciseName}: {formatSetsSummary(e.sets)}
               </div>
               <div className="flex gap-1 shrink-0">
                 <IconButton
@@ -285,7 +284,8 @@ function SessionCard({
 }
 
 export default function Strength({ appData }: { appData: UseAppData }) {
-  const { data, addStrengthSession, updateStrengthSession, deleteStrengthSession } = appData;
+  const { data, addStrengthSession, updateStrengthSession, deleteStrengthSession, clearStrengthSessions } =
+    appData;
   const [date, setDate] = useState(todayIso());
   const [name, setName] = useState('');
   const [notes, setNotes] = useState('');
@@ -372,6 +372,13 @@ export default function Strength({ appData }: { appData: UseAppData }) {
     }
   }
 
+  function clearHistory() {
+    if (data.strengthSessions.length === 0) return;
+    if (window.confirm('Supprimer tout l\'historique des séances ? Cette action est irréversible.')) {
+      clearStrengthSessions();
+    }
+  }
+
   const sortedSessions = [...data.strengthSessions].sort((a, b) => b.date.localeCompare(a.date));
   const selectedProgram = data.programs.find((p) => p.id === programId);
 
@@ -379,7 +386,14 @@ export default function Strength({ appData }: { appData: UseAppData }) {
     <div className="space-y-3">
       <div className="flex justify-between items-center">
         <h1 className="text-xl font-bold">Séances</h1>
-        <Button onClick={toggleForm}>{showForm ? 'Annuler' : '+ Nouvelle séance'}</Button>
+        <div className="flex gap-2">
+          {sortedSessions.length > 0 && (
+            <Button variant="danger" onClick={clearHistory}>
+              Supprimer l'historique
+            </Button>
+          )}
+          <Button onClick={toggleForm}>{showForm ? 'Annuler' : '+ Nouvelle séance'}</Button>
+        </div>
       </div>
 
       {showForm && (
@@ -540,7 +554,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
       {sortedSessions.length === 0 ? (
         <EmptyState>Aucune séance de musculation enregistrée.</EmptyState>
       ) : (
-        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-start">
+        <div className="grid gap-2 sm:grid-cols-2 items-start">
           {sortedSessions.map((s) => (
             <SessionCard
               key={s.id}
