@@ -309,7 +309,7 @@ export default function Programs({ appData }: { appData: UseAppData }) {
                   <h3 className="font-semibold flex items-center gap-1.5">
                     {p.name}
                     {data.activeProgramId === p.id && (
-                      <span className="text-xs font-medium px-1.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
+                      <span className="text-xs font-medium px-1.5 py-0.5 rounded-full bg-ember-100 text-ember-700 dark:bg-ember-950 dark:text-ember-300">
                         Actif
                       </span>
                     )}
@@ -351,7 +351,7 @@ export default function Programs({ appData }: { appData: UseAppData }) {
                 <button
                   type="button"
                   onClick={() => generateFakeHistory(p)}
-                  className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
+                  className="text-xs text-ember-600 dark:text-ember-400 hover:underline"
                 >
                   🧪 Générer un historique fictif (test des visualisations)
                 </button>

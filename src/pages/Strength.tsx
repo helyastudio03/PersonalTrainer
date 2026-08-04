@@ -209,7 +209,7 @@ function SessionCard({
           editingExerciseId === e.id ? (
             <div
               key={e.id}
-              className="border border-indigo-200 dark:border-indigo-800 rounded-lg p-2 space-y-1"
+              className="border border-ember-200 dark:border-ember-800 rounded-lg p-2 space-y-1"
             >
               <p className="text-sm font-medium">{e.exerciseName}</p>
               {exerciseDraft.map((s, i) => (
@@ -445,8 +445,8 @@ export default function Strength({ appData }: { appData: UseAppData }) {
           </div>
 
           {selectedProgram && selectedProgram.strengthTargets.length > 0 && (
-            <div className="border border-indigo-200 dark:border-indigo-900 bg-indigo-50 dark:bg-indigo-950/40 rounded-lg p-2 space-y-2">
-              <p className="text-xs font-semibold text-indigo-700 dark:text-indigo-300">
+            <div className="border border-ember-200 dark:border-ember-900 bg-ember-50 dark:bg-ember-950/40 rounded-lg p-2 space-y-2">
+              <p className="text-xs font-semibold text-ember-700 dark:text-ember-300">
                 Exercices de "{selectedProgram.name}"
               </p>
               {selectedProgram.days.map((day) => {
@@ -455,10 +455,10 @@ export default function Strength({ appData }: { appData: UseAppData }) {
                 return (
                   <div key={day.id}>
                     <div className="flex justify-between items-center mb-1">
-                      <p className="text-xs text-indigo-600/70 dark:text-indigo-400/70">{day.name}</p>
+                      <p className="text-xs text-ember-600/70 dark:text-ember-400/70">{day.name}</p>
                       <button
                         type="button"
-                        className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
+                        className="text-xs text-ember-600 dark:text-ember-400 hover:underline"
                         onClick={() => dayTargets.forEach((t) => addExerciseFromTarget(t))}
                       >
                         + Tout ajouter
@@ -470,7 +470,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
                           key={t.id}
                           type="button"
                           onClick={() => addExerciseFromTarget(t)}
-                          className="text-xs px-2 py-1 rounded-full border border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900"
+                          className="text-xs px-2 py-1 rounded-full border border-ember-300 dark:border-ember-700 text-ember-700 dark:text-ember-300 hover:bg-ember-100 dark:hover:bg-ember-900"
                         >
                           + {t.exerciseName} ({t.targetSets}×
                           {formatRepRange(t.targetRepsMin, t.targetRepsMax)}

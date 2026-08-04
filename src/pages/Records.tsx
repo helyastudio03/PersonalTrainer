@@ -11,7 +11,7 @@ import {
 function chipClassName(active: boolean) {
   return `text-xs px-2 py-1 rounded-full border transition-colors ${
     active
-      ? 'bg-indigo-600 text-white border-transparent'
+      ? 'bg-ember-600 text-white border-transparent'
       : 'border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
   }`;
 }
@@ -154,7 +154,7 @@ export default function Records({ appData }: { appData: UseAppData }) {
                       onClick={() => toggleMuscleGroup(mg)}
                       className={`w-full text-left text-xs font-semibold uppercase tracking-wide ${
                         groupActive
-                          ? 'text-indigo-600 dark:text-indigo-400'
+                          ? 'text-ember-600 dark:text-ember-400'
                           : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                       }`}
                     >

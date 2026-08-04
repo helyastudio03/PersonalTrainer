@@ -27,7 +27,7 @@ const periodLabel: Record<ProgressionPeriod, string> = {
   week: 'Par semaine',
 };
 
-const LINE_COLORS = ['#6366f1', '#22c55e', '#f59e0b', '#ec4899', '#06b6d4', '#ef4444', '#84cc16', '#a855f7'];
+const LINE_COLORS = ['#f2541f', '#ffb347', '#b32d10', '#7a6152', '#d93c15', '#ff9c6e', '#8f240f', '#efe4d8'];
 
 function selectClassName() {
   return 'px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 text-sm';
@@ -64,7 +64,7 @@ function renderRecordDot(color: string, exerciseName: string) {
 function chipClassName(active: boolean) {
   return `text-xs px-2 py-1 rounded-full border transition-colors ${
     active
-      ? 'bg-indigo-600 text-white border-transparent'
+      ? 'bg-ember-600 text-white border-transparent'
       : 'border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
   }`;
 }
@@ -201,7 +201,7 @@ export default function Progression({ appData }: { appData: UseAppData }) {
                       onClick={() => toggleMuscleGroup(mg)}
                       className={`w-full text-left text-xs font-semibold uppercase tracking-wide ${
                         groupActive
-                          ? 'text-indigo-600 dark:text-indigo-400'
+                          ? 'text-ember-600 dark:text-ember-400'
                           : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                       }`}
                     >
@@ -276,7 +276,7 @@ export default function Progression({ appData }: { appData: UseAppData }) {
                   onClick={() => setPeriod(p)}
                   className={`px-3 py-1.5 ${
                     period === p
-                      ? 'bg-indigo-600 text-white'
+                      ? 'bg-ember-600 text-white'
                       : 'bg-white dark:bg-gray-950 text-gray-600 dark:text-gray-300'
                   }`}
                 >

@@ -1,5 +1,31 @@
 @import 'tailwindcss';
 
+@theme {
+  --color-ember-50: #fff1eb;
+  --color-ember-100: #ffe0d1;
+  --color-ember-200: #ffc2a3;
+  --color-ember-300: #ff9c6e;
+  --color-ember-400: #ff7a42;
+  --color-ember-500: #f2541f;
+  --color-ember-600: #d93c15;
+  --color-ember-700: #b32d10;
+  --color-ember-800: #8f240f;
+  --color-ember-900: #6e1c0e;
+  --color-ember-950: #3d0f08;
+
+  --color-ash-50: #f5f1ee;
+  --color-ash-100: #efe4d8;
+  --color-ash-200: #d8c4b4;
+  --color-ash-300: #a88972;
+  --color-ash-400: #7a6152;
+  --color-ash-500: #554234;
+  --color-ash-600: #3a2c23;
+  --color-ash-700: #2b201a;
+  --color-ash-800: #1e1613;
+  --color-ash-900: #150f0c;
+  --color-ash-950: #0b0908;
+}
+
 :root {
   color-scheme: light dark;
 }
@@ -7,4 +33,25 @@
 body {
   margin: 0;
   font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+}
+
+.flame-text {
+  background: linear-gradient(90deg, #ffb347 0%, #f2541f 45%, #b32d10 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: 0.04em;
+}
+
+.chrome-rule {
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    #7a6152 15%,
+    #efe4d8 50%,
+    #7a6152 85%,
+    transparent 100%
+  );
+  opacity: 0.6;
 }

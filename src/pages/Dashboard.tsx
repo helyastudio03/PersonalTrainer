@@ -52,7 +52,7 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
       <Card>
         <div className="flex justify-between items-center mb-2">
           <h2 className="font-semibold">Programme actif</h2>
-          <Link to="/programmes" className="text-xs text-indigo-600 hover:underline">
+          <Link to="/programmes" className="text-xs text-ember-600 hover:underline">
             Gérer les programmes
           </Link>
         </div>
@@ -68,7 +68,7 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
             </div>
             <Link
               to="/musculation"
-              className="text-xs bg-indigo-600 text-white rounded px-3 py-1.5 hover:bg-indigo-700 shrink-0"
+              className="text-xs bg-ember-600 text-white rounded px-3 py-1.5 hover:bg-ember-700 shrink-0"
             >
               Démarrer une séance
             </Link>
@@ -131,7 +131,7 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
         <Card>
           <div className="flex justify-between items-center mb-2">
             <h2 className="font-semibold">Dernières séances</h2>
-            <Link to="/musculation" className="text-xs text-indigo-600 hover:underline">
+            <Link to="/musculation" className="text-xs text-ember-600 hover:underline">
               Voir tout
             </Link>
           </div>
