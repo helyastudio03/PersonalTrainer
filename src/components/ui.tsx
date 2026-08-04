@@ -36,8 +36,9 @@ export function IconButton({
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'secondary' | 'danger' }) {
   const styles = {
     secondary:
-      'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700',
-    danger: 'bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-950 dark:text-red-400',
+      'text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-500 dark:hover:bg-gray-800 dark:hover:text-gray-200',
+    danger:
+      'text-gray-400 hover:bg-red-50 hover:text-red-600 dark:text-gray-500 dark:hover:bg-red-950 dark:hover:text-red-400',
   };
   return (
     <button

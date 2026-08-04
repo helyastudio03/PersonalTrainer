@@ -12,7 +12,7 @@ import {
 import type { UseAppData } from '../lib/useAppData';
 import type { MuscleGroup, Program, ProgramDay, ProgramExerciseTarget } from '../types';
 import { MUSCLE_GROUPS } from '../types';
-import { Button, Card, EmptyState, Input, Label } from '../components/ui';
+import { Button, Card, EmptyState, IconButton, Input, Label } from '../components/ui';
 import { formatRepRange, getWeeklySetsByMuscleGroup, listAllExerciseNames } from '../lib/records';
 import { generateFakeSessions } from '../lib/fakeData';
 
@@ -208,13 +208,14 @@ export default function Programs({ appData }: { appData: UseAppData }) {
                         onChange={(e) => updateDayName(day.id, e.target.value)}
                         placeholder="Nom du jour (ex: Jour 1 - Push)"
                       />
-                      <button
-                        type="button"
-                        className="text-red-500 text-sm shrink-0"
+                      <IconButton
+                        variant="danger"
                         onClick={() => removeDay(day.id)}
+                        title="Supprimer le jour"
+                        aria-label="Supprimer le jour"
                       >
-                        Supprimer le jour
-                      </button>
+                        ✕
+                      </IconButton>
                     </div>
 
                     <div className="space-y-1.5">
@@ -326,13 +327,23 @@ export default function Programs({ appData }: { appData: UseAppData }) {
                   <h3 className="font-semibold">{p.name}</h3>
                   {p.description && <p className="text-sm text-gray-500">{p.description}</p>}
                 </div>
-                <div className="flex gap-2 shrink-0">
-                  <Button variant="secondary" onClick={() => startEdit(p)}>
-                    Modifier
-                  </Button>
-                  <Button variant="danger" onClick={() => deleteProgram(p.id)}>
-                    Supprimer
-                  </Button>
+                <div className="flex gap-1.5 shrink-0">
+                  <IconButton
+                    variant="secondary"
+                    onClick={() => startEdit(p)}
+                    title="Modifier"
+                    aria-label="Modifier"
+                  >
+                    ✏️
+                  </IconButton>
+                  <IconButton
+                    variant="danger"
+                    onClick={() => deleteProgram(p.id)}
+                    title="Supprimer"
+                    aria-label="Supprimer"
+                  >
+                    ✕
+                  </IconButton>
                 </div>
               </div>
 
@@ -346,25 +357,30 @@ export default function Programs({ appData }: { appData: UseAppData }) {
                 </button>
               )}
 
-              {p.days.map((day) => {
-                const dayTargets = p.strengthTargets.filter((t) => t.dayId === day.id);
-                if (dayTargets.length === 0) return null;
-                return (
-                  <div key={day.id}>
-                    <p className="text-xs font-semibold text-gray-500 mb-1">{day.name}</p>
-                    <ul className="text-sm space-y-0.5">
-                      {dayTargets.map((t) => (
-                        <li key={t.id}>
-                          {t.exerciseName}{' '}
-                          <span className="text-gray-400">({t.muscleGroup})</span>: {t.targetSets}×
-                          {formatRepRange(t.targetRepsMin, t.targetRepsMax)}
-                          {t.targetRIR !== undefined ? ` @ RIR ${t.targetRIR}` : ''}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                );
-              })}
+              <div className="grid gap-2 sm:grid-cols-2 items-start">
+                {p.days.map((day) => {
+                  const dayTargets = p.strengthTargets.filter((t) => t.dayId === day.id);
+                  if (dayTargets.length === 0) return null;
+                  return (
+                    <div
+                      key={day.id}
+                      className="border border-gray-200 dark:border-gray-800 rounded-lg p-2"
+                    >
+                      <p className="text-xs font-semibold text-gray-500 mb-1">{day.name}</p>
+                      <ul className="text-sm space-y-0.5">
+                        {dayTargets.map((t) => (
+                          <li key={t.id}>
+                            {t.exerciseName}{' '}
+                            <span className="text-gray-400">({t.muscleGroup})</span>: {t.targetSets}×
+                            {formatRepRange(t.targetRepsMin, t.targetRepsMax)}
+                            {t.targetRIR !== undefined ? ` @ RIR ${t.targetRIR}` : ''}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })}
+              </div>
 
               <VolumeChart strengthTargets={p.strengthTargets} />
             </Card>

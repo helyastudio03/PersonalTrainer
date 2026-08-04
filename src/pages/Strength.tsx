@@ -19,7 +19,7 @@ function emptyExercise(): StrengthExerciseEntry {
   return {
     id: uuid(),
     exerciseName: '',
-    sets: [{ id: uuid(), reps: 8, weightKg: 0 }],
+    sets: [],
   };
 }
 
@@ -52,6 +52,7 @@ function SessionCard({
 }) {
   const [editingMeta, setEditingMeta] = useState(false);
   const [metaDate, setMetaDate] = useState(session.date);
+  const [metaName, setMetaName] = useState(session.name ?? '');
   const [metaProgramId, setMetaProgramId] = useState(session.programId ?? '');
 
   const [editingExerciseId, setEditingExerciseId] = useState<string | null>(null);
@@ -59,12 +60,18 @@ function SessionCard({
 
   function startEditMeta() {
     setMetaDate(session.date);
+    setMetaName(session.name ?? '');
     setMetaProgramId(session.programId ?? '');
     setEditingMeta(true);
   }
 
   function saveMeta() {
-    updateStrengthSession({ ...session, date: metaDate, programId: metaProgramId || undefined });
+    updateStrengthSession({
+      ...session,
+      date: metaDate,
+      name: metaName.trim() || undefined,
+      programId: metaProgramId || undefined,
+    });
     setEditingMeta(false);
   }
 
@@ -113,6 +120,12 @@ function SessionCard({
         {editingMeta ? (
           <div className="flex flex-wrap gap-1.5 items-center">
             <Input
+              value={metaName}
+              onChange={(e) => setMetaName(e.target.value)}
+              placeholder="Nom (ex: Upper 1)"
+              className="w-32"
+            />
+            <Input
               type="date"
               value={metaDate}
               onChange={(e) => setMetaDate(e.target.value)}
@@ -143,7 +156,9 @@ function SessionCard({
             </IconButton>
           </div>
         ) : (
-          <h3 className="font-semibold">{session.date}</h3>
+          <h3 className="font-semibold">
+            {session.name ? `${session.name} · ${session.date}` : session.date}
+          </h3>
         )}
         <div className="flex gap-1.5 shrink-0">
           {!editingMeta && (
@@ -250,6 +265,7 @@ function SessionCard({
 export default function Strength({ appData }: { appData: UseAppData }) {
   const { data, addStrengthSession, updateStrengthSession, deleteStrengthSession } = appData;
   const [date, setDate] = useState(todayIso());
+  const [name, setName] = useState('');
   const [programId, setProgramId] = useState('');
   const [exercises, setExercises] = useState<StrengthExerciseEntry[]>([emptyExercise()]);
   const [showForm, setShowForm] = useState(false);
@@ -277,7 +293,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
     setExercises((ex) =>
       ex.map((e) =>
         e.id === exerciseId
-          ? { ...e, sets: [...e.sets, { id: uuid(), reps: 8, weightKg: 0 }] }
+          ? { ...e, sets: [...e.sets, { id: uuid(), reps: 0, weightKg: 0 }] }
           : e,
       ),
     );
@@ -304,6 +320,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
   function resetDraft() {
     setExercises([emptyExercise()]);
     setDate(todayIso());
+    setName('');
     setProgramId('');
   }
 
@@ -312,6 +329,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
     if (validExercises.length === 0) return;
     addStrengthSession({
       date,
+      name: name.trim() || undefined,
       programId: programId || undefined,
       exercises: validExercises,
     });
@@ -336,10 +354,14 @@ export default function Strength({ appData }: { appData: UseAppData }) {
 
       {showForm && (
         <Card className="space-y-3">
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             <div>
               <Label>Date</Label>
               <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+            </div>
+            <div>
+              <Label>Nom (optionnel)</Label>
+              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="ex: Upper 1" />
             </div>
             <div>
               <Label>Programme (optionnel)</Label>
@@ -360,26 +382,24 @@ export default function Strength({ appData }: { appData: UseAppData }) {
 
           {selectedProgram && selectedProgram.strengthTargets.length > 0 && (
             <div className="border border-indigo-200 dark:border-indigo-900 bg-indigo-50 dark:bg-indigo-950/40 rounded-lg p-2 space-y-2">
-              <div className="flex justify-between items-center">
-                <p className="text-xs font-semibold text-indigo-700 dark:text-indigo-300">
-                  Exercices de "{selectedProgram.name}"
-                </p>
-                <button
-                  type="button"
-                  className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
-                  onClick={() =>
-                    selectedProgram.strengthTargets.forEach((t) => addExerciseFromTarget(t))
-                  }
-                >
-                  + Tout ajouter
-                </button>
-              </div>
+              <p className="text-xs font-semibold text-indigo-700 dark:text-indigo-300">
+                Exercices de "{selectedProgram.name}"
+              </p>
               {selectedProgram.days.map((day) => {
                 const dayTargets = selectedProgram.strengthTargets.filter((t) => t.dayId === day.id);
                 if (dayTargets.length === 0) return null;
                 return (
                   <div key={day.id}>
-                    <p className="text-xs text-indigo-600/70 dark:text-indigo-400/70 mb-1">{day.name}</p>
+                    <div className="flex justify-between items-center mb-1">
+                      <p className="text-xs text-indigo-600/70 dark:text-indigo-400/70">{day.name}</p>
+                      <button
+                        type="button"
+                        className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
+                        onClick={() => dayTargets.forEach((t) => addExerciseFromTarget(t))}
+                      >
+                        + Tout ajouter
+                      </button>
+                    </div>
                     <div className="flex flex-wrap gap-2">
                       {dayTargets.map((t) => (
                         <button
@@ -418,43 +438,44 @@ export default function Strength({ appData }: { appData: UseAppData }) {
                     </button>
                   </div>
 
-                  {lastPerformance && (
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-                      Dernière fois ({lastPerformance.date}): {formatSetsSummary(lastPerformance.sets)}
-                    </p>
-                  )}
-
                   <div className="space-y-1">
-                    {ex.sets.map((s, i) => (
-                      <div key={s.id} className="flex items-center gap-2">
-                        <span className="w-5 shrink-0 text-xs text-gray-400">#{i + 1}</span>
-                        <Input
-                          type="number"
-                          min={0}
-                          placeholder="Reps"
-                          value={s.reps}
-                          onChange={(e) => updateSet(ex.id, s.id, { reps: Number(e.target.value) })}
-                        />
-                        <Input
-                          type="number"
-                          min={0}
-                          step={0.5}
-                          placeholder="Poids kg"
-                          value={s.weightKg === 0 ? '' : s.weightKg}
-                          onChange={(e) =>
-                            updateSet(ex.id, s.id, {
-                              weightKg: e.target.value ? Number(e.target.value) : 0,
-                            })
-                          }
-                        />
-                        <button
-                          className="shrink-0 text-red-500 text-sm"
-                          onClick={() => removeSet(ex.id, s.id)}
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ))}
+                    {ex.sets.map((s, i) => {
+                      const lastSet = lastPerformance?.sets[i];
+                      return (
+                        <div key={s.id} className="flex items-center gap-2">
+                          <span className="w-5 shrink-0 text-xs text-gray-400">#{i + 1}</span>
+                          <Input
+                            type="number"
+                            min={0}
+                            placeholder={lastSet ? `${lastSet.reps}` : 'Reps'}
+                            value={s.reps === 0 ? '' : s.reps}
+                            onChange={(e) =>
+                              updateSet(ex.id, s.id, {
+                                reps: e.target.value ? Number(e.target.value) : 0,
+                              })
+                            }
+                          />
+                          <Input
+                            type="number"
+                            min={0}
+                            step={0.5}
+                            placeholder={lastSet ? `${lastSet.weightKg} kg` : 'Poids kg'}
+                            value={s.weightKg === 0 ? '' : s.weightKg}
+                            onChange={(e) =>
+                              updateSet(ex.id, s.id, {
+                                weightKg: e.target.value ? Number(e.target.value) : 0,
+                              })
+                            }
+                          />
+                          <button
+                            className="shrink-0 text-red-500 text-sm"
+                            onClick={() => removeSet(ex.id, s.id)}
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
                   <Button variant="secondary" className="mt-1.5" onClick={() => addSet(ex.id)}>
                     + Série

@@ -125,7 +125,7 @@ export default function Progression({ appData }: { appData: UseAppData }) {
             onClick={resetFilters}
             className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
           >
-            Réinitialiser
+            ↺ Réinitialiser
           </button>
         </div>
 

@@ -57,6 +57,7 @@ export interface StrengthExerciseEntry {
 export interface StrengthSession {
   id: string;
   date: string; // ISO date (yyyy-mm-dd)
+  name?: string; // ex: "Upper 1"
   programId?: string;
   exercises: StrengthExerciseEntry[];
   notes?: string;
