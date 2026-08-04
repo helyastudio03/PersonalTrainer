@@ -14,7 +14,7 @@ export function Button({
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' | 'danger' }) {
   const styles = {
-    primary: 'bg-ember-600 text-white hover:bg-ember-700',
+    primary: 'bg-ember-600 text-ash-200 hover:bg-ember-700',
     secondary: 'bg-ash-800 text-ash-100 hover:bg-ash-700',
     danger: 'bg-red-950 text-red-400 hover:bg-red-900',
   };

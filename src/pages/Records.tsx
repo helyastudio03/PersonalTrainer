@@ -11,7 +11,7 @@ import {
 function chipClassName(active: boolean) {
   return `text-xs px-2 py-1 rounded-full border transition-colors ${
     active
-      ? 'bg-ember-600 text-white border-transparent'
+      ? 'bg-ember-600 text-ash-200 border-transparent'
       : 'border-ash-600 text-ash-200 hover:bg-ash-800'
   }`;
 }

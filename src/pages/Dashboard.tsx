@@ -68,7 +68,7 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
             </div>
             <Link
               to="/musculation"
-              className="text-xs bg-ember-600 text-white rounded px-3 py-1.5 hover:bg-ember-700 shrink-0"
+              className="text-xs bg-ember-600 text-ash-200 rounded px-3 py-1.5 hover:bg-ember-700 shrink-0"
             >
               Démarrer une séance
             </Link>

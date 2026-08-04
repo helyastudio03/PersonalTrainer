@@ -64,7 +64,7 @@ function renderRecordDot(color: string, exerciseName: string) {
 function chipClassName(active: boolean) {
   return `text-xs px-2 py-1 rounded-full border transition-colors ${
     active
-      ? 'bg-ember-600 text-white border-transparent'
+      ? 'bg-ember-600 text-ash-200 border-transparent'
       : 'border-ash-600 text-ash-200 hover:bg-ash-800'
   }`;
 }
@@ -276,7 +276,7 @@ export default function Progression({ appData }: { appData: UseAppData }) {
                   onClick={() => setPeriod(p)}
                   className={`px-3 py-1.5 ${
                     period === p
-                      ? 'bg-ember-600 text-white'
+                      ? 'bg-ember-600 text-ash-200'
                       : 'bg-ash-950 text-ash-200'
                   }`}
                 >
