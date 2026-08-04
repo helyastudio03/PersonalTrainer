@@ -36,7 +36,7 @@ function selectClassName() {
 function chipClassName(active: boolean) {
   return `text-xs px-2 py-1 rounded-full border transition-colors ${
     active
-      ? 'text-white border-transparent'
+      ? 'bg-indigo-600 text-white border-transparent'
       : 'border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
   }`;
 }
@@ -182,16 +182,12 @@ export default function Progression({ appData }: { appData: UseAppData }) {
                     <div className="flex flex-wrap gap-1.5">
                       {names.map((name) => {
                         const active = activeExercises.includes(name);
-                        const color = active
-                          ? LINE_COLORS[activeExercises.indexOf(name) % LINE_COLORS.length]
-                          : undefined;
                         return (
                           <button
                             key={name}
                             type="button"
                             onClick={() => toggleExercise(name)}
                             className={chipClassName(active)}
-                            style={color ? { backgroundColor: color } : undefined}
                           >
                             {name}
                           </button>
@@ -209,16 +205,12 @@ export default function Progression({ appData }: { appData: UseAppData }) {
                   <div className="flex flex-wrap gap-1.5">
                     {exercisesByGroup.ungrouped.map((name) => {
                       const active = activeExercises.includes(name);
-                      const color = active
-                        ? LINE_COLORS[activeExercises.indexOf(name) % LINE_COLORS.length]
-                        : undefined;
                       return (
                         <button
                           key={name}
                           type="button"
                           onClick={() => toggleExercise(name)}
                           className={chipClassName(active)}
-                          style={color ? { backgroundColor: color } : undefined}
                         >
                           {name}
                         </button>
