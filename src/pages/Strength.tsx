@@ -253,11 +253,13 @@ function SessionCard({
               </div>
             </div>
           ) : (
-            <div key={e.id} className="group flex justify-between items-start gap-2 text-sm">
-              <div>
-                {e.exerciseName}: {formatSetsSummary(e.sets)}
-              </div>
-              <div className="flex gap-1 shrink-0">
+            <div
+              key={e.id}
+              className="group relative text-sm whitespace-nowrap overflow-hidden text-ellipsis"
+              title={`${e.exerciseName}: ${formatSetsSummary(e.sets)}`}
+            >
+              {e.exerciseName}: {formatSetsSummary(e.sets)}
+              <div className="absolute right-0 top-0 flex gap-1 bg-ash-900 pl-1">
                 <IconButton
                   variant="secondary"
                   onClick={() => startEditExercise(e)}

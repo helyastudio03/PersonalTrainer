@@ -92,26 +92,17 @@ export default function Progression({ appData }: { appData: UseAppData }) {
   const [selectedExercises, setSelectedExercises] = useState<string[]>(() =>
     allExerciseNames[0] ? [allExerciseNames[0]] : [],
   );
-  const [selectedMuscleGroups, setSelectedMuscleGroups] = useState<MuscleGroup[]>([]);
   const [metric, setMetric] = useState<ProgressionMetric>('weight');
   const [period, setPeriod] = useState<ProgressionPeriod>('session');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
 
-  const filteredExerciseNames = useMemo(() => {
-    if (selectedMuscleGroups.length === 0) return allExerciseNames;
-    return allExerciseNames.filter((name) => {
-      const mg = exerciseMuscleGroups[name];
-      return mg ? selectedMuscleGroups.includes(mg) : false;
-    });
-  }, [allExerciseNames, exerciseMuscleGroups, selectedMuscleGroups]);
-
-  const activeExercises = selectedExercises.filter((name) => filteredExerciseNames.includes(name));
+  const activeExercises = selectedExercises.filter((name) => allExerciseNames.includes(name));
 
   const exercisesByGroup = useMemo(() => {
     const map = new Map<MuscleGroup, string[]>();
     const ungrouped: string[] = [];
-    for (const name of filteredExerciseNames) {
+    for (const name of allExerciseNames) {
       const mg = exerciseMuscleGroups[name];
       if (mg) {
         const list = map.get(mg);
@@ -122,11 +113,7 @@ export default function Progression({ appData }: { appData: UseAppData }) {
       }
     }
     return { map, ungrouped };
-  }, [filteredExerciseNames, exerciseMuscleGroups]);
-
-  const groupsToShow = availableMuscleGroups.filter(
-    (mg) => selectedMuscleGroups.length === 0 || selectedMuscleGroups.includes(mg),
-  );
+  }, [allExerciseNames, exerciseMuscleGroups]);
 
   const filteredSessions = useMemo(() => {
     if (!dateFrom && !dateTo) return data.strengthSessions;
@@ -149,13 +136,15 @@ export default function Progression({ appData }: { appData: UseAppData }) {
   }
 
   function toggleMuscleGroup(mg: MuscleGroup) {
-    setSelectedMuscleGroups((prev) =>
-      prev.includes(mg) ? prev.filter((g) => g !== mg) : [...prev, mg],
-    );
+    const names = exercisesByGroup.map.get(mg) ?? [];
+    const allSelected = names.every((n) => selectedExercises.includes(n));
+    setSelectedExercises((prev) => {
+      if (allSelected) return prev.filter((n) => !names.includes(n));
+      return [...new Set([...prev, ...names])];
+    });
   }
 
   function resetFilters() {
-    setSelectedMuscleGroups([]);
     setDateFrom('');
     setDateTo('');
     setSelectedExercises(allExerciseNames[0] ? [allExerciseNames[0]] : []);
@@ -181,14 +170,14 @@ export default function Progression({ appData }: { appData: UseAppData }) {
 
         <div>
           <p className="text-xs font-semibold text-ash-300 mb-1.5">Exercices</p>
-          {filteredExerciseNames.length === 0 ? (
+          {allExerciseNames.length === 0 ? (
             <p className="text-xs text-ash-400">Aucun exercice pour ce filtre.</p>
           ) : (
             <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {groupsToShow.map((mg) => {
+              {availableMuscleGroups.map((mg) => {
                 const names = exercisesByGroup.map.get(mg);
                 if (!names || names.length === 0) return null;
-                const groupActive = selectedMuscleGroups.includes(mg);
+                const groupActive = names.every((n) => activeExercises.includes(n));
                 return (
                   <div
                     key={mg}
@@ -197,6 +186,7 @@ export default function Progression({ appData }: { appData: UseAppData }) {
                     <button
                       type="button"
                       onClick={() => toggleMuscleGroup(mg)}
+                      title="Sélectionner/désélectionner tous les exercices de ce groupe"
                       className={`w-full text-left text-xs font-semibold uppercase tracking-wide ${
                         groupActive
                           ? 'text-ember-400'

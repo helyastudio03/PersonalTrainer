@@ -69,6 +69,63 @@ export function getStrengthPRsByRepWeight(sessions: StrengthSession[]): RepWeigh
   });
 }
 
+// Records personnels par couple (poids, répétitions): pour chaque exercice
+// et chaque poids déjà soulevé, le nombre maximal de répétitions réalisées,
+// ainsi que le précédent record (pour le fil "records récents").
+export interface WeightRepsRecord {
+  exerciseName: string;
+  weightKg: number;
+  maxReps: number;
+  date: string;
+  previousMaxReps: number | null;
+}
+
+export function getStrengthPRsByWeightReps(sessions: StrengthSession[]): WeightRepsRecord[] {
+  const byKey = new Map<string, { exerciseName: string; weightKg: number; reps: number; date: string }[]>();
+
+  for (const session of sessions) {
+    for (const entry of session.exercises) {
+      for (const set of entry.sets) {
+        const key = `${entry.exerciseName}__${set.weightKg}`;
+        const point = { exerciseName: entry.exerciseName, weightKg: set.weightKg, reps: set.reps, date: session.date };
+        const list = byKey.get(key);
+        if (list) list.push(point);
+        else byKey.set(key, [point]);
+      }
+    }
+  }
+
+  const records: WeightRepsRecord[] = [];
+  for (const points of byKey.values()) {
+    const sorted = [...points].sort((a, b) => a.date.localeCompare(b.date));
+
+    let maxReps = -Infinity;
+    let maxDate = '';
+    let previousMaxReps: number | null = null;
+
+    for (const p of sorted) {
+      if (p.reps > maxReps) {
+        previousMaxReps = maxReps === -Infinity ? null : maxReps;
+        maxReps = p.reps;
+        maxDate = p.date;
+      }
+    }
+
+    records.push({
+      exerciseName: sorted[0].exerciseName,
+      weightKg: sorted[0].weightKg,
+      maxReps,
+      date: maxDate,
+      previousMaxReps,
+    });
+  }
+
+  return records.sort((a, b) => {
+    const nameCmp = a.exerciseName.localeCompare(b.exerciseName);
+    return nameCmp !== 0 ? nameCmp : a.weightKg - b.weightKg;
+  });
+}
+
 export interface LastPerformance {
   date: string;
   sets: StrengthSet[];
@@ -338,13 +395,13 @@ export function getActualWeeklySetsByMuscleGroup(
 export function getRecentPRImprovements(
   sessions: StrengthSession[],
   days = 14,
-): RepWeightRecord[] {
+): WeightRepsRecord[] {
   const cutoff = new Date();
   cutoff.setDate(cutoff.getDate() - days);
   const cutoffStr = cutoff.toISOString().slice(0, 10);
 
-  return getStrengthPRsByRepWeight(sessions)
-    .filter((r) => r.previousMaxWeight !== null && r.date >= cutoffStr)
+  return getStrengthPRsByWeightReps(sessions)
+    .filter((r) => r.previousMaxReps !== null && r.date >= cutoffStr)
     .sort((a, b) => b.date.localeCompare(a.date));
 }
 

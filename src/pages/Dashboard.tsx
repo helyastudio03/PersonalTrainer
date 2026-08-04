@@ -113,14 +113,14 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
             <ul className="space-y-1">
               {recentPRs.map((r) => (
                 <li
-                  key={`${r.exerciseName}-${r.reps}`}
+                  key={`${r.exerciseName}-${r.weightKg}`}
                   className="text-sm flex justify-between border-b border-ash-800 py-1"
                 >
                   <span>
-                    {r.exerciseName} <span className="text-ash-300">({r.reps} reps)</span>
+                    {r.exerciseName} <span className="text-ash-300">({r.weightKg} kg)</span>
                   </span>
                   <span className="text-green-400 font-medium">
-                    {r.previousMaxWeight} → {r.maxWeight} kg
+                    {r.previousMaxReps} reps → {r.maxReps} reps
                   </span>
                 </li>
               ))}
