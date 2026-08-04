@@ -393,19 +393,21 @@ export default function Strength({ appData }: { appData: UseAppData }) {
 
   const monthGroups = useMemo(() => {
     const chronological = [...data.strengthSessions].sort((a, b) => a.date.localeCompare(b.date));
-    const byMonth = new Map<string, StrengthSession[]>();
-    for (const s of chronological) {
-      const key = monthKey(s.date);
+    const rows = groupSessionsIntoCycleRows(chronological, data.programs);
+
+    const byMonth = new Map<string, StrengthSession[][]>();
+    for (const row of rows) {
+      const key = monthKey(row[0].date);
       const list = byMonth.get(key);
-      if (list) list.push(s);
-      else byMonth.set(key, [s]);
+      if (list) list.push(row);
+      else byMonth.set(key, [row]);
     }
     return [...byMonth.entries()]
       .sort((a, b) => b[0].localeCompare(a[0]))
-      .map(([key, sessions]) => ({
+      .map(([key, monthRows]) => ({
         key,
-        label: formatMonthLabel(sessions[0].date),
-        rows: groupSessionsIntoCycleRows(sessions, data.programs).reverse(),
+        label: formatMonthLabel(monthRows[0][0].date),
+        rows: [...monthRows].reverse(),
       }));
   }, [data.strengthSessions, data.programs]);
 

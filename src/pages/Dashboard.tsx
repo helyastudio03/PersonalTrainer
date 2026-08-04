@@ -5,6 +5,7 @@ import {
   getActualWeeklySetsByMuscleGroup,
   getExerciseMuscleGroups,
   getRecentPRImprovements,
+  getStrengthPRsByWeightReps,
   getWeeklySetsByMuscleGroup,
   listStrengthExerciseNames,
   suggestNextProgramDay,
@@ -29,6 +30,12 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
   const actualByGroup = new Map(actualVolume.map((v) => [v.muscleGroup, v.weeklySets]));
 
   const recentPRs = getRecentPRImprovements(data.strengthSessions, 14).slice(0, 5);
+
+  const recordCountByDate = new Map<string, number>();
+  for (const r of getStrengthPRsByWeightReps(data.strengthSessions)) {
+    if (r.previousMaxReps === null) continue;
+    recordCountByDate.set(r.date, (recordCountByDate.get(r.date) ?? 0) + 1);
+  }
 
   return (
     <div className="space-y-3">
@@ -92,7 +99,7 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
                   key={t.muscleGroup}
                   className={`text-xs rounded-full px-2 py-1 ${
                     met
-                      ? 'bg-green-950 text-green-400'
+                      ? 'bg-amber-950 text-amber-400'
                       : 'bg-ash-800 text-ash-200'
                   }`}
                 >
@@ -119,7 +126,7 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
                   <span>
                     {r.exerciseName} <span className="text-ash-300">({r.weightKg} kg)</span>
                   </span>
-                  <span className="text-green-400 font-medium">
+                  <span className="text-amber-400 font-medium">
                     {r.previousMaxReps} reps → {r.maxReps} reps
                   </span>
                 </li>
@@ -139,17 +146,27 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
             <EmptyState>Aucune séance enregistrée pour le moment.</EmptyState>
           ) : (
             <ul className="space-y-1">
-              {recentStrength.map((s) => (
-                <li
-                  key={s.id}
-                  className="text-sm flex justify-between border-b border-ash-800 py-1"
-                >
-                  <span>{s.date}</span>
-                  <span className="text-ash-300">
-                    {s.exercises.length} exercice{s.exercises.length > 1 ? 's' : ''}
-                  </span>
-                </li>
-              ))}
+              {recentStrength.map((s) => {
+                const recordCount = recordCountByDate.get(s.date) ?? 0;
+                return (
+                  <li
+                    key={s.id}
+                    className="text-sm flex justify-between border-b border-ash-800 py-1"
+                  >
+                    <span>
+                      {s.name ? `${s.name} · ${s.date}` : s.date}
+                      {recordCount > 0 && (
+                        <span className="ml-1.5 text-amber-400">
+                          {recordCount > 1 ? recordCount : ''}⭐
+                        </span>
+                      )}
+                    </span>
+                    <span className="text-ash-300">
+                      {s.exercises.length} exercice{s.exercises.length > 1 ? 's' : ''}
+                    </span>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </Card>

@@ -221,7 +221,7 @@ export default function Records({ appData }: { appData: UseAppData }) {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="text-left text-ash-300 border-b border-ash-800">
-                      <th className="py-1 pr-3">Répétitions</th>
+                      <th className="py-1 pr-3">Reps</th>
                       <th className="py-1 pr-3">Poids</th>
                       <th className="py-1">Date</th>
                     </tr>
@@ -234,7 +234,7 @@ export default function Records({ appData }: { appData: UseAppData }) {
                           {r.maxWeight} kg
                           {r.previousMaxWeight !== null && (
                             <span
-                              className="ml-1 text-green-400"
+                              className="ml-1 text-amber-400"
                               title={`Précédent record: ${r.previousMaxWeight} kg`}
                             >
                               ↗
