@@ -1,10 +1,21 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { v4 as uuid } from 'uuid';
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 import type { UseAppData } from '../lib/useAppData';
 import type { MuscleGroup, Program, ProgramDay, ProgramExerciseTarget } from '../types';
 import { MUSCLE_GROUPS } from '../types';
 import { Button, Card, EmptyState, Input, Label } from '../components/ui';
-import { getWeeklySetsByMuscleGroup } from '../lib/records';
+import { getWeeklySetsByExercise, getWeeklySetsByMuscleGroup, listAllExerciseNames } from '../lib/records';
+
+const EXERCISE_DATALIST_ID = 'known-exercise-names';
 
 function emptyDraft(): Omit<Program, 'id' | 'createdAt'> {
   const firstDay: ProgramDay = { id: uuid(), name: 'Jour 1' };
@@ -31,11 +42,46 @@ function VolumeTable({ strengthTargets }: { strengthTargets: ProgramExerciseTarg
   );
 }
 
+function ExerciseVolumeChart({ strengthTargets }: { strengthTargets: ProgramExerciseTarget[] }) {
+  const volumes = getWeeklySetsByExercise(strengthTargets);
+  if (volumes.length === 0) return null;
+  return (
+    <div>
+      <p className="text-xs font-semibold text-gray-500 mb-1">Séries par semaine et par exercice</p>
+      <ResponsiveContainer width="100%" height={Math.max(volumes.length * 44, 100)}>
+        <BarChart
+          data={volumes}
+          layout="vertical"
+          barCategoryGap="25%"
+          margin={{ left: 8, right: 16 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" opacity={0.3} horizontal={false} />
+          <XAxis type="number" allowDecimals={false} fontSize={12} />
+          <YAxis type="category" dataKey="exerciseName" width={140} fontSize={12} />
+          <Tooltip />
+          <Bar
+            dataKey="weeklySets"
+            name="Séries/sem."
+            fill="#6366f1"
+            radius={[0, 4, 4, 0]}
+            isAnimationActive={false}
+          />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
 export default function Programs({ appData }: { appData: UseAppData }) {
   const { data, addProgram, updateProgram, deleteProgram } = appData;
   const [draft, setDraft] = useState(emptyDraft());
   const [showForm, setShowForm] = useState(false);
   const [editingProgram, setEditingProgram] = useState<Program | null>(null);
+
+  const knownExerciseNames = useMemo(
+    () => listAllExerciseNames(data.programs, data.strengthSessions),
+    [data.programs, data.strengthSessions],
+  );
 
   function startCreate() {
     setEditingProgram(null);
@@ -119,6 +165,12 @@ export default function Programs({ appData }: { appData: UseAppData }) {
 
   return (
     <div className="space-y-4">
+      <datalist id={EXERCISE_DATALIST_ID}>
+        {knownExerciseNames.map((name) => (
+          <option key={name} value={name} />
+        ))}
+      </datalist>
+
       <div className="flex justify-between items-center">
         <h1 className="text-xl font-bold">Programmes</h1>
         <Button onClick={() => (showForm ? cancelForm() : startCreate())}>
@@ -184,6 +236,7 @@ export default function Programs({ appData }: { appData: UseAppData }) {
                           <Input
                             className="col-span-3"
                             placeholder="Exercice (ex: Développé couché)"
+                            list={EXERCISE_DATALIST_ID}
                             value={t.exerciseName}
                             onChange={(e) => updateStrengthTarget(t.id, { exerciseName: e.target.value })}
                           />
@@ -248,6 +301,7 @@ export default function Programs({ appData }: { appData: UseAppData }) {
           </div>
 
           <VolumeTable strengthTargets={draft.strengthTargets} />
+          <ExerciseVolumeChart strengthTargets={draft.strengthTargets} />
 
           <div className="flex gap-2">
             <Button onClick={submit} disabled={!draft.name.trim()}>
@@ -302,6 +356,7 @@ export default function Programs({ appData }: { appData: UseAppData }) {
               })}
 
               <VolumeTable strengthTargets={p.strengthTargets} />
+              <ExerciseVolumeChart strengthTargets={p.strengthTargets} />
             </Card>
           ))}
         </div>
