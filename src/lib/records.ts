@@ -162,6 +162,45 @@ export function getStrengthMetricSeries(
     }));
 }
 
+export interface MultiExerciseProgressionPoint {
+  label: string;
+  [exerciseName: string]: string | number;
+}
+
+// Fusionne les séries de plusieurs exercices sur un même axe (une clé par
+// exercice), pour afficher plusieurs courbes sur un seul graphique.
+export function getMultiExerciseMetricSeries(
+  sessions: StrengthSession[],
+  exerciseNames: string[],
+  metric: ProgressionMetric,
+  period: ProgressionPeriod,
+): MultiExerciseProgressionPoint[] {
+  const byLabel = new Map<string, MultiExerciseProgressionPoint>();
+
+  for (const name of exerciseNames) {
+    const series = getStrengthMetricSeries(sessions, name, metric, period);
+    for (const point of series) {
+      const existing = byLabel.get(point.label);
+      if (existing) existing[name] = point.value;
+      else byLabel.set(point.label, { label: point.label, [name]: point.value });
+    }
+  }
+
+  return [...byLabel.values()].sort((a, b) => a.label.localeCompare(b.label));
+}
+
+// Déduit le groupe musculaire de chaque exercice à partir des programmes,
+// pour permettre de filtrer les exercices par groupe musculaire.
+export function getExerciseMuscleGroups(programs: Program[]): Record<string, MuscleGroup> {
+  const map: Record<string, MuscleGroup> = {};
+  for (const program of programs) {
+    for (const target of program.strengthTargets) {
+      if (target.exerciseName.trim()) map[target.exerciseName] = target.muscleGroup;
+    }
+  }
+  return map;
+}
+
 // Volume hebdomadaire par groupe musculaire, déduit du programme (chaque jour
 // du programme est supposé réalisé une fois par semaine).
 
