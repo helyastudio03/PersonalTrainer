@@ -17,7 +17,7 @@ export default function Layout() {
   return (
     <div className="min-h-svh bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
       <header className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center gap-4">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4">
           <h1 className="text-lg font-bold text-indigo-600 dark:text-indigo-400 shrink-0">
             🏋️ Plus Lourd Que Toi
           </h1>
@@ -37,7 +37,7 @@ export default function Layout() {
           </nav>
         </div>
       </header>
-      <main className="max-w-5xl mx-auto px-4 py-6">
+      <main className="max-w-7xl mx-auto px-4 py-6">
         <Outlet />
       </main>
     </div>

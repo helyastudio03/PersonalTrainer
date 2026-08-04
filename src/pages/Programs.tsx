@@ -320,7 +320,7 @@ export default function Programs({ appData }: { appData: UseAppData }) {
       {data.programs.length === 0 ? (
         <EmptyState>Aucun programme créé. Crée ton premier programme d'entrainement !</EmptyState>
       ) : (
-        <div className="grid md:grid-cols-2 gap-3">
+        <div className="space-y-3">
           {data.programs.map((p) => (
             <Card key={p.id} className="group space-y-2">
               <div className="flex justify-between items-start">
@@ -358,7 +358,7 @@ export default function Programs({ appData }: { appData: UseAppData }) {
                 </button>
               )}
 
-              <div className="grid gap-2 sm:grid-cols-2 items-start">
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-start">
                 {p.days.map((day) => {
                   const dayTargets = p.strengthTargets.filter((t) => t.dayId === day.id);
                   if (dayTargets.length === 0) return null;

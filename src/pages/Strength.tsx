@@ -504,7 +504,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
       {sortedSessions.length === 0 ? (
         <EmptyState>Aucune séance de musculation enregistrée.</EmptyState>
       ) : (
-        <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3 items-start">
+        <div className="grid gap-2 sm:grid-cols-2 items-start">
           {sortedSessions.map((s) => (
             <SessionCard
               key={s.id}
