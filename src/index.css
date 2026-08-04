@@ -1,10 +1,91 @@
 @import 'tailwindcss';
 
+/*
+ * Thème "garage redneck" : on réassigne la palette Tailwind utilisée dans
+ * toute l'app (gray-*, indigo-*, red-*, white) pour forcer une ambiance
+ * unique (asphalte, chrome, flamme) quel que soit le thème clair/sombre
+ * du système. Aucune classe utilitaire n'a été retirée des composants,
+ * seules les valeurs sous-jacentes changent.
+ */
+@theme {
+  /* Neutres : asphalte / cuir / chrome */
+  --color-white: #241a14;
+  --color-gray-50: #16110c;
+  --color-gray-100: #f3e6d3;
+  --color-gray-200: #4a3a2c;
+  --color-gray-300: #5c4a3a;
+  --color-gray-400: #a3927e;
+  --color-gray-500: #baa88f;
+  --color-gray-600: #cdbca3;
+  --color-gray-700: #3a2c20;
+  --color-gray-800: #2a1f16;
+  --color-gray-900: #1c140e;
+  --color-gray-950: #16110c;
+
+  /* Accent : flamme */
+  --color-indigo-50: #3a1408;
+  --color-indigo-100: #4a1a0a;
+  --color-indigo-200: #5c2410;
+  --color-indigo-300: #8a3d14;
+  --color-indigo-400: #ffb020;
+  --color-indigo-500: #ff7a1a;
+  --color-indigo-600: #ff4d1a;
+  --color-indigo-700: #d93a0a;
+  --color-indigo-900: #5c2410;
+  --color-indigo-950: #3a1408;
+
+  /* Danger : sang / feu de stop */
+  --color-red-50: #3a0d0d;
+  --color-red-100: #4a1414;
+}
+
 :root {
-  color-scheme: light dark;
+  color-scheme: dark;
 }
 
 body {
   margin: 0;
-  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Segoe UI', system-ui, Roboto, sans-serif;
+  background-color: #16110c;
+  background-image:
+    radial-gradient(ellipse 900px 500px at 15% -10%, rgba(255, 77, 26, 0.18), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 110% 10%, rgba(255, 176, 32, 0.1), transparent 55%),
+    repeating-linear-gradient(
+      135deg,
+      rgba(0, 0, 0, 0.35) 0px,
+      rgba(0, 0, 0, 0.35) 26px,
+      transparent 26px,
+      transparent 52px
+    );
+  background-attachment: fixed;
+}
+
+h1,
+h2,
+h3 {
+  font-family: 'Arial Black', 'Segoe UI', Impact, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+h1 {
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 122, 26, 0.35);
+}
+
+::selection {
+  background: #ff4d1a;
+  color: #16110c;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #16110c;
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #ff7a1a, #d93a0a);
+  border-radius: 999px;
+  border: 2px solid #16110c;
 }

@@ -3,7 +3,7 @@ import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode } from 'react
 export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
     <div
-      className={`bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4 shadow-sm ${className}`}
+      className={`relative bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-md p-4 shadow-[4px_4px_0_rgba(0,0,0,0.45)] before:content-[''] before:absolute before:inset-x-0 before:top-0 before:h-1 before:rounded-t-md before:bg-gradient-to-r before:from-indigo-600 before:via-indigo-400 before:to-indigo-600 ${className}`}
     >
       {children}
     </div>
@@ -16,14 +16,16 @@ export function Button({
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' | 'danger' }) {
   const styles = {
-    primary: 'bg-indigo-600 text-white hover:bg-indigo-700',
+    primary:
+      'bg-gradient-to-b from-indigo-500 to-indigo-700 text-gray-100 hover:from-indigo-400 hover:to-indigo-600 shadow-[2px_2px_0_rgba(0,0,0,0.5)] border border-black/30',
     secondary:
-      'bg-gray-100 text-gray-800 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700',
-    danger: 'bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-950 dark:text-red-400',
+      'bg-gray-100 text-gray-800 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-700',
+    danger:
+      'bg-red-50 text-red-500 hover:bg-red-100 dark:bg-red-950 dark:text-red-400 border border-red-500/30',
   };
   return (
     <button
-      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${styles[variant]} ${className}`}
+      className={`px-3 py-1.5 rounded-md text-sm font-bold uppercase tracking-wide transition-colors disabled:opacity-50 ${styles[variant]} ${className}`}
       {...props}
     />
   );
@@ -33,14 +35,14 @@ export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
       {...props}
-      className={`w-full px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 ${props.className ?? ''}`}
+      className={`w-full px-3 py-1.5 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${props.className ?? ''}`}
     />
   );
 }
 
 export function Label({ children }: { children: ReactNode }) {
   return (
-    <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+    <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">
       {children}
     </label>
   );
@@ -48,7 +50,7 @@ export function Label({ children }: { children: ReactNode }) {
 
 export function EmptyState({ children }: { children: ReactNode }) {
   return (
-    <div className="text-center py-10 text-sm text-gray-500 dark:text-gray-400 border border-dashed border-gray-300 dark:border-gray-700 rounded-xl">
+    <div className="text-center py-10 text-sm text-gray-500 dark:text-gray-400 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-md">
       {children}
     </div>
   );

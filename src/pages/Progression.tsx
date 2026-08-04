@@ -84,7 +84,7 @@ export default function Progression({ appData }: { appData: UseAppData }) {
                 onClick={() => setPeriod(p)}
                 className={`px-3 py-1.5 ${
                   period === p
-                    ? 'bg-indigo-600 text-white'
+                    ? 'bg-indigo-600 text-gray-100'
                     : 'bg-white dark:bg-gray-950 text-gray-600 dark:text-gray-300'
                 }`}
               >
@@ -107,7 +107,7 @@ export default function Progression({ appData }: { appData: UseAppData }) {
                 type="monotone"
                 dataKey="value"
                 name={PROGRESSION_METRIC_LABELS[metric]}
-                stroke="#6366f1"
+                stroke="#ff4d1a"
                 strokeWidth={2}
                 isAnimationActive={false}
               />
