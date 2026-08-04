@@ -102,17 +102,17 @@ export default function Strength({ appData }: { appData: UseAppData }) {
   const selectedProgram = data.programs.find((p) => p.id === programId);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <div className="flex justify-between items-center">
-        <h1 className="text-xl font-bold">Musculation</h1>
+        <h1 className="text-xl font-bold">Séances</h1>
         <Button onClick={() => setShowForm((s) => !s)}>
           {showForm ? 'Annuler' : '+ Nouvelle séance'}
         </Button>
       </div>
 
       {showForm && (
-        <Card className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
+        <Card className="space-y-3">
+          <div className="grid grid-cols-2 gap-2">
             <div>
               <Label>Date</Label>
               <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
@@ -135,7 +135,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
           </div>
 
           {selectedProgram && selectedProgram.strengthTargets.length > 0 && (
-            <div className="border border-indigo-200 dark:border-indigo-900 bg-indigo-50 dark:bg-indigo-950/40 rounded-lg p-3 space-y-3">
+            <div className="border border-indigo-200 dark:border-indigo-900 bg-indigo-50 dark:bg-indigo-950/40 rounded-lg p-2 space-y-2">
               <div className="flex justify-between items-center">
                 <p className="text-xs font-semibold text-indigo-700 dark:text-indigo-300">
                   Exercices de "{selectedProgram.name}"
@@ -176,36 +176,35 @@ export default function Strength({ appData }: { appData: UseAppData }) {
             </div>
           )}
 
-          <div className="space-y-4">
+          <div className="space-y-2">
             {exercises.map((ex) => {
               const suggestion = ex.exerciseName
                 ? suggestNextStrength(data.strengthSessions, ex.exerciseName)
                 : null;
               return (
-                <div key={ex.id} className="border border-gray-200 dark:border-gray-800 rounded-lg p-3">
-                  <div className="flex gap-2 items-center mb-2">
+                <div key={ex.id} className="border border-gray-200 dark:border-gray-800 rounded-lg p-2">
+                  <div className="flex gap-2 items-center mb-1.5">
                     <Input
                       placeholder="Nom de l'exercice (ex: Squat)"
                       value={ex.exerciseName}
                       onChange={(e) => updateExercise(ex.id, e.target.value)}
                     />
-                    <button className="text-red-500 text-sm" onClick={() => removeExercise(ex.id)}>
+                    <button className="text-red-500 text-sm shrink-0" onClick={() => removeExercise(ex.id)}>
                       ✕
                     </button>
                   </div>
 
                   {suggestion && (
-                    <p className="text-xs text-indigo-600 dark:text-indigo-400 mb-2">
+                    <p className="text-xs text-indigo-600 dark:text-indigo-400 mb-1.5">
                       💡 {suggestion.message}
                     </p>
                   )}
 
                   <div className="space-y-1">
                     {ex.sets.map((s, i) => (
-                      <div key={s.id} className="grid grid-cols-12 gap-2 items-center">
-                        <span className="col-span-1 text-xs text-gray-400">#{i + 1}</span>
+                      <div key={s.id} className="flex items-center gap-2">
+                        <span className="w-5 shrink-0 text-xs text-gray-400">#{i + 1}</span>
                         <Input
-                          className="col-span-4"
                           type="number"
                           min={0}
                           placeholder="Reps"
@@ -213,7 +212,6 @@ export default function Strength({ appData }: { appData: UseAppData }) {
                           onChange={(e) => updateSet(ex.id, s.id, { reps: Number(e.target.value) })}
                         />
                         <Input
-                          className="col-span-4"
                           type="number"
                           min={0}
                           step={0.5}
@@ -226,7 +224,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
                           }
                         />
                         <button
-                          className="col-span-1 text-red-500 text-sm"
+                          className="shrink-0 text-red-500 text-sm"
                           onClick={() => removeSet(ex.id, s.id)}
                         >
                           ✕
@@ -234,7 +232,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
                       </div>
                     ))}
                   </div>
-                  <Button variant="secondary" className="mt-2" onClick={() => addSet(ex.id)}>
+                  <Button variant="secondary" className="mt-1.5" onClick={() => addSet(ex.id)}>
                     + Série
                   </Button>
                 </div>
@@ -254,7 +252,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
       {sortedSessions.length === 0 ? (
         <EmptyState>Aucune séance de musculation enregistrée.</EmptyState>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {sortedSessions.map((s) => (
             <Card key={s.id}>
               <div className="flex justify-between items-start">
@@ -263,7 +261,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
                   Supprimer
                 </Button>
               </div>
-              <div className="mt-2 space-y-1">
+              <div className="mt-1.5 space-y-0.5">
                 {s.exercises.map((e) => (
                   <div key={e.id} className="text-sm">
                     <span className="font-medium">{e.exerciseName}: </span>

@@ -145,7 +145,7 @@ export default function Programs({ appData }: { appData: UseAppData }) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <datalist id={EXERCISE_DATALIST_ID}>
         {knownExerciseNames.map((name) => (
           <option key={name} value={name} />
@@ -160,7 +160,7 @@ export default function Programs({ appData }: { appData: UseAppData }) {
       </div>
 
       {showForm && (
-        <Card className="space-y-4">
+        <Card className="space-y-3">
           <h2 className="text-sm font-semibold text-gray-500">
             {editingProgram ? `Modifier "${editingProgram.name}"` : 'Nouveau programme'}
           </h2>
@@ -181,7 +181,7 @@ export default function Programs({ appData }: { appData: UseAppData }) {
             />
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2">
             <div className="flex justify-between items-center">
               <h3 className="text-sm font-semibold">Jours</h3>
               <Button variant="secondary" onClick={addDay}>
@@ -195,7 +195,7 @@ export default function Programs({ appData }: { appData: UseAppData }) {
               draft.days.map((day) => {
                 const dayTargets = draft.strengthTargets.filter((t) => t.dayId === day.id);
                 return (
-                  <div key={day.id} className="border border-gray-200 dark:border-gray-800 rounded-lg p-3 space-y-3">
+                  <div key={day.id} className="border border-gray-200 dark:border-gray-800 rounded-lg p-2 space-y-2">
                     <div className="flex gap-2 items-center">
                       <Input
                         value={day.name}
@@ -211,7 +211,7 @@ export default function Programs({ appData }: { appData: UseAppData }) {
                       </button>
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="space-y-1.5">
                       {dayTargets.map((t) => (
                         <div key={t.id} className="grid grid-cols-12 gap-2 items-center">
                           <Input
@@ -312,9 +312,9 @@ export default function Programs({ appData }: { appData: UseAppData }) {
       {data.programs.length === 0 ? (
         <EmptyState>Aucun programme créé. Crée ton premier programme d'entrainement !</EmptyState>
       ) : (
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid md:grid-cols-2 gap-3">
           {data.programs.map((p) => (
-            <Card key={p.id} className="space-y-3">
+            <Card key={p.id} className="space-y-2">
               <div className="flex justify-between items-start">
                 <div>
                   <h3 className="font-semibold">{p.name}</h3>

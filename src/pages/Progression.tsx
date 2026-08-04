@@ -45,11 +45,11 @@ export default function Progression({ appData }: { appData: UseAppData }) {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       <h1 className="text-xl font-bold">Progression</h1>
 
       <Card>
-        <div className="flex flex-wrap justify-between items-center gap-3 mb-3">
+        <div className="flex flex-wrap justify-between items-center gap-2 mb-2">
           <div className="flex flex-wrap gap-2">
             {exerciseNames.length > 0 && (
               <select

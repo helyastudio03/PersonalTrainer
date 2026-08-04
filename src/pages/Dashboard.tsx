@@ -12,8 +12,8 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
     .slice(0, 5);
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-3 gap-4">
+    <div className="space-y-3">
+      <div className="grid grid-cols-3 gap-3">
         <Card>
           <p className="text-xs text-gray-500">Programmes</p>
           <p className="text-2xl font-bold">{data.programs.length}</p>
@@ -29,7 +29,7 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
       </div>
 
       <Card>
-        <div className="flex justify-between items-center mb-3">
+        <div className="flex justify-between items-center mb-2">
           <h2 className="font-semibold">Dernières séances</h2>
           <Link to="/musculation" className="text-xs text-indigo-600 hover:underline">
             Voir tout
@@ -38,11 +38,11 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
         {recentStrength.length === 0 ? (
           <EmptyState>Aucune séance enregistrée pour le moment.</EmptyState>
         ) : (
-          <ul className="space-y-2">
+          <ul className="space-y-1">
             {recentStrength.map((s) => (
               <li
                 key={s.id}
-                className="text-sm flex justify-between border-b border-gray-100 dark:border-gray-800 pb-2"
+                className="text-sm flex justify-between border-b border-gray-100 dark:border-gray-800 py-1"
               >
                 <span>{s.date}</span>
                 <span className="text-gray-500">
