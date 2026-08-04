@@ -42,7 +42,7 @@ function VolumeChart({ strengthTargets }: { strengthTargets: ProgramExerciseTarg
           <Bar
             dataKey="weeklySets"
             name="Séries/sem."
-            fill="#ff4d1a"
+            fill="#6366f1"
             radius={[0, 4, 4, 0]}
             isAnimationActive={false}
           />
