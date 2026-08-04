@@ -59,6 +59,26 @@ export default function Records({ appData }: { appData: UseAppData }) {
       .sort();
   }, [records, selectedMuscleGroups, exerciseMuscleGroups]);
 
+  const exercisesByGroup = useMemo(() => {
+    const map = new Map<MuscleGroup, string[]>();
+    const ungrouped: string[] = [];
+    for (const name of availableExerciseNames) {
+      const mg = exerciseMuscleGroups[name];
+      if (mg) {
+        const list = map.get(mg);
+        if (list) list.push(name);
+        else map.set(mg, [name]);
+      } else {
+        ungrouped.push(name);
+      }
+    }
+    return { map, ungrouped };
+  }, [availableExerciseNames, exerciseMuscleGroups]);
+
+  const groupsToShow = availableMuscleGroups.filter(
+    (mg) => selectedMuscleGroups.length === 0 || selectedMuscleGroups.includes(mg),
+  );
+
   const filteredRecords = useMemo(() => {
     return records.filter((r) => {
       if (selectedMuscleGroups.length > 0) {
@@ -116,38 +136,50 @@ export default function Records({ appData }: { appData: UseAppData }) {
           </IconButton>
         </div>
 
-        {availableMuscleGroups.length > 0 && (
-          <div>
-            <p className="text-xs font-semibold text-gray-500 mb-1">Groupe musculaire</p>
-            <div className="flex flex-wrap gap-1.5">
-              {availableMuscleGroups.map((mg) => (
-                <button
-                  key={mg}
-                  type="button"
-                  onClick={() => toggleMuscleGroup(mg)}
-                  className={chipClassName(selectedMuscleGroups.includes(mg))}
-                >
-                  {mg}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
         {availableExerciseNames.length > 0 && (
           <div>
             <p className="text-xs font-semibold text-gray-500 mb-1">Exercice</p>
-            <div className="flex flex-wrap gap-1.5">
-              {availableExerciseNames.map((name) => (
-                <button
-                  key={name}
-                  type="button"
-                  onClick={() => toggleExercise(name)}
-                  className={chipClassName(selectedExercises.includes(name))}
-                >
-                  {name}
-                </button>
-              ))}
+            <div className="space-y-1.5">
+              {groupsToShow.map((mg) => {
+                const names = exercisesByGroup.map.get(mg);
+                if (!names || names.length === 0) return null;
+                return (
+                  <div key={mg} className="flex flex-wrap items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => toggleMuscleGroup(mg)}
+                      className={chipClassName(selectedMuscleGroups.includes(mg))}
+                    >
+                      {mg}
+                    </button>
+                    {names.map((name) => (
+                      <button
+                        key={name}
+                        type="button"
+                        onClick={() => toggleExercise(name)}
+                        className={chipClassName(selectedExercises.includes(name))}
+                      >
+                        {name}
+                      </button>
+                    ))}
+                  </div>
+                );
+              })}
+              {exercisesByGroup.ungrouped.length > 0 && (
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="text-xs text-gray-400 px-1">Sans groupe</span>
+                  {exercisesByGroup.ungrouped.map((name) => (
+                    <button
+                      key={name}
+                      type="button"
+                      onClick={() => toggleExercise(name)}
+                      className={chipClassName(selectedExercises.includes(name))}
+                    >
+                      {name}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}

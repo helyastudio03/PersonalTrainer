@@ -80,6 +80,26 @@ export default function Progression({ appData }: { appData: UseAppData }) {
 
   const activeExercises = selectedExercises.filter((name) => filteredExerciseNames.includes(name));
 
+  const exercisesByGroup = useMemo(() => {
+    const map = new Map<MuscleGroup, string[]>();
+    const ungrouped: string[] = [];
+    for (const name of filteredExerciseNames) {
+      const mg = exerciseMuscleGroups[name];
+      if (mg) {
+        const list = map.get(mg);
+        if (list) list.push(name);
+        else map.set(mg, [name]);
+      } else {
+        ungrouped.push(name);
+      }
+    }
+    return { map, ungrouped };
+  }, [filteredExerciseNames, exerciseMuscleGroups]);
+
+  const groupsToShow = availableMuscleGroups.filter(
+    (mg) => selectedMuscleGroups.length === 0 || selectedMuscleGroups.includes(mg),
+  );
+
   const filteredSessions = useMemo(() => {
     if (!dateFrom && !dateTo) return data.strengthSessions;
     return data.strengthSessions.filter((s) => {
@@ -131,25 +151,6 @@ export default function Progression({ appData }: { appData: UseAppData }) {
           </IconButton>
         </div>
 
-        {availableMuscleGroups.length > 0 && (
-          <div>
-            <p className="text-xs font-semibold text-gray-500 mb-1">Groupe musculaire</p>
-            <div className="flex flex-wrap gap-1.5">
-              {availableMuscleGroups.map((mg) => (
-                <button
-                  key={mg}
-                  type="button"
-                  onClick={() => toggleMuscleGroup(mg)}
-                  className={chipClassName(selectedMuscleGroups.includes(mg))}
-                  style={selectedMuscleGroups.includes(mg) ? { backgroundColor: '#6366f1' } : undefined}
-                >
-                  {mg}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
         <div>
           <p className="text-xs font-semibold text-gray-500 mb-1">
             Exercices (une courbe par exercice sélectionné)
@@ -157,24 +158,62 @@ export default function Progression({ appData }: { appData: UseAppData }) {
           {filteredExerciseNames.length === 0 ? (
             <p className="text-xs text-gray-400">Aucun exercice pour ce filtre.</p>
           ) : (
-            <div className="flex flex-wrap gap-1.5">
-              {filteredExerciseNames.map((name) => {
-                const active = activeExercises.includes(name);
-                const color = active
-                  ? LINE_COLORS[activeExercises.indexOf(name) % LINE_COLORS.length]
-                  : undefined;
+            <div className="space-y-1.5">
+              {groupsToShow.map((mg) => {
+                const names = exercisesByGroup.map.get(mg);
+                if (!names || names.length === 0) return null;
                 return (
-                  <button
-                    key={name}
-                    type="button"
-                    onClick={() => toggleExercise(name)}
-                    className={chipClassName(active)}
-                    style={color ? { backgroundColor: color } : undefined}
-                  >
-                    {name}
-                  </button>
+                  <div key={mg} className="flex flex-wrap items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => toggleMuscleGroup(mg)}
+                      className={chipClassName(selectedMuscleGroups.includes(mg))}
+                      style={selectedMuscleGroups.includes(mg) ? { backgroundColor: '#6366f1' } : undefined}
+                    >
+                      {mg}
+                    </button>
+                    {names.map((name) => {
+                      const active = activeExercises.includes(name);
+                      const color = active
+                        ? LINE_COLORS[activeExercises.indexOf(name) % LINE_COLORS.length]
+                        : undefined;
+                      return (
+                        <button
+                          key={name}
+                          type="button"
+                          onClick={() => toggleExercise(name)}
+                          className={chipClassName(active)}
+                          style={color ? { backgroundColor: color } : undefined}
+                        >
+                          {name}
+                        </button>
+                      );
+                    })}
+                  </div>
                 );
               })}
+              {exercisesByGroup.ungrouped.length > 0 && (
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="text-xs text-gray-400 px-1">Sans groupe</span>
+                  {exercisesByGroup.ungrouped.map((name) => {
+                    const active = activeExercises.includes(name);
+                    const color = active
+                      ? LINE_COLORS[activeExercises.indexOf(name) % LINE_COLORS.length]
+                      : undefined;
+                    return (
+                      <button
+                        key={name}
+                        type="button"
+                        onClick={() => toggleExercise(name)}
+                        className={chipClassName(active)}
+                        style={color ? { backgroundColor: color } : undefined}
+                      >
+                        {name}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
         </div>
