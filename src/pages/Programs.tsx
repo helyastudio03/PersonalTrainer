@@ -14,6 +14,7 @@ import type { MuscleGroup, Program, ProgramDay, ProgramExerciseTarget } from '..
 import { MUSCLE_GROUPS } from '../types';
 import { Button, Card, EmptyState, Input, Label } from '../components/ui';
 import { formatRepRange, getWeeklySetsByMuscleGroup, listAllExerciseNames } from '../lib/records';
+import { generateFakeSessions } from '../lib/fakeData';
 
 const EXERCISE_DATALIST_ID = 'known-exercise-names';
 
@@ -53,7 +54,7 @@ function VolumeChart({ strengthTargets }: { strengthTargets: ProgramExerciseTarg
 }
 
 export default function Programs({ appData }: { appData: UseAppData }) {
-  const { data, addProgram, updateProgram, deleteProgram } = appData;
+  const { data, addProgram, updateProgram, deleteProgram, addStrengthSession } = appData;
   const [draft, setDraft] = useState(emptyDraft());
   const [showForm, setShowForm] = useState(false);
   const [editingProgram, setEditingProgram] = useState<Program | null>(null);
@@ -84,6 +85,11 @@ export default function Programs({ appData }: { appData: UseAppData }) {
     setEditingProgram(null);
     setDraft(emptyDraft());
     setShowForm(false);
+  }
+
+  function generateFakeHistory(program: Program) {
+    const sessions = generateFakeSessions(program);
+    sessions.forEach((session) => addStrengthSession(session));
   }
 
   function addDay() {
@@ -329,6 +335,16 @@ export default function Programs({ appData }: { appData: UseAppData }) {
                   </Button>
                 </div>
               </div>
+
+              {p.strengthTargets.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => generateFakeHistory(p)}
+                  className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
+                >
+                  🧪 Générer un historique fictif (test des visualisations)
+                </button>
+              )}
 
               {p.days.map((day) => {
                 const dayTargets = p.strengthTargets.filter((t) => t.dayId === day.id);
