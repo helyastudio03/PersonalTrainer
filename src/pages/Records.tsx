@@ -120,7 +120,7 @@ export default function Records({ appData }: { appData: UseAppData }) {
 
   return (
     <div className="space-y-3">
-      <h1 className="text-xl font-bold">Records personnels</h1>
+      <h1 className="text-xl font-bold">Records</h1>
 
       <Card className="space-y-3">
         <div className="flex justify-between items-center">

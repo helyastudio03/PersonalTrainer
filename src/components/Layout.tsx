@@ -6,7 +6,7 @@ const linkInactive = 'text-ash-200/70 hover:text-ash-100 hover:bg-white/5';
 const linkActive = 'bg-ember-600 text-ash-200 shadow-[0_0_12px_rgba(242,84,31,0.55)]';
 
 const navItems = [
-  { to: '/', label: 'Dashboard', end: true },
+  { to: '/', label: 'Accueil', end: true },
   { to: '/programmes', label: 'Programmes' },
   { to: '/musculation', label: 'Séances' },
   { to: '/progression', label: 'Progression' },
