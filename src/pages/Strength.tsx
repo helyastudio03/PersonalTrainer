@@ -26,7 +26,7 @@ function exerciseFromTarget(target: ProgramExerciseTarget): StrengthExerciseEntr
     sets: Array.from({ length: Math.max(target.targetSets, 1) }, () => ({
       id: uuid(),
       reps,
-      weightKg: target.targetWeight ?? 0,
+      weightKg: 0,
     })),
   };
 }
@@ -166,7 +166,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
                         >
                           + {t.exerciseName} ({t.targetSets}×
                           {formatRepRange(t.targetRepsMin, t.targetRepsMax)}
-                          {t.targetWeight ? ` @ ${t.targetWeight}kg` : ''})
+                          {t.targetRIR !== undefined ? ` @ RIR ${t.targetRIR}` : ''})
                         </button>
                       ))}
                     </div>

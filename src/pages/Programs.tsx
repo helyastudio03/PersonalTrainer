@@ -268,11 +268,12 @@ export default function Programs({ appData }: { appData: UseAppData }) {
                             className="col-span-2"
                             type="number"
                             min={0}
-                            placeholder="Poids kg"
-                            value={t.targetWeight ?? ''}
+                            placeholder="RIR (optionnel)"
+                            title="Reps in reserve"
+                            value={t.targetRIR ?? ''}
                             onChange={(e) =>
                               updateStrengthTarget(t.id, {
-                                targetWeight: e.target.value ? Number(e.target.value) : undefined,
+                                targetRIR: e.target.value ? Number(e.target.value) : undefined,
                               })
                             }
                           />
@@ -341,7 +342,7 @@ export default function Programs({ appData }: { appData: UseAppData }) {
                           {t.exerciseName}{' '}
                           <span className="text-gray-400">({t.muscleGroup})</span>: {t.targetSets}×
                           {formatRepRange(t.targetRepsMin, t.targetRepsMax)}
-                          {t.targetWeight ? ` @ ${t.targetWeight}kg` : ''}
+                          {t.targetRIR !== undefined ? ` @ RIR ${t.targetRIR}` : ''}
                         </li>
                       ))}
                     </ul>

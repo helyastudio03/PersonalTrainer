@@ -29,7 +29,7 @@ export interface ProgramExerciseTarget {
   targetSets: number;
   targetRepsMin: number;
   targetRepsMax: number;
-  targetWeight?: number; // kg, optionnel
+  targetRIR?: number; // reps in reserve, optionnel
   notes?: string;
 }
 
