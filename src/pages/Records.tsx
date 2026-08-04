@@ -139,20 +139,49 @@ export default function Records({ appData }: { appData: UseAppData }) {
         {availableExerciseNames.length > 0 && (
           <div>
             <p className="text-xs font-semibold text-gray-500 mb-1.5">Exercice</p>
-            <div className="space-y-1.5">
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {groupsToShow.map((mg) => {
                 const names = exercisesByGroup.map.get(mg);
                 if (!names || names.length === 0) return null;
+                const groupActive = selectedMuscleGroups.includes(mg);
                 return (
-                  <div key={mg} className="flex flex-wrap items-center gap-1.5">
+                  <div
+                    key={mg}
+                    className="border border-gray-200 dark:border-gray-800 rounded-lg p-2 space-y-1.5"
+                  >
                     <button
                       type="button"
                       onClick={() => toggleMuscleGroup(mg)}
-                      className={chipClassName(selectedMuscleGroups.includes(mg))}
+                      className={`w-full text-left text-xs font-semibold uppercase tracking-wide ${
+                        groupActive
+                          ? 'text-indigo-600 dark:text-indigo-400'
+                          : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                      }`}
                     >
                       {mg}
                     </button>
-                    {names.map((name) => (
+                    <div className="flex flex-wrap gap-1.5">
+                      {names.map((name) => (
+                        <button
+                          key={name}
+                          type="button"
+                          onClick={() => toggleExercise(name)}
+                          className={chipClassName(selectedExercises.includes(name))}
+                        >
+                          {name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+              {exercisesByGroup.ungrouped.length > 0 && (
+                <div className="border border-gray-200 dark:border-gray-800 rounded-lg p-2 space-y-1.5">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                    Sans groupe
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {exercisesByGroup.ungrouped.map((name) => (
                       <button
                         key={name}
                         type="button"
@@ -163,21 +192,6 @@ export default function Records({ appData }: { appData: UseAppData }) {
                       </button>
                     ))}
                   </div>
-                );
-              })}
-              {exercisesByGroup.ungrouped.length > 0 && (
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="text-xs text-gray-400 px-1">Sans groupe</span>
-                  {exercisesByGroup.ungrouped.map((name) => (
-                    <button
-                      key={name}
-                      type="button"
-                      onClick={() => toggleExercise(name)}
-                      className={chipClassName(selectedExercises.includes(name))}
-                    >
-                      {name}
-                    </button>
-                  ))}
                 </div>
               )}
             </div>

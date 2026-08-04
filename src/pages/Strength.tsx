@@ -37,7 +37,7 @@ function exerciseFromTarget(target: ProgramExerciseTarget): StrengthExerciseEntr
 }
 
 const selectClassName =
-  'px-2 py-1 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 text-xs';
+  'px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 text-sm';
 
 function SessionCard({
   session,
@@ -384,6 +384,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
 
       {showForm && (
         <Card className="space-y-3">
+          <h2 className="text-sm font-semibold text-gray-500">Nouvelle séance</h2>
           <div className="grid grid-cols-3 gap-2">
             <div>
               <Label>Date</Label>
@@ -459,84 +460,87 @@ export default function Strength({ appData }: { appData: UseAppData }) {
             </div>
           )}
 
-          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3 items-start">
-            {exercises.map((ex) => {
-              const lastPerformance = ex.exerciseName
-                ? getLastPerformance(data.strengthSessions, ex.exerciseName)
-                : null;
-              return (
-                <div key={ex.id} className="border border-gray-200 dark:border-gray-800 rounded-lg p-2">
-                  <div className="flex gap-2 items-center mb-1.5">
-                    <Input
-                      placeholder="Nom de l'exercice (ex: Squat)"
-                      value={ex.exerciseName}
-                      onChange={(e) => updateExercise(ex.id, e.target.value)}
-                    />
-                    <button className="text-red-500 text-sm shrink-0" onClick={() => removeExercise(ex.id)}>
-                      ✕
-                    </button>
-                  </div>
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <h3 className="text-sm font-semibold">Exercices</h3>
+              <Button variant="secondary" onClick={addExercise}>
+                + Exercice
+              </Button>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-start">
+              {exercises.map((ex) => {
+                const lastPerformance = ex.exerciseName
+                  ? getLastPerformance(data.strengthSessions, ex.exerciseName)
+                  : null;
+                return (
+                  <div key={ex.id} className="border border-gray-200 dark:border-gray-800 rounded-lg p-2">
+                    <div className="flex gap-2 items-center mb-1.5">
+                      <Input
+                        placeholder="Nom de l'exercice (ex: Squat)"
+                        value={ex.exerciseName}
+                        onChange={(e) => updateExercise(ex.id, e.target.value)}
+                      />
+                      <button className="text-red-500 text-sm shrink-0" onClick={() => removeExercise(ex.id)}>
+                        ✕
+                      </button>
+                    </div>
 
-                  <div className="space-y-1">
-                    {ex.sets.map((s, i) => {
-                      const lastSet = lastPerformance?.sets[i];
-                      return (
-                        <div key={s.id} className="flex items-center gap-2">
-                          <span className="w-5 shrink-0 text-xs text-gray-400">#{i + 1}</span>
-                          <Input
-                            type="number"
-                            min={0}
-                            placeholder={lastSet ? `${lastSet.reps}` : 'Reps'}
-                            value={s.reps === 0 ? '' : s.reps}
-                            onChange={(e) =>
-                              updateSet(ex.id, s.id, {
-                                reps: e.target.value ? Number(e.target.value) : 0,
-                              })
-                            }
-                          />
-                          <Input
-                            type="number"
-                            min={0}
-                            step={0.5}
-                            placeholder={lastSet ? `${lastSet.weightKg} kg` : 'Poids kg'}
-                            value={s.weightKg === 0 ? '' : s.weightKg}
-                            onChange={(e) =>
-                              updateSet(ex.id, s.id, {
-                                weightKg: e.target.value ? Number(e.target.value) : 0,
-                              })
-                            }
-                          />
-                          <button
-                            className="shrink-0 text-red-500 text-sm"
-                            onClick={() => removeSet(ex.id, s.id)}
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      );
-                    })}
+                    <div className="space-y-1">
+                      {ex.sets.map((s, i) => {
+                        const lastSet = lastPerformance?.sets[i];
+                        return (
+                          <div key={s.id} className="flex items-center gap-2">
+                            <span className="w-5 shrink-0 text-xs text-gray-400">#{i + 1}</span>
+                            <Input
+                              type="number"
+                              min={0}
+                              placeholder={lastSet ? `${lastSet.reps}` : 'Reps'}
+                              value={s.reps === 0 ? '' : s.reps}
+                              onChange={(e) =>
+                                updateSet(ex.id, s.id, {
+                                  reps: e.target.value ? Number(e.target.value) : 0,
+                                })
+                              }
+                            />
+                            <Input
+                              type="number"
+                              min={0}
+                              step={0.5}
+                              placeholder={lastSet ? `${lastSet.weightKg} kg` : 'Poids kg'}
+                              value={s.weightKg === 0 ? '' : s.weightKg}
+                              onChange={(e) =>
+                                updateSet(ex.id, s.id, {
+                                  weightKg: e.target.value ? Number(e.target.value) : 0,
+                                })
+                              }
+                            />
+                            <button
+                              className="shrink-0 text-red-500 text-sm"
+                              onClick={() => removeSet(ex.id, s.id)}
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <Button variant="secondary" className="mt-1.5" onClick={() => addSet(ex.id)}>
+                      + Série
+                    </Button>
                   </div>
-                  <Button variant="secondary" className="mt-1.5" onClick={() => addSet(ex.id)}>
-                    + Série
-                  </Button>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
 
-          <div className="flex gap-2">
-            <Button variant="secondary" onClick={addExercise}>
-              + Exercice
-            </Button>
-            <Button onClick={submit}>Enregistrer la séance</Button>
-          </div>
+          <Button onClick={submit}>Enregistrer la séance</Button>
         </Card>
       )}
 
       {sortedSessions.length === 0 ? (
         <EmptyState>Aucune séance de musculation enregistrée.</EmptyState>
       ) : (
-        <div className="grid gap-2 sm:grid-cols-2 items-start">
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-start">
           {sortedSessions.map((s) => (
             <SessionCard
               key={s.id}
