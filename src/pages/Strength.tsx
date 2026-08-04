@@ -54,6 +54,7 @@ function SessionCard({
   const [metaDate, setMetaDate] = useState(session.date);
   const [metaName, setMetaName] = useState(session.name ?? '');
   const [metaProgramId, setMetaProgramId] = useState(session.programId ?? '');
+  const [metaNotes, setMetaNotes] = useState(session.notes ?? '');
 
   const [editingExerciseId, setEditingExerciseId] = useState<string | null>(null);
   const [exerciseDraft, setExerciseDraft] = useState<StrengthSet[]>([]);
@@ -62,6 +63,7 @@ function SessionCard({
     setMetaDate(session.date);
     setMetaName(session.name ?? '');
     setMetaProgramId(session.programId ?? '');
+    setMetaNotes(session.notes ?? '');
     setEditingMeta(true);
   }
 
@@ -71,6 +73,7 @@ function SessionCard({
       date: metaDate,
       name: metaName.trim() || undefined,
       programId: metaProgramId || undefined,
+      notes: metaNotes.trim() || undefined,
     });
     setEditingMeta(false);
   }
@@ -115,65 +118,77 @@ function SessionCard({
   }
 
   return (
-    <Card className="group">
-      <div className="flex justify-between items-start gap-2">
+    <Card>
+      <div className="group flex justify-between items-start gap-2">
         {editingMeta ? (
-          <div className="flex flex-wrap gap-1.5 items-center">
+          <div className="flex-1 space-y-1.5">
+            <div className="flex flex-wrap gap-1.5 items-center">
+              <Input
+                value={metaName}
+                onChange={(e) => setMetaName(e.target.value)}
+                placeholder="Nom (ex: Upper 1)"
+                className="w-32"
+              />
+              <Input
+                type="date"
+                value={metaDate}
+                onChange={(e) => setMetaDate(e.target.value)}
+                className="w-36"
+              />
+              <select
+                className={selectClassName}
+                value={metaProgramId}
+                onChange={(e) => setMetaProgramId(e.target.value)}
+              >
+                <option value="">Aucun programme</option>
+                {programs.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+              <IconButton
+                variant="secondary"
+                hoverOnly={false}
+                onClick={saveMeta}
+                title="Valider"
+                aria-label="Valider"
+              >
+                ✓
+              </IconButton>
+              <IconButton
+                variant="secondary"
+                hoverOnly={false}
+                onClick={() => setEditingMeta(false)}
+                title="Annuler"
+                aria-label="Annuler"
+              >
+                ✕
+              </IconButton>
+            </div>
             <Input
-              value={metaName}
-              onChange={(e) => setMetaName(e.target.value)}
-              placeholder="Nom (ex: Upper 1)"
-              className="w-32"
+              value={metaNotes}
+              onChange={(e) => setMetaNotes(e.target.value)}
+              placeholder="Notes (optionnel): fatigue, douleur, ressenti..."
             />
-            <Input
-              type="date"
-              value={metaDate}
-              onChange={(e) => setMetaDate(e.target.value)}
-              className="w-36"
-            />
-            <select
-              className={selectClassName}
-              value={metaProgramId}
-              onChange={(e) => setMetaProgramId(e.target.value)}
-            >
-              <option value="">Aucun programme</option>
-              {programs.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-            <IconButton
-              variant="secondary"
-              hoverOnly={false}
-              onClick={saveMeta}
-              title="Valider"
-              aria-label="Valider"
-            >
-              ✓
-            </IconButton>
-            <IconButton
-              variant="secondary"
-              hoverOnly={false}
-              onClick={() => setEditingMeta(false)}
-              title="Annuler"
-              aria-label="Annuler"
-            >
-              ✕
-            </IconButton>
           </div>
         ) : (
-          <h3 className="font-semibold">
-            {session.name ? `${session.name} · ${session.date}` : session.date}
-          </h3>
+          <div>
+            <h3 className="font-semibold">
+              {session.name ? `${session.name} · ${session.date}` : session.date}
+            </h3>
+            {session.notes && (
+              <p className="text-xs text-gray-500 dark:text-gray-400 italic mt-0.5">{session.notes}</p>
+            )}
+          </div>
         )}
         <div className="flex gap-1.5 shrink-0">
           {!editingMeta && (
             <IconButton
               variant="secondary"
               onClick={startEditMeta}
-              title="Modifier la date / le programme"
-              aria-label="Modifier la date ou le programme"
+              title="Modifier la date / le programme / les notes"
+              aria-label="Modifier la date, le programme ou les notes"
             >
               ✏️
             </IconButton>
@@ -238,7 +253,7 @@ function SessionCard({
               </div>
             </div>
           ) : (
-            <div key={e.id} className="flex justify-between items-start gap-2 text-sm">
+            <div key={e.id} className="group flex justify-between items-start gap-2 text-sm">
               <div>
                 <span className="font-medium">{e.exerciseName}: </span>
                 {formatSetsSummary(e.sets)}
@@ -273,6 +288,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
   const { data, addStrengthSession, updateStrengthSession, deleteStrengthSession } = appData;
   const [date, setDate] = useState(todayIso());
   const [name, setName] = useState('');
+  const [notes, setNotes] = useState('');
   const [programId, setProgramId] = useState('');
   const [exercises, setExercises] = useState<StrengthExerciseEntry[]>([emptyExercise()]);
   const [showForm, setShowForm] = useState(false);
@@ -328,6 +344,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
     setExercises([emptyExercise()]);
     setDate(todayIso());
     setName('');
+    setNotes('');
     setProgramId('');
   }
 
@@ -337,6 +354,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
     addStrengthSession({
       date,
       name: name.trim() || undefined,
+      notes: notes.trim() || undefined,
       programId: programId || undefined,
       exercises: validExercises,
     });
@@ -345,8 +363,13 @@ export default function Strength({ appData }: { appData: UseAppData }) {
   }
 
   function toggleForm() {
-    if (showForm) resetDraft();
-    setShowForm((s) => !s);
+    if (showForm) {
+      resetDraft();
+      setShowForm(false);
+    } else {
+      if (data.activeProgramId) setProgramId(data.activeProgramId);
+      setShowForm(true);
+    }
   }
 
   const sortedSessions = [...data.strengthSessions].sort((a, b) => b.date.localeCompare(a.date));
@@ -385,6 +408,15 @@ export default function Strength({ appData }: { appData: UseAppData }) {
                 ))}
               </select>
             </div>
+          </div>
+
+          <div>
+            <Label>Notes (optionnel)</Label>
+            <Input
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="fatigue, douleur, ressenti..."
+            />
           </div>
 
           {selectedProgram && selectedProgram.strengthTargets.length > 0 && (

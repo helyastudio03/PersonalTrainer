@@ -1,7 +1,14 @@
 import { Link } from 'react-router-dom';
 import type { UseAppData } from '../lib/useAppData';
 import { Card, EmptyState } from '../components/ui';
-import { listStrengthExerciseNames } from '../lib/records';
+import {
+  getActualWeeklySetsByMuscleGroup,
+  getExerciseMuscleGroups,
+  getRecentPRImprovements,
+  getWeeklySetsByMuscleGroup,
+  listStrengthExerciseNames,
+  suggestNextProgramDay,
+} from '../lib/records';
 
 export default function Dashboard({ appData }: { appData: UseAppData }) {
   const { data } = appData;
@@ -10,6 +17,18 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
   const recentStrength = [...data.strengthSessions]
     .sort((a, b) => b.date.localeCompare(a.date))
     .slice(0, 5);
+
+  const activeProgram = data.programs.find((p) => p.id === data.activeProgramId);
+  const suggestedDay = activeProgram
+    ? suggestNextProgramDay(activeProgram, data.strengthSessions)
+    : null;
+
+  const exerciseMuscleGroups = getExerciseMuscleGroups(data.programs);
+  const targetVolume = activeProgram ? getWeeklySetsByMuscleGroup(activeProgram.strengthTargets) : [];
+  const actualVolume = getActualWeeklySetsByMuscleGroup(data.strengthSessions, exerciseMuscleGroups);
+  const actualByGroup = new Map(actualVolume.map((v) => [v.muscleGroup, v.weeklySets]));
+
+  const recentPRs = getRecentPRImprovements(data.strengthSessions, 14).slice(0, 5);
 
   return (
     <div className="space-y-3">
@@ -27,6 +46,88 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
           <p className="text-2xl font-bold">{exerciseNames.length}</p>
         </Card>
       </div>
+
+      <Card>
+        <div className="flex justify-between items-center mb-2">
+          <h2 className="font-semibold">Programme actif</h2>
+          <Link to="/programmes" className="text-xs text-indigo-600 hover:underline">
+            Gérer les programmes
+          </Link>
+        </div>
+        {activeProgram ? (
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="font-medium">{activeProgram.name}</p>
+              {suggestedDay && (
+                <p className="text-sm text-gray-500">
+                  Prochaine séance suggérée : <span className="font-medium">{suggestedDay.name}</span>
+                </p>
+              )}
+            </div>
+            <Link
+              to="/musculation"
+              className="text-xs bg-indigo-600 text-white rounded px-3 py-1.5 hover:bg-indigo-700 shrink-0"
+            >
+              Démarrer une séance
+            </Link>
+          </div>
+        ) : (
+          <EmptyState>
+            Aucun programme actif. Choisissez-en un depuis la page Programmes.
+          </EmptyState>
+        )}
+      </Card>
+
+      {activeProgram && targetVolume.length > 0 && (
+        <Card>
+          <h2 className="font-semibold mb-2">Volume hebdomadaire (cette semaine)</h2>
+          <ul className="space-y-1.5">
+            {targetVolume.map((t) => {
+              const actual = actualByGroup.get(t.muscleGroup) ?? 0;
+              const pct = t.weeklySets > 0 ? Math.min(100, Math.round((actual / t.weeklySets) * 100)) : 0;
+              return (
+                <li key={t.muscleGroup} className="text-sm">
+                  <div className="flex justify-between mb-0.5">
+                    <span>{t.muscleGroup}</span>
+                    <span className="text-gray-500">
+                      {actual} / {t.weeklySets} séries
+                    </span>
+                  </div>
+                  <div className="h-1.5 rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
+                    <div
+                      className="h-full bg-indigo-600 rounded-full"
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </Card>
+      )}
+
+      <Card>
+        <h2 className="font-semibold mb-2">Records récents</h2>
+        {recentPRs.length === 0 ? (
+          <EmptyState>Aucun record battu ces 14 derniers jours.</EmptyState>
+        ) : (
+          <ul className="space-y-1">
+            {recentPRs.map((r) => (
+              <li
+                key={`${r.exerciseName}-${r.reps}`}
+                className="text-sm flex justify-between border-b border-gray-100 dark:border-gray-800 py-1"
+              >
+                <span>
+                  {r.exerciseName} <span className="text-gray-500">({r.reps} reps)</span>
+                </span>
+                <span className="text-green-600 dark:text-green-400 font-medium">
+                  {r.previousMaxWeight} → {r.maxWeight} kg
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
 
       <Card>
         <div className="flex justify-between items-center mb-2">

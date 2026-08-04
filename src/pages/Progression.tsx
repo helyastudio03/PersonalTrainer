@@ -11,7 +11,7 @@ import {
 } from 'recharts';
 import type { UseAppData } from '../lib/useAppData';
 import type { MuscleGroup } from '../types';
-import { Card, EmptyState, Input, Label } from '../components/ui';
+import { Card, EmptyState, IconButton, Input, Label } from '../components/ui';
 import {
   getExerciseMuscleGroups,
   getMultiExerciseMetricSeries,
@@ -120,13 +120,15 @@ export default function Progression({ appData }: { appData: UseAppData }) {
       <Card className="space-y-3">
         <div className="flex justify-between items-center">
           <h2 className="text-sm font-semibold text-gray-500">Filtres</h2>
-          <button
-            type="button"
+          <IconButton
+            variant="secondary"
+            hoverOnly={false}
             onClick={resetFilters}
-            className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
+            title="Réinitialiser les filtres"
+            aria-label="Réinitialiser les filtres"
           >
-            ↺ Réinitialiser
-          </button>
+            ↺
+          </IconButton>
         </div>
 
         {availableMuscleGroups.length > 0 && (

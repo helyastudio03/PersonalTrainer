@@ -66,6 +66,7 @@ export interface StrengthSession {
 export interface AppData {
   programs: Program[];
   strengthSessions: StrengthSession[];
+  activeProgramId?: string;
 }
 
 export const emptyAppData: AppData = {

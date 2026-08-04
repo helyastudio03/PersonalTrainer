@@ -54,7 +54,7 @@ function VolumeChart({ strengthTargets }: { strengthTargets: ProgramExerciseTarg
 }
 
 export default function Programs({ appData }: { appData: UseAppData }) {
-  const { data, addProgram, updateProgram, deleteProgram, addStrengthSession } = appData;
+  const { data, addProgram, updateProgram, deleteProgram, setActiveProgram, addStrengthSession } = appData;
   const [draft, setDraft] = useState(emptyDraft());
   const [showForm, setShowForm] = useState(false);
   const [editingProgram, setEditingProgram] = useState<Program | null>(null);
@@ -325,10 +325,28 @@ export default function Programs({ appData }: { appData: UseAppData }) {
             <Card key={p.id} className="group space-y-2">
               <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="font-semibold">{p.name}</h3>
+                  <h3 className="font-semibold flex items-center gap-1.5">
+                    {p.name}
+                    {data.activeProgramId === p.id && (
+                      <span className="text-xs font-medium px-1.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
+                        Actif
+                      </span>
+                    )}
+                  </h3>
                   {p.description && <p className="text-sm text-gray-500">{p.description}</p>}
                 </div>
                 <div className="flex gap-1.5 shrink-0">
+                  <IconButton
+                    variant="secondary"
+                    onClick={() =>
+                      setActiveProgram(data.activeProgramId === p.id ? undefined : p.id)
+                    }
+                    hoverOnly={data.activeProgramId === p.id ? false : true}
+                    title={data.activeProgramId === p.id ? 'Retirer comme programme actif' : 'Définir comme programme actif'}
+                    aria-label={data.activeProgramId === p.id ? 'Retirer comme programme actif' : 'Définir comme programme actif'}
+                  >
+                    {data.activeProgramId === p.id ? '⭐' : '☆'}
+                  </IconButton>
                   <IconButton
                     variant="secondary"
                     onClick={() => startEdit(p)}

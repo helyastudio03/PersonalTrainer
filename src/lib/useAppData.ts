@@ -28,7 +28,15 @@ export function useAppData() {
   }, []);
 
   const deleteProgram = useCallback((id: string) => {
-    setData((d) => ({ ...d, programs: d.programs.filter((p) => p.id !== id) }));
+    setData((d) => ({
+      ...d,
+      programs: d.programs.filter((p) => p.id !== id),
+      activeProgramId: d.activeProgramId === id ? undefined : d.activeProgramId,
+    }));
+  }, []);
+
+  const setActiveProgram = useCallback((id: string | undefined) => {
+    setData((d) => ({ ...d, activeProgramId: id }));
   }, []);
 
   const addStrengthSession = useCallback((session: Omit<StrengthSession, 'id'>) => {
@@ -57,6 +65,7 @@ export function useAppData() {
     addProgram,
     updateProgram,
     deleteProgram,
+    setActiveProgram,
     addStrengthSession,
     updateStrengthSession,
     deleteStrengthSession,

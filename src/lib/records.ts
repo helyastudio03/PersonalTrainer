@@ -1,4 +1,4 @@
-import type { MuscleGroup, Program, StrengthSession, StrengthSet } from '../types';
+import type { MuscleGroup, Program, ProgramDay, StrengthSession, StrengthSet } from '../types';
 
 export function formatRepRange(min: number, max: number): string {
   return min === max ? `${min}` : `${min}-${max}`;
@@ -152,7 +152,7 @@ function pickMetric(m: SessionSetMetrics, metric: ProgressionMetric): number {
 }
 
 // Lundi de la semaine contenant la date donnée (yyyy-mm-dd).
-function startOfWeek(dateStr: string): string {
+export function startOfWeek(dateStr: string): string {
   const d = new Date(`${dateStr}T00:00:00`);
   const day = d.getDay();
   const diffToMonday = (day === 0 ? -6 : 1) - day;
@@ -253,6 +253,79 @@ export function getWeeklySetsByMuscleGroup(
   return [...totals.entries()]
     .map(([muscleGroup, weeklySets]) => ({ muscleGroup, weeklySets }))
     .sort((a, b) => b.weeklySets - a.weeklySets);
+}
+
+// Suggère le prochain jour de programme à réaliser, en comparant les
+// exercices de la dernière séance liée à ce programme avec ceux de chaque
+// jour, puis en proposant le jour suivant dans l'ordre du programme.
+export function suggestNextProgramDay(
+  program: Program,
+  sessions: StrengthSession[],
+): ProgramDay | null {
+  if (program.days.length === 0) return null;
+
+  const programSessions = sessions
+    .filter((s) => s.programId === program.id)
+    .sort((a, b) => b.date.localeCompare(a.date));
+
+  const lastSession = programSessions[0];
+  if (!lastSession) return program.days[0];
+
+  const sessionExerciseNames = new Set(lastSession.exercises.map((e) => e.exerciseName));
+
+  let bestDay = program.days[0];
+  let bestScore = -1;
+  for (const day of program.days) {
+    const dayExerciseNames = program.strengthTargets
+      .filter((t) => t.dayId === day.id)
+      .map((t) => t.exerciseName);
+    const score = dayExerciseNames.filter((name) => sessionExerciseNames.has(name)).length;
+    if (score > bestScore) {
+      bestScore = score;
+      bestDay = day;
+    }
+  }
+
+  const idx = program.days.findIndex((d) => d.id === bestDay.id);
+  return program.days[(idx + 1) % program.days.length];
+}
+
+// Volume réellement réalisé cette semaine (depuis lundi) par groupe
+// musculaire, à comparer à la cible du programme.
+export function getActualWeeklySetsByMuscleGroup(
+  sessions: StrengthSession[],
+  exerciseMuscleGroups: Record<string, MuscleGroup>,
+): MuscleGroupVolume[] {
+  const currentWeek = startOfWeek(new Date().toISOString().slice(0, 10));
+  const totals = new Map<MuscleGroup, number>();
+
+  for (const session of sessions) {
+    if (startOfWeek(session.date) !== currentWeek) continue;
+    for (const entry of session.exercises) {
+      const muscleGroup = exerciseMuscleGroups[entry.exerciseName];
+      if (!muscleGroup) continue;
+      totals.set(muscleGroup, (totals.get(muscleGroup) ?? 0) + entry.sets.length);
+    }
+  }
+
+  return [...totals.entries()]
+    .map(([muscleGroup, weeklySets]) => ({ muscleGroup, weeklySets }))
+    .sort((a, b) => b.weeklySets - a.weeklySets);
+}
+
+// Records personnels battus récemment (par défaut, les 14 derniers jours),
+// pour mettre en avant la progression sur le tableau de bord.
+export function getRecentPRImprovements(
+  sessions: StrengthSession[],
+  days = 14,
+): RepWeightRecord[] {
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - days);
+  const cutoffStr = cutoff.toISOString().slice(0, 10);
+
+  return getStrengthPRsByRepWeight(sessions)
+    .filter((r) => r.previousMaxWeight !== null && r.date >= cutoffStr)
+    .sort((a, b) => b.date.localeCompare(a.date));
 }
 
 export function listStrengthExerciseNames(sessions: StrengthSession[]): string[] {
