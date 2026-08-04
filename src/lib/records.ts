@@ -4,56 +4,40 @@ export function formatRepRange(min: number, max: number): string {
   return min === max ? `${min}` : `${min}-${max}`;
 }
 
-// Formule d'Epley pour estimer le 1RM (répétition maximale)
-export function estimate1RM(weightKg: number, reps: number): number {
-  if (reps <= 1) return weightKg;
-  return weightKg * (1 + reps / 30);
-}
-
-export interface StrengthExerciseRecord {
+// Records personnels par couple (répétitions, poids): pour chaque exercice
+// et chaque nombre de répétitions déjà réalisé, le poids maximal soulevé.
+export interface RepWeightRecord {
   exerciseName: string;
-  best1RM: number;
-  best1RMDate: string;
+  reps: number;
   maxWeight: number;
-  maxWeightDate: string;
-  maxWeightReps: number;
+  date: string;
 }
 
-export function getStrengthPRs(sessions: StrengthSession[]): StrengthExerciseRecord[] {
-  const byExercise = new Map<string, StrengthExerciseRecord>();
+export function getStrengthPRsByRepWeight(sessions: StrengthSession[]): RepWeightRecord[] {
+  const byKey = new Map<string, RepWeightRecord>();
 
   for (const session of sessions) {
     for (const entry of session.exercises) {
       for (const set of entry.sets) {
-        const oneRM = estimate1RM(set.weightKg, set.reps);
-        const existing = byExercise.get(entry.exerciseName);
+        const key = `${entry.exerciseName}__${set.reps}`;
+        const existing = byKey.get(key);
 
-        if (!existing) {
-          byExercise.set(entry.exerciseName, {
+        if (!existing || set.weightKg > existing.maxWeight) {
+          byKey.set(key, {
             exerciseName: entry.exerciseName,
-            best1RM: oneRM,
-            best1RMDate: session.date,
+            reps: set.reps,
             maxWeight: set.weightKg,
-            maxWeightDate: session.date,
-            maxWeightReps: set.reps,
+            date: session.date,
           });
-          continue;
-        }
-
-        if (oneRM > existing.best1RM) {
-          existing.best1RM = oneRM;
-          existing.best1RMDate = session.date;
-        }
-        if (set.weightKg > existing.maxWeight) {
-          existing.maxWeight = set.weightKg;
-          existing.maxWeightDate = session.date;
-          existing.maxWeightReps = set.reps;
         }
       }
     }
   }
 
-  return [...byExercise.values()].sort((a, b) => a.exerciseName.localeCompare(b.exerciseName));
+  return [...byKey.values()].sort((a, b) => {
+    const nameCmp = a.exerciseName.localeCompare(b.exerciseName);
+    return nameCmp !== 0 ? nameCmp : a.reps - b.reps;
+  });
 }
 
 // Courbes de progression configurables (poids, reps, poids×reps, volume),

@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom';
 import type { UseAppData } from '../lib/useAppData';
 import { Card, EmptyState } from '../components/ui';
-import { getStrengthPRs } from '../lib/records';
+import { listStrengthExerciseNames } from '../lib/records';
 
 export default function Dashboard({ appData }: { appData: UseAppData }) {
   const { data } = appData;
-  const strengthPRs = getStrengthPRs(data.strengthSessions);
+  const exerciseNames = listStrengthExerciseNames(data.strengthSessions);
 
   const recentStrength = [...data.strengthSessions]
     .sort((a, b) => b.date.localeCompare(a.date))
@@ -24,7 +24,7 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
         </Card>
         <Card>
           <p className="text-xs text-gray-500">Exercices suivis</p>
-          <p className="text-2xl font-bold">{strengthPRs.length}</p>
+          <p className="text-2xl font-bold">{exerciseNames.length}</p>
         </Card>
       </div>
 
