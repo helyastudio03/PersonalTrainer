@@ -32,9 +32,33 @@ function VolumeTable({ strengthTargets }: { strengthTargets: ProgramExerciseTarg
 }
 
 export default function Programs({ appData }: { appData: UseAppData }) {
-  const { data, addProgram, deleteProgram } = appData;
+  const { data, addProgram, updateProgram, deleteProgram } = appData;
   const [draft, setDraft] = useState(emptyDraft());
   const [showForm, setShowForm] = useState(false);
+  const [editingProgram, setEditingProgram] = useState<Program | null>(null);
+
+  function startCreate() {
+    setEditingProgram(null);
+    setDraft(emptyDraft());
+    setShowForm(true);
+  }
+
+  function startEdit(program: Program) {
+    setEditingProgram(program);
+    setDraft({
+      name: program.name,
+      description: program.description ?? '',
+      days: program.days,
+      strengthTargets: program.strengthTargets,
+    });
+    setShowForm(true);
+  }
+
+  function cancelForm() {
+    setEditingProgram(null);
+    setDraft(emptyDraft());
+    setShowForm(false);
+  }
 
   function addDay() {
     setDraft((d) => ({
@@ -83,7 +107,12 @@ export default function Programs({ appData }: { appData: UseAppData }) {
 
   function submit() {
     if (!draft.name.trim()) return;
-    addProgram(draft);
+    if (editingProgram) {
+      updateProgram({ ...editingProgram, ...draft });
+    } else {
+      addProgram(draft);
+    }
+    setEditingProgram(null);
     setDraft(emptyDraft());
     setShowForm(false);
   }
@@ -92,13 +121,16 @@ export default function Programs({ appData }: { appData: UseAppData }) {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h1 className="text-xl font-bold">Programmes</h1>
-        <Button onClick={() => setShowForm((s) => !s)}>
+        <Button onClick={() => (showForm ? cancelForm() : startCreate())}>
           {showForm ? 'Annuler' : '+ Nouveau programme'}
         </Button>
       </div>
 
       {showForm && (
         <Card className="space-y-4">
+          <h2 className="text-sm font-semibold text-gray-500">
+            {editingProgram ? `Modifier "${editingProgram.name}"` : 'Nouveau programme'}
+          </h2>
           <div>
             <Label>Nom du programme</Label>
             <Input
@@ -217,9 +249,14 @@ export default function Programs({ appData }: { appData: UseAppData }) {
 
           <VolumeTable strengthTargets={draft.strengthTargets} />
 
-          <Button onClick={submit} disabled={!draft.name.trim()}>
-            Enregistrer le programme
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={submit} disabled={!draft.name.trim()}>
+              {editingProgram ? 'Enregistrer les modifications' : 'Enregistrer le programme'}
+            </Button>
+            <Button variant="secondary" onClick={cancelForm}>
+              Annuler
+            </Button>
+          </div>
         </Card>
       )}
 
@@ -234,9 +271,14 @@ export default function Programs({ appData }: { appData: UseAppData }) {
                   <h3 className="font-semibold">{p.name}</h3>
                   {p.description && <p className="text-sm text-gray-500">{p.description}</p>}
                 </div>
-                <Button variant="danger" onClick={() => deleteProgram(p.id)}>
-                  Supprimer
-                </Button>
+                <div className="flex gap-2 shrink-0">
+                  <Button variant="secondary" onClick={() => startEdit(p)}>
+                    Modifier
+                  </Button>
+                  <Button variant="danger" onClick={() => deleteProgram(p.id)}>
+                    Supprimer
+                  </Button>
+                </div>
               </div>
 
               {p.days.map((day) => {
