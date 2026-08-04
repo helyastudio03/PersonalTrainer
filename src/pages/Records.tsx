@@ -12,7 +12,7 @@ function chipClassName(active: boolean) {
   return `text-xs px-2 py-1 rounded-full border transition-colors ${
     active
       ? 'bg-ember-600 text-white border-transparent'
-      : 'border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+      : 'border-ash-600 text-ash-200 hover:bg-ash-800'
   }`;
 }
 
@@ -124,7 +124,7 @@ export default function Records({ appData }: { appData: UseAppData }) {
 
       <Card className="space-y-3">
         <div className="flex justify-between items-center">
-          <h2 className="text-sm font-semibold text-gray-500">Filtres</h2>
+          <h2 className="text-sm font-semibold text-ash-300">Filtres</h2>
           <IconButton
             variant="secondary"
             hoverOnly={false}
@@ -138,7 +138,7 @@ export default function Records({ appData }: { appData: UseAppData }) {
 
         {availableExerciseNames.length > 0 && (
           <div>
-            <p className="text-xs font-semibold text-gray-500 mb-1.5">Exercice</p>
+            <p className="text-xs font-semibold text-ash-300 mb-1.5">Exercice</p>
             <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {groupsToShow.map((mg) => {
                 const names = exercisesByGroup.map.get(mg);
@@ -147,15 +147,15 @@ export default function Records({ appData }: { appData: UseAppData }) {
                 return (
                   <div
                     key={mg}
-                    className="border border-gray-200 dark:border-gray-800 rounded-lg p-2 space-y-1.5"
+                    className="border border-ash-700 rounded-lg p-2 space-y-1.5"
                   >
                     <button
                       type="button"
                       onClick={() => toggleMuscleGroup(mg)}
                       className={`w-full text-left text-xs font-semibold uppercase tracking-wide ${
                         groupActive
-                          ? 'text-ember-600 dark:text-ember-400'
-                          : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                          ? 'text-ember-400'
+                          : 'text-ash-300 hover:text-ash-100'
                       }`}
                     >
                       {mg}
@@ -176,8 +176,8 @@ export default function Records({ appData }: { appData: UseAppData }) {
                 );
               })}
               {exercisesByGroup.ungrouped.length > 0 && (
-                <div className="border border-gray-200 dark:border-gray-800 rounded-lg p-2 space-y-1.5">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                <div className="border border-ash-700 rounded-lg p-2 space-y-1.5">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-ash-400">
                     Sans groupe
                   </p>
                   <div className="flex flex-wrap gap-1.5">
@@ -220,7 +220,7 @@ export default function Records({ appData }: { appData: UseAppData }) {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-left text-gray-500 border-b border-gray-200 dark:border-gray-800">
+                    <tr className="text-left text-ash-300 border-b border-ash-800">
                       <th className="py-1 pr-3">Répétitions</th>
                       <th className="py-1 pr-3">Poids</th>
                       <th className="py-1">Date</th>
@@ -228,20 +228,20 @@ export default function Records({ appData }: { appData: UseAppData }) {
                   </thead>
                   <tbody>
                     {exerciseRecords.map((r) => (
-                      <tr key={r.reps} className="border-b border-gray-100 dark:border-gray-900">
+                      <tr key={r.reps} className="border-b border-ash-900">
                         <td className="py-1 pr-3 font-medium">{r.reps}</td>
                         <td className="py-1 pr-3">
                           {r.maxWeight} kg
                           {r.previousMaxWeight !== null && (
                             <span
-                              className="ml-1 text-green-600 dark:text-green-400"
+                              className="ml-1 text-green-400"
                               title={`Précédent record: ${r.previousMaxWeight} kg`}
                             >
                               ↗
                             </span>
                           )}
                         </td>
-                        <td className="py-1 text-gray-500">{r.date}</td>
+                        <td className="py-1 text-ash-300">{r.date}</td>
                       </tr>
                     ))}
                   </tbody>

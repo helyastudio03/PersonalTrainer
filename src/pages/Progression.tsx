@@ -30,7 +30,7 @@ const periodLabel: Record<ProgressionPeriod, string> = {
 const LINE_COLORS = ['#f2541f', '#ffb347', '#b32d10', '#7a6152', '#d93c15', '#ff9c6e', '#8f240f', '#efe4d8'];
 
 function selectClassName() {
-  return 'px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 text-sm';
+  return 'px-3 py-1.5 rounded-lg border border-ash-600 bg-ash-950 text-sm';
 }
 
 function renderRecordDot(color: string, exerciseName: string) {
@@ -65,7 +65,7 @@ function chipClassName(active: boolean) {
   return `text-xs px-2 py-1 rounded-full border transition-colors ${
     active
       ? 'bg-ember-600 text-white border-transparent'
-      : 'border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+      : 'border-ash-600 text-ash-200 hover:bg-ash-800'
   }`;
 }
 
@@ -167,7 +167,7 @@ export default function Progression({ appData }: { appData: UseAppData }) {
 
       <Card className="space-y-3">
         <div className="flex justify-between items-center">
-          <h2 className="text-sm font-semibold text-gray-500">Filtres</h2>
+          <h2 className="text-sm font-semibold text-ash-300">Filtres</h2>
           <IconButton
             variant="secondary"
             hoverOnly={false}
@@ -180,11 +180,11 @@ export default function Progression({ appData }: { appData: UseAppData }) {
         </div>
 
         <div>
-          <p className="text-xs font-semibold text-gray-500 mb-1.5">
+          <p className="text-xs font-semibold text-ash-300 mb-1.5">
             Exercices (une courbe par exercice sélectionné)
           </p>
           {filteredExerciseNames.length === 0 ? (
-            <p className="text-xs text-gray-400">Aucun exercice pour ce filtre.</p>
+            <p className="text-xs text-ash-400">Aucun exercice pour ce filtre.</p>
           ) : (
             <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {groupsToShow.map((mg) => {
@@ -194,15 +194,15 @@ export default function Progression({ appData }: { appData: UseAppData }) {
                 return (
                   <div
                     key={mg}
-                    className="border border-gray-200 dark:border-gray-800 rounded-lg p-2 space-y-1.5"
+                    className="border border-ash-700 rounded-lg p-2 space-y-1.5"
                   >
                     <button
                       type="button"
                       onClick={() => toggleMuscleGroup(mg)}
                       className={`w-full text-left text-xs font-semibold uppercase tracking-wide ${
                         groupActive
-                          ? 'text-ember-600 dark:text-ember-400'
-                          : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                          ? 'text-ember-400'
+                          : 'text-ash-300 hover:text-ash-100'
                       }`}
                     >
                       {mg}
@@ -226,8 +226,8 @@ export default function Progression({ appData }: { appData: UseAppData }) {
                 );
               })}
               {exercisesByGroup.ungrouped.length > 0 && (
-                <div className="border border-gray-200 dark:border-gray-800 rounded-lg p-2 space-y-1.5">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                <div className="border border-ash-700 rounded-lg p-2 space-y-1.5">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-ash-400">
                     Sans groupe
                   </p>
                   <div className="flex flex-wrap gap-1.5">
@@ -268,7 +268,7 @@ export default function Progression({ appData }: { appData: UseAppData }) {
           </div>
           <div>
             <Label>Période</Label>
-            <div className="flex rounded-lg border border-gray-300 dark:border-gray-700 overflow-hidden text-sm">
+            <div className="flex rounded-lg border border-ash-600 overflow-hidden text-sm">
               {(['session', 'week'] as ProgressionPeriod[]).map((p) => (
                 <button
                   key={p}
@@ -277,7 +277,7 @@ export default function Progression({ appData }: { appData: UseAppData }) {
                   className={`px-3 py-1.5 ${
                     period === p
                       ? 'bg-ember-600 text-white'
-                      : 'bg-white dark:bg-gray-950 text-gray-600 dark:text-gray-300'
+                      : 'bg-ash-950 text-ash-200'
                   }`}
                 >
                   {periodLabel[p]}

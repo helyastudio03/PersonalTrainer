@@ -15,7 +15,7 @@ const navItems = [
 
 export default function Layout() {
   return (
-    <div className="min-h-svh bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
+    <div className="min-h-svh bg-ash-950 text-ash-50">
       <header className="sticky top-0 z-10 relative overflow-hidden bg-gradient-to-b from-ash-950 via-ash-900 to-ash-950">
         <svg
           className="absolute inset-0 w-full h-full opacity-30 pointer-events-none"

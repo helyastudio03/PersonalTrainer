@@ -36,15 +36,15 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
 
       <div className="grid grid-cols-3 gap-3">
         <Card>
-          <p className="text-xs text-gray-500">Programmes</p>
+          <p className="text-xs text-ash-300">Programmes</p>
           <p className="text-2xl font-bold">{data.programs.length}</p>
         </Card>
         <Card>
-          <p className="text-xs text-gray-500">Séances</p>
+          <p className="text-xs text-ash-300">Séances</p>
           <p className="text-2xl font-bold">{data.strengthSessions.length}</p>
         </Card>
         <Card>
-          <p className="text-xs text-gray-500">Exercices suivis</p>
+          <p className="text-xs text-ash-300">Exercices suivis</p>
           <p className="text-2xl font-bold">{exerciseNames.length}</p>
         </Card>
       </div>
@@ -61,7 +61,7 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
             <div>
               <p className="font-medium">{activeProgram.name}</p>
               {suggestedDay && (
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-ash-300">
                   Prochaine séance suggérée : <span className="font-medium">{suggestedDay.name}</span>
                 </p>
               )}
@@ -92,8 +92,8 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
                   key={t.muscleGroup}
                   className={`text-xs rounded-full px-2 py-1 ${
                     met
-                      ? 'bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-400'
-                      : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
+                      ? 'bg-green-950 text-green-400'
+                      : 'bg-ash-800 text-ash-200'
                   }`}
                 >
                   {t.muscleGroup} <span className="font-semibold">{actual}/{t.weeklySets}</span>
@@ -114,12 +114,12 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
               {recentPRs.map((r) => (
                 <li
                   key={`${r.exerciseName}-${r.reps}`}
-                  className="text-sm flex justify-between border-b border-gray-100 dark:border-gray-800 py-1"
+                  className="text-sm flex justify-between border-b border-ash-800 py-1"
                 >
                   <span>
-                    {r.exerciseName} <span className="text-gray-500">({r.reps} reps)</span>
+                    {r.exerciseName} <span className="text-ash-300">({r.reps} reps)</span>
                   </span>
-                  <span className="text-green-600 dark:text-green-400 font-medium">
+                  <span className="text-green-400 font-medium">
                     {r.previousMaxWeight} → {r.maxWeight} kg
                   </span>
                 </li>
@@ -142,10 +142,10 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
               {recentStrength.map((s) => (
                 <li
                   key={s.id}
-                  className="text-sm flex justify-between border-b border-gray-100 dark:border-gray-800 py-1"
+                  className="text-sm flex justify-between border-b border-ash-800 py-1"
                 >
                   <span>{s.date}</span>
-                  <span className="text-gray-500">
+                  <span className="text-ash-300">
                     {s.exercises.length} exercice{s.exercises.length > 1 ? 's' : ''}
                   </span>
                 </li>
