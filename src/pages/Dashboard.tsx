@@ -81,28 +81,24 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
       {activeProgram && targetVolume.length > 0 && (
         <Card>
           <h2 className="font-semibold mb-2">Volume hebdomadaire (cette semaine)</h2>
-          <ul className="space-y-1.5">
+          <div className="flex flex-wrap gap-1.5">
             {targetVolume.map((t) => {
               const actual = actualByGroup.get(t.muscleGroup) ?? 0;
-              const pct = t.weeklySets > 0 ? Math.min(100, Math.round((actual / t.weeklySets) * 100)) : 0;
+              const met = actual >= t.weeklySets;
               return (
-                <li key={t.muscleGroup} className="text-sm">
-                  <div className="flex justify-between mb-0.5">
-                    <span>{t.muscleGroup}</span>
-                    <span className="text-gray-500">
-                      {actual} / {t.weeklySets} séries
-                    </span>
-                  </div>
-                  <div className="h-1.5 rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
-                    <div
-                      className="h-full bg-indigo-600 rounded-full"
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                </li>
+                <span
+                  key={t.muscleGroup}
+                  className={`text-xs rounded-full px-2 py-1 ${
+                    met
+                      ? 'bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-400'
+                      : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
+                  }`}
+                >
+                  {t.muscleGroup} <span className="font-semibold">{actual}/{t.weeklySets}</span>
+                </span>
               );
             })}
-          </ul>
+          </div>
         </Card>
       )}
 

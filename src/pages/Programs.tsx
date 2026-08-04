@@ -1,14 +1,5 @@
 import { useMemo, useState } from 'react';
 import { v4 as uuid } from 'uuid';
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
 import type { UseAppData } from '../lib/useAppData';
 import type { MuscleGroup, Program, ProgramDay, ProgramExerciseTarget } from '../types';
 import { MUSCLE_GROUPS } from '../types';
@@ -29,26 +20,16 @@ function VolumeChart({ strengthTargets }: { strengthTargets: ProgramExerciseTarg
   return (
     <div>
       <p className="text-xs font-semibold text-gray-500 mb-1">Séries par semaine et par groupe musculaire</p>
-      <ResponsiveContainer width="100%" height={Math.max(volumes.length * 32, 80)}>
-        <BarChart
-          data={volumes}
-          layout="vertical"
-          barCategoryGap="25%"
-          margin={{ left: 8, right: 16 }}
-        >
-          <CartesianGrid strokeDasharray="3 3" opacity={0.3} horizontal={false} />
-          <XAxis type="number" allowDecimals={false} fontSize={12} />
-          <YAxis type="category" dataKey="muscleGroup" width={90} fontSize={12} />
-          <Tooltip />
-          <Bar
-            dataKey="weeklySets"
-            name="Séries/sem."
-            fill="#6366f1"
-            radius={[0, 4, 4, 0]}
-            isAnimationActive={false}
-          />
-        </BarChart>
-      </ResponsiveContainer>
+      <div className="flex flex-wrap gap-1.5">
+        {volumes.map((v) => (
+          <span
+            key={v.muscleGroup}
+            className="text-xs rounded-full px-2 py-1 bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
+          >
+            {v.muscleGroup} <span className="font-semibold">{v.weeklySets}</span>
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
