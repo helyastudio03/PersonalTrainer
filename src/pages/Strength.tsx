@@ -9,7 +9,6 @@ import type {
   StrengthSet,
 } from '../types';
 import { Button, Card, EmptyState, IconButton, Input, Label } from '../components/ui';
-import { suggestNextStrength } from '../lib/suggestions';
 import { formatRepRange, formatSetsSummary, getLastPerformance } from '../lib/records';
 
 function todayIso() {
@@ -403,9 +402,6 @@ export default function Strength({ appData }: { appData: UseAppData }) {
 
           <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3 items-start">
             {exercises.map((ex) => {
-              const suggestion = ex.exerciseName
-                ? suggestNextStrength(data.strengthSessions, ex.exerciseName)
-                : null;
               const lastPerformance = ex.exerciseName
                 ? getLastPerformance(data.strengthSessions, ex.exerciseName)
                 : null;
@@ -425,12 +421,6 @@ export default function Strength({ appData }: { appData: UseAppData }) {
                   {lastPerformance && (
                     <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
                       Dernière fois ({lastPerformance.date}): {formatSetsSummary(lastPerformance.sets)}
-                    </p>
-                  )}
-
-                  {suggestion && (
-                    <p className="text-xs text-indigo-600 dark:text-indigo-400 mb-1.5">
-                      💡 {suggestion.message}
                     </p>
                   )}
 
