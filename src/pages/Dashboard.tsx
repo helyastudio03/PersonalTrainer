@@ -127,7 +127,7 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
                     {r.exerciseName} <span className="text-ash-300">({r.weightKg} kg)</span>
                   </span>
                   <span className="text-amber-400 font-medium">
-                    {r.previousMaxReps} reps → {r.maxReps} reps
+                    {r.previousMaxReps}→{r.maxReps} reps
                   </span>
                 </li>
               ))}
