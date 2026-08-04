@@ -7,13 +7,11 @@ import {
   getRecentPRImprovements,
   getStrengthPRsByWeightReps,
   getWeeklySetsByMuscleGroup,
-  listStrengthExerciseNames,
   suggestNextProgramDay,
 } from '../lib/records';
 
 export default function Dashboard({ appData }: { appData: UseAppData }) {
   const { data } = appData;
-  const exerciseNames = listStrengthExerciseNames(data.strengthSessions);
 
   const recentStrength = [...data.strengthSessions]
     .sort((a, b) => b.date.localeCompare(a.date))
@@ -40,21 +38,6 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
   return (
     <div className="space-y-3">
       <h1 className="text-xl font-bold">Accueil</h1>
-
-      <div className="grid grid-cols-3 gap-3">
-        <Card>
-          <p className="text-xs text-ash-300">Programmes</p>
-          <p className="text-2xl font-bold">{data.programs.length}</p>
-        </Card>
-        <Card>
-          <p className="text-xs text-ash-300">Séances</p>
-          <p className="text-2xl font-bold">{data.strengthSessions.length}</p>
-        </Card>
-        <Card>
-          <p className="text-xs text-ash-300">Exercices suivis</p>
-          <p className="text-2xl font-bold">{exerciseNames.length}</p>
-        </Card>
-      </div>
 
       <Card>
         <div className="flex justify-between items-center mb-2">
