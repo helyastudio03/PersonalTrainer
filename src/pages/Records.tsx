@@ -32,7 +32,6 @@ export default function Records({ appData }: { appData: UseAppData }) {
     return [...set].sort();
   }, [data.strengthSessions, exerciseMuscleGroups]);
 
-  const [selectedMuscleGroups, setSelectedMuscleGroups] = useState<MuscleGroup[]>([]);
   const [selectedExercises, setSelectedExercises] = useState<string[]>([]);
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -48,16 +47,10 @@ export default function Records({ appData }: { appData: UseAppData }) {
 
   const records = useMemo(() => getStrengthPRsByRepWeight(filteredSessions), [filteredSessions]);
 
-  const availableExerciseNames = useMemo(() => {
-    const names = [...new Set(records.map((r) => r.exerciseName))];
-    if (selectedMuscleGroups.length === 0) return names.sort();
-    return names
-      .filter((name) => {
-        const mg = exerciseMuscleGroups[name];
-        return mg ? selectedMuscleGroups.includes(mg) : false;
-      })
-      .sort();
-  }, [records, selectedMuscleGroups, exerciseMuscleGroups]);
+  const availableExerciseNames = useMemo(
+    () => [...new Set(records.map((r) => r.exerciseName))].sort(),
+    [records],
+  );
 
   const exercisesByGroup = useMemo(() => {
     const map = new Map<MuscleGroup, string[]>();
@@ -75,22 +68,14 @@ export default function Records({ appData }: { appData: UseAppData }) {
     return { map, ungrouped };
   }, [availableExerciseNames, exerciseMuscleGroups]);
 
-  const groupsToShow = availableMuscleGroups.filter(
-    (mg) => selectedMuscleGroups.length === 0 || selectedMuscleGroups.includes(mg),
-  );
-
   const filteredRecords = useMemo(() => {
     return records.filter((r) => {
-      if (selectedMuscleGroups.length > 0) {
-        const mg = exerciseMuscleGroups[r.exerciseName];
-        if (!mg || !selectedMuscleGroups.includes(mg)) return false;
-      }
       if (selectedExercises.length > 0 && !selectedExercises.includes(r.exerciseName)) {
         return false;
       }
       return true;
     });
-  }, [records, selectedMuscleGroups, selectedExercises, exerciseMuscleGroups]);
+  }, [records, selectedExercises]);
 
   const byExercise = new Map<string, typeof filteredRecords>();
   for (const r of filteredRecords) {
@@ -100,9 +85,12 @@ export default function Records({ appData }: { appData: UseAppData }) {
   }
 
   function toggleMuscleGroup(mg: MuscleGroup) {
-    setSelectedMuscleGroups((prev) =>
-      prev.includes(mg) ? prev.filter((g) => g !== mg) : [...prev, mg],
-    );
+    const names = exercisesByGroup.map.get(mg) ?? [];
+    const allSelected = names.every((n) => selectedExercises.includes(n));
+    setSelectedExercises((prev) => {
+      if (allSelected) return prev.filter((n) => !names.includes(n));
+      return [...new Set([...prev, ...names])];
+    });
   }
 
   function toggleExercise(name: string) {
@@ -112,7 +100,6 @@ export default function Records({ appData }: { appData: UseAppData }) {
   }
 
   function resetFilters() {
-    setSelectedMuscleGroups([]);
     setSelectedExercises([]);
     setDateFrom('');
     setDateTo('');
@@ -140,10 +127,10 @@ export default function Records({ appData }: { appData: UseAppData }) {
           <div>
             <p className="text-xs font-semibold text-ash-300 mb-1.5">Exercice</p>
             <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {groupsToShow.map((mg) => {
+              {availableMuscleGroups.map((mg) => {
                 const names = exercisesByGroup.map.get(mg);
                 if (!names || names.length === 0) return null;
-                const groupActive = selectedMuscleGroups.includes(mg);
+                const groupActive = names.every((n) => selectedExercises.includes(n));
                 return (
                   <div
                     key={mg}
@@ -152,6 +139,7 @@ export default function Records({ appData }: { appData: UseAppData }) {
                     <button
                       type="button"
                       onClick={() => toggleMuscleGroup(mg)}
+                      title="Sélectionner/désélectionner tous les exercices de ce groupe"
                       className={`w-full text-left text-xs font-semibold uppercase tracking-wide ${
                         groupActive
                           ? 'text-ember-400'
@@ -232,12 +220,12 @@ export default function Records({ appData }: { appData: UseAppData }) {
                         <td className="py-1 pr-3 font-medium">{r.reps}</td>
                         <td className="py-1 pr-3">
                           {r.maxWeight} kg
-                          {r.previousMaxWeight !== null && (
+                          {r.lastWeight < r.maxWeight && (
                             <span
-                              className="ml-1 text-amber-400"
-                              title={`Précédent record: ${r.previousMaxWeight} kg`}
+                              className="ml-1 text-ash-400"
+                              title={`Dernière perf: ${r.lastWeight} kg le ${r.lastDate}`}
                             >
-                              ↗
+                              ↘
                             </span>
                           )}
                         </td>

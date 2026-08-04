@@ -16,6 +16,7 @@ import {
   getLastPerformance,
   groupSessionsIntoCycleRows,
   monthKey,
+  suggestNextProgramDay,
 } from '../lib/records';
 
 function todayIso() {
@@ -65,6 +66,7 @@ function SessionCard({
 
   const [editingExerciseId, setEditingExerciseId] = useState<string | null>(null);
   const [exerciseDraft, setExerciseDraft] = useState<StrengthSet[]>([]);
+  const [exerciseNotesDraft, setExerciseNotesDraft] = useState('');
 
   function startEditMeta() {
     setMetaDate(session.date);
@@ -88,6 +90,7 @@ function SessionCard({
   function startEditExercise(entry: StrengthExerciseEntry) {
     setEditingExerciseId(entry.id);
     setExerciseDraft(entry.sets.map((s) => ({ ...s })));
+    setExerciseNotesDraft(entry.notes ?? '');
   }
 
   function updateDraftSet(setId: string, patch: Partial<StrengthSet>) {
@@ -107,7 +110,9 @@ function SessionCard({
     updateStrengthSession({
       ...session,
       exercises: session.exercises.map((e) =>
-        e.id === editingExerciseId ? { ...e, sets: exerciseDraft } : e,
+        e.id === editingExerciseId
+          ? { ...e, sets: exerciseDraft, notes: exerciseNotesDraft.trim() || undefined }
+          : e,
       ),
     });
     setEditingExerciseId(null);
@@ -249,6 +254,11 @@ function SessionCard({
                   </button>
                 </div>
               ))}
+              <Input
+                value={exerciseNotesDraft}
+                onChange={(ev) => setExerciseNotesDraft(ev.target.value)}
+                placeholder="Ressenti (optionnel): douleur, facile, dur..."
+              />
               <div className="flex gap-1.5 pt-1">
                 <Button variant="secondary" onClick={addDraftSet}>
                   + Série
@@ -263,9 +273,10 @@ function SessionCard({
             <div key={e.id} className="group relative text-sm">
               <div
                 className="whitespace-nowrap overflow-hidden text-ellipsis pr-0 group-hover:pr-14 transition-[padding-right]"
-                title={`${e.exerciseName}: ${formatSetsSummary(e.sets)}`}
+                title={`${e.exerciseName}: ${formatSetsSummary(e.sets)}${e.notes ? ` — ${e.notes}` : ''}`}
               >
                 <span className="text-ash-400">{e.exerciseName}</span>: {formatSetsSummary(e.sets)}
+                {e.notes && <span className="text-ash-400 italic"> — {e.notes}</span>}
               </div>
               <div className="absolute right-0 top-0 flex gap-1">
                 <IconButton
@@ -317,6 +328,10 @@ export default function Strength({ appData }: { appData: UseAppData }) {
 
   function updateExercise(id: string, name: string) {
     setExercises((ex) => ex.map((e) => (e.id === id ? { ...e, exerciseName: name } : e)));
+  }
+
+  function updateExerciseNotes(id: string, notes: string) {
+    setExercises((ex) => ex.map((e) => (e.id === id ? { ...e, notes } : e)));
   }
 
   function removeExercise(id: string) {
@@ -378,7 +393,18 @@ export default function Strength({ appData }: { appData: UseAppData }) {
       resetDraft();
       setShowForm(false);
     } else {
-      if (data.activeProgramId) setProgramId(data.activeProgramId);
+      const activeProgram = data.programs.find((p) => p.id === data.activeProgramId);
+      if (activeProgram) {
+        setProgramId(activeProgram.id);
+        const suggested = suggestNextProgramDay(activeProgram, data.strengthSessions);
+        const dayTargets = suggested
+          ? activeProgram.strengthTargets.filter((t) => t.dayId === suggested.id)
+          : [];
+        if (dayTargets.length > 0) {
+          setName(suggested!.name);
+          setExercises(dayTargets.map((t) => exerciseFromTarget(t)));
+        }
+      }
       setShowForm(true);
     }
   }
@@ -581,6 +607,12 @@ export default function Strength({ appData }: { appData: UseAppData }) {
                     <Button variant="secondary" className="mt-1.5" onClick={() => addSet(ex.id)}>
                       + Série
                     </Button>
+                    <Input
+                      className="mt-1.5"
+                      value={ex.notes ?? ''}
+                      onChange={(e) => updateExerciseNotes(ex.id, e.target.value)}
+                      placeholder="Ressenti (optionnel): douleur, facile, dur..."
+                    />
                   </div>
                 );
               })}

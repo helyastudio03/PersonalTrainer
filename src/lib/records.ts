@@ -30,6 +30,8 @@ export interface RepWeightRecord {
   maxWeight: number;
   date: string;
   previousMaxWeight: number | null;
+  lastWeight: number;
+  lastDate: string;
 }
 
 export function getStrengthPRsByRepWeight(sessions: StrengthSession[]): RepWeightRecord[] {
@@ -63,12 +65,16 @@ export function getStrengthPRsByRepWeight(sessions: StrengthSession[]): RepWeigh
       }
     }
 
+    const last = sorted[sorted.length - 1];
+
     records.push({
       exerciseName: sorted[0].exerciseName,
       reps: sorted[0].reps,
       maxWeight,
       date: maxDate,
       previousMaxWeight,
+      lastWeight: last.weightKg,
+      lastDate: last.date,
     });
   }
 

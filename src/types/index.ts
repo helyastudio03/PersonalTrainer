@@ -52,6 +52,7 @@ export interface StrengthExerciseEntry {
   id: string;
   exerciseName: string;
   sets: StrengthSet[];
+  notes?: string;
 }
 
 export interface StrengthSession {
