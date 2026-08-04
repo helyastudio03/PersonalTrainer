@@ -218,9 +218,11 @@ export default function Strength({ appData }: { appData: UseAppData }) {
                           min={0}
                           step={0.5}
                           placeholder="Poids kg"
-                          value={s.weightKg}
+                          value={s.weightKg === 0 ? '' : s.weightKg}
                           onChange={(e) =>
-                            updateSet(ex.id, s.id, { weightKg: Number(e.target.value) })
+                            updateSet(ex.id, s.id, {
+                              weightKg: e.target.value ? Number(e.target.value) : 0,
+                            })
                           }
                         />
                         <button
