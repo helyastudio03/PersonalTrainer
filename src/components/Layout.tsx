@@ -8,7 +8,7 @@ const linkActive = 'bg-indigo-600 text-white';
 const navItems = [
   { to: '/', label: 'Dashboard', end: true },
   { to: '/programmes', label: 'Programmes' },
-  { to: '/musculation', label: 'Musculation' },
+  { to: '/musculation', label: 'Séances' },
   { to: '/progression', label: 'Progression' },
   { to: '/records', label: 'Records' },
 ];

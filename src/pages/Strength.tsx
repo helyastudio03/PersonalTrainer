@@ -176,7 +176,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
             </div>
           )}
 
-          <div className="space-y-2">
+          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3 items-start">
             {exercises.map((ex) => {
               const suggestion = ex.exerciseName
                 ? suggestNextStrength(data.strengthSessions, ex.exerciseName)
@@ -252,7 +252,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
       {sortedSessions.length === 0 ? (
         <EmptyState>Aucune séance de musculation enregistrée.</EmptyState>
       ) : (
-        <div className="space-y-2">
+        <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3 items-start">
           {sortedSessions.map((s) => (
             <Card key={s.id}>
               <div className="flex justify-between items-start">
