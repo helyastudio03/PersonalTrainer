@@ -29,6 +29,24 @@ export function Button({
   );
 }
 
+export function IconButton({
+  className = '',
+  variant = 'secondary',
+  ...props
+}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'secondary' | 'danger' }) {
+  const styles = {
+    secondary:
+      'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700',
+    danger: 'bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-950 dark:text-red-400',
+  };
+  return (
+    <button
+      className={`w-7 h-7 shrink-0 flex items-center justify-center rounded-full text-sm leading-none transition-colors disabled:opacity-50 ${styles[variant]} ${className}`}
+      {...props}
+    />
+  );
+}
+
 export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input

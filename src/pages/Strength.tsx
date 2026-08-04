@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { v4 as uuid } from 'uuid';
 import type { UseAppData } from '../lib/useAppData';
 import type { ProgramExerciseTarget, StrengthExerciseEntry, StrengthSession, StrengthSet } from '../types';
-import { Button, Card, EmptyState, Input, Label } from '../components/ui';
+import { Button, Card, EmptyState, IconButton, Input, Label } from '../components/ui';
 import { suggestNextStrength } from '../lib/suggestions';
 import { formatRepRange, formatSetsSummary, getLastPerformance } from '../lib/records';
 
@@ -300,13 +300,23 @@ export default function Strength({ appData }: { appData: UseAppData }) {
             <Card key={s.id}>
               <div className="flex justify-between items-start">
                 <h3 className="font-semibold">{s.date}</h3>
-                <div className="flex gap-2 shrink-0">
-                  <Button variant="secondary" onClick={() => startEdit(s)}>
-                    Modifier
-                  </Button>
-                  <Button variant="danger" onClick={() => deleteStrengthSession(s.id)}>
-                    Supprimer
-                  </Button>
+                <div className="flex gap-1.5 shrink-0">
+                  <IconButton
+                    variant="secondary"
+                    onClick={() => startEdit(s)}
+                    title="Modifier"
+                    aria-label="Modifier"
+                  >
+                    ✏️
+                  </IconButton>
+                  <IconButton
+                    variant="danger"
+                    onClick={() => deleteStrengthSession(s.id)}
+                    title="Supprimer"
+                    aria-label="Supprimer"
+                  >
+                    ✕
+                  </IconButton>
                 </div>
               </div>
               <div className="mt-1.5 space-y-0.5">
