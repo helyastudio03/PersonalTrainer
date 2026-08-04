@@ -152,27 +152,62 @@ export default function Progression({ appData }: { appData: UseAppData }) {
         </div>
 
         <div>
-          <p className="text-xs font-semibold text-gray-500 mb-1">
+          <p className="text-xs font-semibold text-gray-500 mb-1.5">
             Exercices (une courbe par exercice sélectionné)
           </p>
           {filteredExerciseNames.length === 0 ? (
             <p className="text-xs text-gray-400">Aucun exercice pour ce filtre.</p>
           ) : (
-            <div className="space-y-1.5">
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {groupsToShow.map((mg) => {
                 const names = exercisesByGroup.map.get(mg);
                 if (!names || names.length === 0) return null;
+                const groupActive = selectedMuscleGroups.includes(mg);
                 return (
-                  <div key={mg} className="flex flex-wrap items-center gap-1.5">
+                  <div
+                    key={mg}
+                    className="border border-gray-200 dark:border-gray-800 rounded-lg p-2 space-y-1.5"
+                  >
                     <button
                       type="button"
                       onClick={() => toggleMuscleGroup(mg)}
-                      className={chipClassName(selectedMuscleGroups.includes(mg))}
-                      style={selectedMuscleGroups.includes(mg) ? { backgroundColor: '#6366f1' } : undefined}
+                      className={`w-full text-left text-xs font-semibold uppercase tracking-wide ${
+                        groupActive
+                          ? 'text-indigo-600 dark:text-indigo-400'
+                          : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                      }`}
                     >
                       {mg}
                     </button>
-                    {names.map((name) => {
+                    <div className="flex flex-wrap gap-1.5">
+                      {names.map((name) => {
+                        const active = activeExercises.includes(name);
+                        const color = active
+                          ? LINE_COLORS[activeExercises.indexOf(name) % LINE_COLORS.length]
+                          : undefined;
+                        return (
+                          <button
+                            key={name}
+                            type="button"
+                            onClick={() => toggleExercise(name)}
+                            className={chipClassName(active)}
+                            style={color ? { backgroundColor: color } : undefined}
+                          >
+                            {name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+              {exercisesByGroup.ungrouped.length > 0 && (
+                <div className="border border-gray-200 dark:border-gray-800 rounded-lg p-2 space-y-1.5">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                    Sans groupe
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {exercisesByGroup.ungrouped.map((name) => {
                       const active = activeExercises.includes(name);
                       const color = active
                         ? LINE_COLORS[activeExercises.indexOf(name) % LINE_COLORS.length]
@@ -190,28 +225,6 @@ export default function Progression({ appData }: { appData: UseAppData }) {
                       );
                     })}
                   </div>
-                );
-              })}
-              {exercisesByGroup.ungrouped.length > 0 && (
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="text-xs text-gray-400 px-1">Sans groupe</span>
-                  {exercisesByGroup.ungrouped.map((name) => {
-                    const active = activeExercises.includes(name);
-                    const color = active
-                      ? LINE_COLORS[activeExercises.indexOf(name) % LINE_COLORS.length]
-                      : undefined;
-                    return (
-                      <button
-                        key={name}
-                        type="button"
-                        onClick={() => toggleExercise(name)}
-                        className={chipClassName(active)}
-                        style={color ? { backgroundColor: color } : undefined}
-                      >
-                        {name}
-                      </button>
-                    );
-                  })}
                 </div>
               )}
             </div>
