@@ -9,7 +9,6 @@ const navItems = [
   { to: '/', label: 'Dashboard', end: true },
   { to: '/programmes', label: 'Programmes' },
   { to: '/musculation', label: 'Musculation' },
-  { to: '/course', label: 'Course à pied' },
   { to: '/progression', label: 'Progression' },
   { to: '/records', label: 'Records' },
 ];

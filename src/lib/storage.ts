@@ -11,7 +11,6 @@ export function loadData(): AppData {
     return {
       programs: parsed.programs ?? [],
       strengthSessions: parsed.strengthSessions ?? [],
-      runSessions: parsed.runSessions ?? [],
     };
   } catch {
     return structuredClone(emptyAppData);

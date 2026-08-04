@@ -1,4 +1,4 @@
-import type { RunSession, StrengthSession } from '../types';
+import type { StrengthSession } from '../types';
 
 // Formule d'Epley pour estimer le 1RM (répétition maximale)
 export function estimate1RM(weightKg: number, reps: number): number {
@@ -52,58 +52,6 @@ export function getStrengthPRs(sessions: StrengthSession[]): StrengthExerciseRec
   return [...byExercise.values()].sort((a, b) => a.exerciseName.localeCompare(b.exerciseName));
 }
 
-export interface RunRecord {
-  bestPaceMinPerKm: number;
-  bestPaceDate: string;
-  bestPaceDistanceKm: number;
-  longestDistanceKm: number;
-  longestDistanceDate: string;
-}
-
-export function paceMinPerKm(run: RunSession): number {
-  if (run.distanceKm <= 0) return Infinity;
-  return run.durationMin / run.distanceKm;
-}
-
-export function getRunPRs(sessions: RunSession[]): RunRecord | null {
-  if (sessions.length === 0) return null;
-
-  let best = sessions[0];
-  let bestPace = paceMinPerKm(sessions[0]);
-  let longest = sessions[0];
-
-  for (const run of sessions) {
-    const pace = paceMinPerKm(run);
-    if (pace < bestPace) {
-      bestPace = pace;
-      best = run;
-    }
-    if (run.distanceKm > longest.distanceKm) {
-      longest = run;
-    }
-  }
-
-  return {
-    bestPaceMinPerKm: bestPace,
-    bestPaceDate: best.date,
-    bestPaceDistanceKm: best.distanceKm,
-    longestDistanceKm: longest.distanceKm,
-    longestDistanceDate: longest.date,
-  };
-}
-
-export function formatPace(paceMinPerKmValue: number): string {
-  if (!isFinite(paceMinPerKmValue)) return '-';
-  const minutes = Math.floor(paceMinPerKmValue);
-  const seconds = Math.round((paceMinPerKmValue - minutes) * 60);
-  return `${minutes}:${seconds.toString().padStart(2, '0')} /km`;
-}
-
-export function speedKmH(run: RunSession): number {
-  if (run.durationMin <= 0) return 0;
-  return run.distanceKm / (run.durationMin / 60);
-}
-
 // Séries pour graphiques de progression
 
 export interface StrengthProgressionPoint {
@@ -134,24 +82,6 @@ export function getStrengthProgressionSeries(
   }
 
   return points.sort((a, b) => a.date.localeCompare(b.date));
-}
-
-export interface RunProgressionPoint {
-  date: string;
-  distanceKm: number;
-  paceMinPerKm: number;
-  speedKmH: number;
-}
-
-export function getRunProgressionSeries(sessions: RunSession[]): RunProgressionPoint[] {
-  return [...sessions]
-    .sort((a, b) => a.date.localeCompare(b.date))
-    .map((run) => ({
-      date: run.date,
-      distanceKm: run.distanceKm,
-      paceMinPerKm: Math.round(paceMinPerKm(run) * 100) / 100,
-      speedKmH: Math.round(speedKmH(run) * 100) / 100,
-    }));
 }
 
 export function listStrengthExerciseNames(sessions: StrengthSession[]): string[] {

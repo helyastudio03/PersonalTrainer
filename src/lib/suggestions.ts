@@ -1,5 +1,4 @@
-import type { RunSession, StrengthSession } from '../types';
-import { paceMinPerKm } from './records';
+import type { StrengthSession } from '../types';
 
 // Suggestions simples de surcharge progressive (règle de base, pas de ML).
 
@@ -45,40 +44,5 @@ export function suggestNextStrength(
     message: `Reste sur ${maxWeight} kg et vise ${REP_TARGET_THRESHOLD} reps sur toutes les séries (moyenne actuelle: ${avgReps.toFixed(1)}).`,
     targetWeightKg: maxWeight,
     targetReps: REP_TARGET_THRESHOLD,
-  };
-}
-
-export interface RunSuggestion {
-  message: string;
-  targetDistanceKm?: number;
-  targetPaceMinPerKm?: number;
-}
-
-export function suggestNextRun(sessions: RunSession[]): RunSuggestion | null {
-  const sorted = [...sessions].sort((a, b) => b.date.localeCompare(a.date));
-  const last = sorted[0];
-  if (!last) return null;
-
-  const lastPace = paceMinPerKm(last);
-  const paceImprovement = 0.05; // 3 secondes/km plus rapide, environ
-  const distanceIncrease = 1.1; // +10% de distance
-
-  // Alterne: une sortie sur deux on vise la distance, l'autre l'allure
-  const targetsDistance = sorted.length % 2 === 0;
-
-  if (targetsDistance) {
-    const targetDistanceKm = Math.round(last.distanceKm * distanceIncrease * 10) / 10;
-    return {
-      message: `Vise une distance un peu plus longue: ${targetDistanceKm} km, à une allure proche de ${lastPace.toFixed(2)} min/km.`,
-      targetDistanceKm,
-      targetPaceMinPerKm: lastPace,
-    };
-  }
-
-  const targetPace = Math.max(lastPace - paceImprovement, 0);
-  return {
-    message: `Vise la même distance (${last.distanceKm} km) mais un peu plus vite: ~${targetPace.toFixed(2)} min/km.`,
-    targetDistanceKm: last.distanceKm,
-    targetPaceMinPerKm: targetPace,
   };
 }

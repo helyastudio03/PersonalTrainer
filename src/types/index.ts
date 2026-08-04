@@ -9,21 +9,12 @@ export interface ProgramExerciseTarget {
   notes?: string;
 }
 
-export interface ProgramRunTarget {
-  id: string;
-  label: string; // ex: "Sortie longue", "Fractionné"
-  targetDistanceKm?: number;
-  targetPaceMinPerKm?: number; // min/km cible
-  notes?: string;
-}
-
 export interface Program {
   id: string;
   name: string;
   description?: string;
   createdAt: string; // ISO
   strengthTargets: ProgramExerciseTarget[];
-  runTargets: ProgramRunTarget[];
 }
 
 export interface StrengthSet {
@@ -46,23 +37,12 @@ export interface StrengthSession {
   notes?: string;
 }
 
-export interface RunSession {
-  id: string;
-  date: string; // ISO date
-  programId?: string;
-  distanceKm: number;
-  durationMin: number; // temps total en minutes
-  notes?: string;
-}
-
 export interface AppData {
   programs: Program[];
   strengthSessions: StrengthSession[];
-  runSessions: RunSession[];
 }
 
 export const emptyAppData: AppData = {
   programs: [],
   strengthSessions: [],
-  runSessions: [],
 };

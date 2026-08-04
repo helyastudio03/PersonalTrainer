@@ -1,11 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { v4 as uuid } from 'uuid';
-import type {
-  AppData,
-  Program,
-  RunSession,
-  StrengthSession,
-} from '../types';
+import type { AppData, Program, StrengthSession } from '../types';
 import { loadData, saveData } from './storage';
 
 export function useAppData() {
@@ -50,20 +45,6 @@ export function useAppData() {
     }));
   }, []);
 
-  const addRunSession = useCallback((session: Omit<RunSession, 'id'>) => {
-    setData((d) => ({
-      ...d,
-      runSessions: [...d.runSessions, { ...session, id: uuid() }],
-    }));
-  }, []);
-
-  const deleteRunSession = useCallback((id: string) => {
-    setData((d) => ({
-      ...d,
-      runSessions: d.runSessions.filter((s) => s.id !== id),
-    }));
-  }, []);
-
   return {
     data,
     addProgram,
@@ -71,8 +52,6 @@ export function useAppData() {
     deleteProgram,
     addStrengthSession,
     deleteStrengthSession,
-    addRunSession,
-    deleteRunSession,
   };
 }
 
