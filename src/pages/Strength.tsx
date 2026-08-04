@@ -253,13 +253,14 @@ function SessionCard({
               </div>
             </div>
           ) : (
-            <div
-              key={e.id}
-              className="group relative text-sm whitespace-nowrap overflow-hidden text-ellipsis"
-              title={`${e.exerciseName}: ${formatSetsSummary(e.sets)}`}
-            >
-              {e.exerciseName}: {formatSetsSummary(e.sets)}
-              <div className="absolute right-0 top-0 flex gap-1 bg-ash-900 pl-1">
+            <div key={e.id} className="group relative text-sm">
+              <div
+                className="whitespace-nowrap overflow-hidden text-ellipsis pr-0 group-hover:pr-14 transition-[padding-right]"
+                title={`${e.exerciseName}: ${formatSetsSummary(e.sets)}`}
+              >
+                <span className="text-ash-400">{e.exerciseName}</span>: {formatSetsSummary(e.sets)}
+              </div>
+              <div className="absolute right-0 top-0 flex gap-1">
                 <IconButton
                   variant="secondary"
                   onClick={() => startEditExercise(e)}
@@ -567,7 +568,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
         <EmptyState>Aucune séance de musculation enregistrée.</EmptyState>
       ) : (
         <>
-          <p className="text-xs text-ash-400">Format des séries : répétitions × poids (kg)</p>
+          <p className="text-xs text-ash-400">Format des séries : poids (kg) × répétitions</p>
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-start">
           {sortedSessions.map((s) => (
             <SessionCard

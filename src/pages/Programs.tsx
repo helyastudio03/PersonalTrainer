@@ -370,8 +370,7 @@ export default function Programs({ appData }: { appData: UseAppData }) {
                       <ul className="text-sm space-y-0.5">
                         {dayTargets.map((t) => (
                           <li key={t.id}>
-                            {t.exerciseName}{' '}
-                            <span className="text-ash-400">({t.muscleGroup})</span>: {t.targetSets}×
+                            <span className="text-ash-400">{t.exerciseName} ({t.muscleGroup})</span>: {t.targetSets}×
                             {formatRepRange(t.targetRepsMin, t.targetRepsMax)}
                             {t.targetRIR !== undefined ? ` @ RIR ${t.targetRIR}` : ''}
                           </li>
