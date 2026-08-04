@@ -4,6 +4,26 @@ export function formatRepRange(min: number, max: number): string {
   return min === max ? `${min}` : `${min}-${max}`;
 }
 
+// Regroupe les séries consécutives identiques (mêmes reps/poids) pour un
+// affichage plus lisible, ex: "2×(7×67.5kg), 8×67.5kg" au lieu de
+// "7×67.5kg, 7×67.5kg, 8×67.5kg".
+export function formatSetsSummary(sets: StrengthSet[]): string {
+  const groups: { reps: number; weightKg: number; count: number }[] = [];
+
+  for (const set of sets) {
+    const last = groups[groups.length - 1];
+    if (last && last.reps === set.reps && last.weightKg === set.weightKg) {
+      last.count += 1;
+    } else {
+      groups.push({ reps: set.reps, weightKg: set.weightKg, count: 1 });
+    }
+  }
+
+  return groups
+    .map((g) => (g.count > 1 ? `${g.count}×(${g.reps}×${g.weightKg}kg)` : `${g.reps}×${g.weightKg}kg`))
+    .join(', ');
+}
+
 // Records personnels par couple (répétitions, poids): pour chaque exercice
 // et chaque nombre de répétitions déjà réalisé, le poids maximal soulevé.
 export interface RepWeightRecord {

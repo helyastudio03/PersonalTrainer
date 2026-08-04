@@ -33,6 +33,7 @@ export default function Records({ appData }: { appData: UseAppData }) {
   }, [data.strengthSessions, exerciseMuscleGroups]);
 
   const [selectedMuscleGroups, setSelectedMuscleGroups] = useState<MuscleGroup[]>([]);
+  const [selectedExercises, setSelectedExercises] = useState<string[]>([]);
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
 
@@ -47,13 +48,29 @@ export default function Records({ appData }: { appData: UseAppData }) {
 
   const records = useMemo(() => getStrengthPRsByRepWeight(filteredSessions), [filteredSessions]);
 
-  const filteredRecords = useMemo(() => {
-    if (selectedMuscleGroups.length === 0) return records;
-    return records.filter((r) => {
-      const mg = exerciseMuscleGroups[r.exerciseName];
-      return mg ? selectedMuscleGroups.includes(mg) : false;
-    });
+  const availableExerciseNames = useMemo(() => {
+    const names = [...new Set(records.map((r) => r.exerciseName))];
+    if (selectedMuscleGroups.length === 0) return names.sort();
+    return names
+      .filter((name) => {
+        const mg = exerciseMuscleGroups[name];
+        return mg ? selectedMuscleGroups.includes(mg) : false;
+      })
+      .sort();
   }, [records, selectedMuscleGroups, exerciseMuscleGroups]);
+
+  const filteredRecords = useMemo(() => {
+    return records.filter((r) => {
+      if (selectedMuscleGroups.length > 0) {
+        const mg = exerciseMuscleGroups[r.exerciseName];
+        if (!mg || !selectedMuscleGroups.includes(mg)) return false;
+      }
+      if (selectedExercises.length > 0 && !selectedExercises.includes(r.exerciseName)) {
+        return false;
+      }
+      return true;
+    });
+  }, [records, selectedMuscleGroups, selectedExercises, exerciseMuscleGroups]);
 
   const byExercise = new Map<string, typeof filteredRecords>();
   for (const r of filteredRecords) {
@@ -68,8 +85,15 @@ export default function Records({ appData }: { appData: UseAppData }) {
     );
   }
 
+  function toggleExercise(name: string) {
+    setSelectedExercises((prev) =>
+      prev.includes(name) ? prev.filter((n) => n !== name) : [...prev, name],
+    );
+  }
+
   function resetFilters() {
     setSelectedMuscleGroups([]);
+    setSelectedExercises([]);
     setDateFrom('');
     setDateTo('');
   }
@@ -102,6 +126,24 @@ export default function Records({ appData }: { appData: UseAppData }) {
                   className={chipClassName(selectedMuscleGroups.includes(mg))}
                 >
                   {mg}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {availableExerciseNames.length > 0 && (
+          <div>
+            <p className="text-xs font-semibold text-gray-500 mb-1">Exercice</p>
+            <div className="flex flex-wrap gap-1.5">
+              {availableExerciseNames.map((name) => (
+                <button
+                  key={name}
+                  type="button"
+                  onClick={() => toggleExercise(name)}
+                  className={chipClassName(selectedExercises.includes(name))}
+                >
+                  {name}
                 </button>
               ))}
             </div>

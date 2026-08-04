@@ -38,6 +38,13 @@ export function useAppData() {
     }));
   }, []);
 
+  const updateStrengthSession = useCallback((session: StrengthSession) => {
+    setData((d) => ({
+      ...d,
+      strengthSessions: d.strengthSessions.map((s) => (s.id === session.id ? session : s)),
+    }));
+  }, []);
+
   const deleteStrengthSession = useCallback((id: string) => {
     setData((d) => ({
       ...d,
@@ -51,6 +58,7 @@ export function useAppData() {
     updateProgram,
     deleteProgram,
     addStrengthSession,
+    updateStrengthSession,
     deleteStrengthSession,
   };
 }

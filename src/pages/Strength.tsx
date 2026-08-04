@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { v4 as uuid } from 'uuid';
 import type { UseAppData } from '../lib/useAppData';
-import type { ProgramExerciseTarget, StrengthExerciseEntry, StrengthSet } from '../types';
+import type { ProgramExerciseTarget, StrengthExerciseEntry, StrengthSession, StrengthSet } from '../types';
 import { Button, Card, EmptyState, Input, Label } from '../components/ui';
 import { suggestNextStrength } from '../lib/suggestions';
-import { formatRepRange, getLastPerformance } from '../lib/records';
+import { formatRepRange, formatSetsSummary, getLastPerformance } from '../lib/records';
 
 function todayIso() {
   return new Date().toISOString().slice(0, 10);
@@ -32,11 +32,12 @@ function exerciseFromTarget(target: ProgramExerciseTarget): StrengthExerciseEntr
 }
 
 export default function Strength({ appData }: { appData: UseAppData }) {
-  const { data, addStrengthSession, deleteStrengthSession } = appData;
+  const { data, addStrengthSession, updateStrengthSession, deleteStrengthSession } = appData;
   const [date, setDate] = useState(todayIso());
   const [programId, setProgramId] = useState('');
   const [exercises, setExercises] = useState<StrengthExerciseEntry[]>([emptyExercise()]);
   const [showForm, setShowForm] = useState(false);
+  const [editingSession, setEditingSession] = useState<StrengthSession | null>(null);
 
   function addExercise() {
     setExercises((ex) => [...ex, emptyExercise()]);
@@ -89,16 +90,34 @@ export default function Strength({ appData }: { appData: UseAppData }) {
     setExercises([emptyExercise()]);
     setDate(todayIso());
     setProgramId('');
+    setEditingSession(null);
+  }
+
+  function startEdit(session: StrengthSession) {
+    setEditingSession(session);
+    setDate(session.date);
+    setProgramId(session.programId ?? '');
+    setExercises(session.exercises.map((e) => ({ ...e, sets: e.sets.map((s) => ({ ...s })) })));
+    setShowForm(true);
   }
 
   function submit() {
     const validExercises = exercises.filter((e) => e.exerciseName.trim() && e.sets.length > 0);
     if (validExercises.length === 0) return;
-    addStrengthSession({
-      date,
-      programId: programId || undefined,
-      exercises: validExercises,
-    });
+    if (editingSession) {
+      updateStrengthSession({
+        ...editingSession,
+        date,
+        programId: programId || undefined,
+        exercises: validExercises,
+      });
+    } else {
+      addStrengthSession({
+        date,
+        programId: programId || undefined,
+        exercises: validExercises,
+      });
+    }
     resetDraft();
     setShowForm(false);
   }
@@ -120,6 +139,11 @@ export default function Strength({ appData }: { appData: UseAppData }) {
 
       {showForm && (
         <Card className="space-y-3">
+          {editingSession && (
+            <h2 className="text-sm font-semibold text-gray-500">
+              Modifier la séance du {editingSession.date}
+            </h2>
+          )}
           <div className="grid grid-cols-2 gap-2">
             <div>
               <Label>Date</Label>
@@ -207,8 +231,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
 
                   {lastPerformance && (
                     <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-                      Dernière fois ({lastPerformance.date}):{' '}
-                      {lastPerformance.sets.map((s) => `${s.reps}×${s.weightKg}kg`).join(', ')}
+                      Dernière fois ({lastPerformance.date}): {formatSetsSummary(lastPerformance.sets)}
                     </p>
                   )}
 
@@ -262,7 +285,9 @@ export default function Strength({ appData }: { appData: UseAppData }) {
             <Button variant="secondary" onClick={addExercise}>
               + Exercice
             </Button>
-            <Button onClick={submit}>Enregistrer la séance</Button>
+            <Button onClick={submit}>
+              {editingSession ? 'Enregistrer les modifications' : 'Enregistrer la séance'}
+            </Button>
           </div>
         </Card>
       )}
@@ -275,15 +300,20 @@ export default function Strength({ appData }: { appData: UseAppData }) {
             <Card key={s.id}>
               <div className="flex justify-between items-start">
                 <h3 className="font-semibold">{s.date}</h3>
-                <Button variant="danger" onClick={() => deleteStrengthSession(s.id)}>
-                  Supprimer
-                </Button>
+                <div className="flex gap-2 shrink-0">
+                  <Button variant="secondary" onClick={() => startEdit(s)}>
+                    Modifier
+                  </Button>
+                  <Button variant="danger" onClick={() => deleteStrengthSession(s.id)}>
+                    Supprimer
+                  </Button>
+                </div>
               </div>
               <div className="mt-1.5 space-y-0.5">
                 {s.exercises.map((e) => (
                   <div key={e.id} className="text-sm">
                     <span className="font-medium">{e.exerciseName}: </span>
-                    {e.sets.map((set) => `${set.reps}×${set.weightKg}kg`).join(', ')}
+                    {formatSetsSummary(e.sets)}
                   </div>
                 ))}
               </div>
