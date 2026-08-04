@@ -292,6 +292,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
   const [programId, setProgramId] = useState('');
   const [exercises, setExercises] = useState<StrengthExerciseEntry[]>([emptyExercise()]);
   const [showForm, setShowForm] = useState(false);
+  const [confirmingClear, setConfirmingClear] = useState(false);
 
   function addExercise() {
     setExercises((ex) => [...ex, emptyExercise()]);
@@ -373,10 +374,8 @@ export default function Strength({ appData }: { appData: UseAppData }) {
   }
 
   function clearHistory() {
-    if (data.strengthSessions.length === 0) return;
-    if (window.confirm('Supprimer tout l\'historique des séances ? Cette action est irréversible.')) {
-      clearStrengthSessions();
-    }
+    clearStrengthSessions();
+    setConfirmingClear(false);
   }
 
   const sortedSessions = [...data.strengthSessions].sort((a, b) => b.date.localeCompare(a.date));
@@ -387,11 +386,22 @@ export default function Strength({ appData }: { appData: UseAppData }) {
       <div className="flex justify-between items-center">
         <h1 className="text-xl font-bold">Séances</h1>
         <div className="flex gap-2">
-          {sortedSessions.length > 0 && (
-            <Button variant="danger" onClick={clearHistory}>
-              Supprimer l'historique
-            </Button>
-          )}
+          {sortedSessions.length > 0 &&
+            (confirmingClear ? (
+              <>
+                <span className="text-sm text-gray-500 self-center">Tout supprimer ?</span>
+                <Button variant="danger" onClick={clearHistory}>
+                  Confirmer
+                </Button>
+                <Button variant="secondary" onClick={() => setConfirmingClear(false)}>
+                  Annuler
+                </Button>
+              </>
+            ) : (
+              <Button variant="danger" onClick={() => setConfirmingClear(true)}>
+                Supprimer l'historique
+              </Button>
+            ))}
           <Button onClick={toggleForm}>{showForm ? 'Annuler' : '+ Nouvelle séance'}</Button>
         </div>
       </div>
