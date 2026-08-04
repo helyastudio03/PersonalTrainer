@@ -104,24 +104,6 @@ export function getWeeklySetsByMuscleGroup(
     .sort((a, b) => b.weeklySets - a.weeklySets);
 }
 
-export interface ExerciseVolume {
-  exerciseName: string;
-  weeklySets: number;
-}
-
-export function getWeeklySetsByExercise(
-  strengthTargets: Program['strengthTargets'],
-): ExerciseVolume[] {
-  const totals = new Map<string, number>();
-  for (const target of strengthTargets) {
-    if (!target.exerciseName.trim()) continue;
-    totals.set(target.exerciseName, (totals.get(target.exerciseName) ?? 0) + target.targetSets);
-  }
-  return [...totals.entries()]
-    .map(([exerciseName, weeklySets]) => ({ exerciseName, weeklySets }))
-    .sort((a, b) => b.weeklySets - a.weeklySets);
-}
-
 export function listStrengthExerciseNames(sessions: StrengthSession[]): string[] {
   const names = new Set<string>();
   for (const session of sessions) {

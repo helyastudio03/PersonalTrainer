@@ -13,7 +13,7 @@ import type { UseAppData } from '../lib/useAppData';
 import type { MuscleGroup, Program, ProgramDay, ProgramExerciseTarget } from '../types';
 import { MUSCLE_GROUPS } from '../types';
 import { Button, Card, EmptyState, Input, Label } from '../components/ui';
-import { getWeeklySetsByExercise, getWeeklySetsByMuscleGroup, listAllExerciseNames } from '../lib/records';
+import { getWeeklySetsByMuscleGroup, listAllExerciseNames } from '../lib/records';
 
 const EXERCISE_DATALIST_ID = 'known-exercise-names';
 
@@ -22,33 +22,13 @@ function emptyDraft(): Omit<Program, 'id' | 'createdAt'> {
   return { name: '', description: '', days: [firstDay], strengthTargets: [] };
 }
 
-function VolumeTable({ strengthTargets }: { strengthTargets: ProgramExerciseTarget[] }) {
+function VolumeChart({ strengthTargets }: { strengthTargets: ProgramExerciseTarget[] }) {
   const volumes = getWeeklySetsByMuscleGroup(strengthTargets);
   if (volumes.length === 0) return null;
   return (
     <div>
-      <p className="text-xs font-semibold text-gray-500 mb-1">Volume hebdomadaire par groupe musculaire</p>
-      <div className="flex flex-wrap gap-2">
-        {volumes.map((v) => (
-          <span
-            key={v.muscleGroup}
-            className="text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
-          >
-            {v.muscleGroup}: <strong>{v.weeklySets}</strong> séries/sem.
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function ExerciseVolumeChart({ strengthTargets }: { strengthTargets: ProgramExerciseTarget[] }) {
-  const volumes = getWeeklySetsByExercise(strengthTargets);
-  if (volumes.length === 0) return null;
-  return (
-    <div>
-      <p className="text-xs font-semibold text-gray-500 mb-1">Séries par semaine et par exercice</p>
-      <ResponsiveContainer width="100%" height={Math.max(volumes.length * 44, 100)}>
+      <p className="text-xs font-semibold text-gray-500 mb-1">Séries par semaine et par groupe musculaire</p>
+      <ResponsiveContainer width="100%" height={Math.max(volumes.length * 32, 80)}>
         <BarChart
           data={volumes}
           layout="vertical"
@@ -57,7 +37,7 @@ function ExerciseVolumeChart({ strengthTargets }: { strengthTargets: ProgramExer
         >
           <CartesianGrid strokeDasharray="3 3" opacity={0.3} horizontal={false} />
           <XAxis type="number" allowDecimals={false} fontSize={12} />
-          <YAxis type="category" dataKey="exerciseName" width={140} fontSize={12} />
+          <YAxis type="category" dataKey="muscleGroup" width={90} fontSize={12} />
           <Tooltip />
           <Bar
             dataKey="weeklySets"
@@ -300,8 +280,7 @@ export default function Programs({ appData }: { appData: UseAppData }) {
             )}
           </div>
 
-          <VolumeTable strengthTargets={draft.strengthTargets} />
-          <ExerciseVolumeChart strengthTargets={draft.strengthTargets} />
+          <VolumeChart strengthTargets={draft.strengthTargets} />
 
           <div className="flex gap-2">
             <Button onClick={submit} disabled={!draft.name.trim()}>
@@ -355,8 +334,7 @@ export default function Programs({ appData }: { appData: UseAppData }) {
                 );
               })}
 
-              <VolumeTable strengthTargets={p.strengthTargets} />
-              <ExerciseVolumeChart strengthTargets={p.strengthTargets} />
+              <VolumeChart strengthTargets={p.strengthTargets} />
             </Card>
           ))}
         </div>
