@@ -4,11 +4,12 @@ export function formatRepRange(min: number, max: number): string {
   return min === max ? `${min}` : `${min}-${max}`;
 }
 
-// Liste les séries d'une entrée, espacées, avec l'unité "kg" mentionnée
-// une seule fois à la fin (ex: "7×67.5  7×67.5  8×67.5 kg").
+// Liste les séries d'une entrée, espacées (ex: "7×67.5  7×67.5  8×67.5"),
+// au format répétitions×poids sans unité (voir la légende affichée à
+// l'utilisateur).
 export function formatSetsSummary(sets: StrengthSet[]): string {
   if (sets.length === 0) return '';
-  return `${sets.map((s) => `${s.reps}×${s.weightKg}`).join('   ')} kg`;
+  return sets.map((s) => `${s.reps}×${s.weightKg}`).join('   ');
 }
 
 // Records personnels par couple (répétitions, poids): pour chaque exercice

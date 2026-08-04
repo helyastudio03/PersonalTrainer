@@ -204,7 +204,7 @@ function SessionCard({
         </div>
       </div>
 
-      <div className="mt-1.5 space-y-1.5">
+      <div className="mt-1.5 space-y-0.5">
         {session.exercises.map((e) =>
           editingExerciseId === e.id ? (
             <div
@@ -564,7 +564,9 @@ export default function Strength({ appData }: { appData: UseAppData }) {
       {sortedSessions.length === 0 ? (
         <EmptyState>Aucune séance de musculation enregistrée.</EmptyState>
       ) : (
-        <div className="grid gap-2 sm:grid-cols-2 items-start">
+        <>
+          <p className="text-xs text-ash-400">Format des séries : répétitions × poids (kg)</p>
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-start">
           {sortedSessions.map((s) => (
             <SessionCard
               key={s.id}
@@ -574,7 +576,8 @@ export default function Strength({ appData }: { appData: UseAppData }) {
               deleteStrengthSession={deleteStrengthSession}
             />
           ))}
-        </div>
+          </div>
+        </>
       )}
     </div>
   );
