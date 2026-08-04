@@ -56,36 +56,110 @@ export function getStrengthPRs(sessions: StrengthSession[]): StrengthExerciseRec
   return [...byExercise.values()].sort((a, b) => a.exerciseName.localeCompare(b.exerciseName));
 }
 
-// Séries pour graphiques de progression
+// Courbes de progression configurables (poids, reps, poids×reps, volume),
+// par séance ou agrégées par semaine. Pas d'estimation de 1RM ici.
 
-export interface StrengthProgressionPoint {
+export type ProgressionMetric = 'weight' | 'reps' | 'weightReps' | 'volume';
+export type ProgressionPeriod = 'session' | 'week';
+
+export const PROGRESSION_METRIC_LABELS: Record<ProgressionMetric, string> = {
+  weight: 'Poids (meilleure série)',
+  reps: 'Répétitions (meilleure série)',
+  weightReps: 'Poids × Reps (meilleure série)',
+  volume: 'Volume (poids × reps cumulé)',
+};
+
+interface SessionSetMetrics {
   date: string;
-  best1RM: number;
-  maxWeight: number;
+  topWeight: number;
+  topReps: number;
+  weightReps: number;
+  volume: number;
 }
 
-export function getStrengthProgressionSeries(
+function computeSessionSetMetrics(
   sessions: StrengthSession[],
   exerciseName: string,
-): StrengthProgressionPoint[] {
-  const points: StrengthProgressionPoint[] = [];
+): SessionSetMetrics[] {
+  const points: SessionSetMetrics[] = [];
 
   for (const session of sessions) {
     const entry = session.exercises.find((e) => e.exerciseName === exerciseName);
     if (!entry || entry.sets.length === 0) continue;
 
-    let best1RM = 0;
-    let maxWeight = 0;
+    let topWeight = 0;
+    let topReps = 0;
+    let volume = 0;
     for (const set of entry.sets) {
-      const oneRM = estimate1RM(set.weightKg, set.reps);
-      if (oneRM > best1RM) best1RM = oneRM;
-      if (set.weightKg > maxWeight) maxWeight = set.weightKg;
+      volume += set.weightKg * set.reps;
+      if (set.weightKg > topWeight || (set.weightKg === topWeight && set.reps > topReps)) {
+        topWeight = set.weightKg;
+        topReps = set.reps;
+      }
     }
 
-    points.push({ date: session.date, best1RM: Math.round(best1RM * 10) / 10, maxWeight });
+    points.push({ date: session.date, topWeight, topReps, weightReps: topWeight * topReps, volume });
   }
 
   return points.sort((a, b) => a.date.localeCompare(b.date));
+}
+
+function pickMetric(m: SessionSetMetrics, metric: ProgressionMetric): number {
+  switch (metric) {
+    case 'weight':
+      return m.topWeight;
+    case 'reps':
+      return m.topReps;
+    case 'weightReps':
+      return m.weightReps;
+    case 'volume':
+      return m.volume;
+  }
+}
+
+// Lundi de la semaine contenant la date donnée (yyyy-mm-dd).
+function startOfWeek(dateStr: string): string {
+  const d = new Date(`${dateStr}T00:00:00`);
+  const day = d.getDay();
+  const diffToMonday = (day === 0 ? -6 : 1) - day;
+  d.setDate(d.getDate() + diffToMonday);
+  return d.toISOString().slice(0, 10);
+}
+
+export interface ProgressionPoint {
+  label: string; // date de séance, ou date de début de semaine
+  value: number;
+}
+
+export function getStrengthMetricSeries(
+  sessions: StrengthSession[],
+  exerciseName: string,
+  metric: ProgressionMetric,
+  period: ProgressionPeriod,
+): ProgressionPoint[] {
+  const sessionMetrics = computeSessionSetMetrics(sessions, exerciseName);
+
+  if (period === 'session') {
+    return sessionMetrics.map((m) => ({ label: m.date, value: pickMetric(m, metric) }));
+  }
+
+  const byWeek = new Map<string, SessionSetMetrics[]>();
+  for (const m of sessionMetrics) {
+    const week = startOfWeek(m.date);
+    const list = byWeek.get(week);
+    if (list) list.push(m);
+    else byWeek.set(week, [m]);
+  }
+
+  return [...byWeek.entries()]
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([week, list]) => ({
+      label: week,
+      value:
+        metric === 'volume'
+          ? list.reduce((sum, m) => sum + m.volume, 0)
+          : Math.max(...list.map((m) => pickMetric(m, metric))),
+    }));
 }
 
 // Volume hebdomadaire par groupe musculaire, déduit du programme (chaque jour
