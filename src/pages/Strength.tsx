@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { v4 as uuid } from 'uuid';
 import type { UseAppData } from '../lib/useAppData';
-import type { StrengthExerciseEntry, StrengthSet } from '../types';
+import type { ProgramExerciseTarget, StrengthExerciseEntry, StrengthSet } from '../types';
 import { Button, Card, EmptyState, Input, Label } from '../components/ui';
 import { suggestNextStrength } from '../lib/suggestions';
 
@@ -17,6 +17,18 @@ function emptyExercise(): StrengthExerciseEntry {
   };
 }
 
+function exerciseFromTarget(target: ProgramExerciseTarget): StrengthExerciseEntry {
+  return {
+    id: uuid(),
+    exerciseName: target.exerciseName,
+    sets: Array.from({ length: Math.max(target.targetSets, 1) }, () => ({
+      id: uuid(),
+      reps: target.targetReps,
+      weightKg: target.targetWeight ?? 0,
+    })),
+  };
+}
+
 export default function Strength({ appData }: { appData: UseAppData }) {
   const { data, addStrengthSession, deleteStrengthSession } = appData;
   const [date, setDate] = useState(todayIso());
@@ -26,6 +38,13 @@ export default function Strength({ appData }: { appData: UseAppData }) {
 
   function addExercise() {
     setExercises((ex) => [...ex, emptyExercise()]);
+  }
+
+  function addExerciseFromTarget(target: ProgramExerciseTarget) {
+    setExercises((ex) => {
+      const withoutBlanks = ex.filter((e) => e.exerciseName.trim() !== '');
+      return [...withoutBlanks, exerciseFromTarget(target)];
+    });
   }
 
   function updateExercise(id: string, name: string) {
@@ -78,6 +97,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
   }
 
   const sortedSessions = [...data.strengthSessions].sort((a, b) => b.date.localeCompare(a.date));
+  const selectedProgram = data.programs.find((p) => p.id === programId);
 
   return (
     <div className="space-y-4">
@@ -111,6 +131,38 @@ export default function Strength({ appData }: { appData: UseAppData }) {
               </select>
             </div>
           </div>
+
+          {selectedProgram && selectedProgram.strengthTargets.length > 0 && (
+            <div className="border border-indigo-200 dark:border-indigo-900 bg-indigo-50 dark:bg-indigo-950/40 rounded-lg p-3">
+              <div className="flex justify-between items-center mb-2">
+                <p className="text-xs font-semibold text-indigo-700 dark:text-indigo-300">
+                  Exercices de "{selectedProgram.name}"
+                </p>
+                <button
+                  type="button"
+                  className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline"
+                  onClick={() =>
+                    selectedProgram.strengthTargets.forEach((t) => addExerciseFromTarget(t))
+                  }
+                >
+                  + Tout ajouter
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {selectedProgram.strengthTargets.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => addExerciseFromTarget(t)}
+                    className="text-xs px-2 py-1 rounded-full border border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900"
+                  >
+                    + {t.exerciseName} ({t.targetSets}×{t.targetReps}
+                    {t.targetWeight ? ` @ ${t.targetWeight}kg` : ''})
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="space-y-4">
             {exercises.map((ex) => {
