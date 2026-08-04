@@ -27,7 +27,8 @@ export interface ProgramExerciseTarget {
   exerciseName: string;
   muscleGroup: MuscleGroup;
   targetSets: number;
-  targetReps: number;
+  targetRepsMin: number;
+  targetRepsMax: number;
   targetWeight?: number; // kg, optionnel
   notes?: string;
 }

@@ -13,7 +13,7 @@ import type { UseAppData } from '../lib/useAppData';
 import type { MuscleGroup, Program, ProgramDay, ProgramExerciseTarget } from '../types';
 import { MUSCLE_GROUPS } from '../types';
 import { Button, Card, EmptyState, Input, Label } from '../components/ui';
-import { getWeeklySetsByMuscleGroup, listAllExerciseNames } from '../lib/records';
+import { formatRepRange, getWeeklySetsByMuscleGroup, listAllExerciseNames } from '../lib/records';
 
 const EXERCISE_DATALIST_ID = 'known-exercise-names';
 
@@ -115,7 +115,8 @@ export default function Programs({ appData }: { appData: UseAppData }) {
       exerciseName: '',
       muscleGroup: MUSCLE_GROUPS[0],
       targetSets: 3,
-      targetReps: 8,
+      targetRepsMin: 6,
+      targetRepsMax: 8,
     };
     setDraft((d) => ({ ...d, strengthTargets: [...d.strengthTargets, target] }));
   }
@@ -221,7 +222,7 @@ export default function Programs({ appData }: { appData: UseAppData }) {
                             onChange={(e) => updateStrengthTarget(t.id, { exerciseName: e.target.value })}
                           />
                           <select
-                            className="col-span-3 px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 text-sm"
+                            className="col-span-2 px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 text-sm"
                             value={t.muscleGroup}
                             onChange={(e) =>
                               updateStrengthTarget(t.id, { muscleGroup: e.target.value as MuscleGroup })
@@ -245,9 +246,23 @@ export default function Programs({ appData }: { appData: UseAppData }) {
                             className="col-span-1"
                             type="number"
                             min={1}
-                            placeholder="Reps"
-                            value={t.targetReps}
-                            onChange={(e) => updateStrengthTarget(t.id, { targetReps: Number(e.target.value) })}
+                            placeholder="Reps min"
+                            title="Répétitions min"
+                            value={t.targetRepsMin}
+                            onChange={(e) =>
+                              updateStrengthTarget(t.id, { targetRepsMin: Number(e.target.value) })
+                            }
+                          />
+                          <Input
+                            className="col-span-1"
+                            type="number"
+                            min={1}
+                            placeholder="Reps max"
+                            title="Répétitions max"
+                            value={t.targetRepsMax}
+                            onChange={(e) =>
+                              updateStrengthTarget(t.id, { targetRepsMax: Number(e.target.value) })
+                            }
                           />
                           <Input
                             className="col-span-2"
@@ -325,7 +340,7 @@ export default function Programs({ appData }: { appData: UseAppData }) {
                         <li key={t.id}>
                           {t.exerciseName}{' '}
                           <span className="text-gray-400">({t.muscleGroup})</span>: {t.targetSets}×
-                          {t.targetReps}
+                          {formatRepRange(t.targetRepsMin, t.targetRepsMax)}
                           {t.targetWeight ? ` @ ${t.targetWeight}kg` : ''}
                         </li>
                       ))}

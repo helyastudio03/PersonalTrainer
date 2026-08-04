@@ -1,5 +1,9 @@
 import type { MuscleGroup, Program, StrengthSession } from '../types';
 
+export function formatRepRange(min: number, max: number): string {
+  return min === max ? `${min}` : `${min}-${max}`;
+}
+
 // Formule d'Epley pour estimer le 1RM (répétition maximale)
 export function estimate1RM(weightKg: number, reps: number): number {
   if (reps <= 1) return weightKg;

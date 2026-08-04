@@ -4,6 +4,7 @@ import type { UseAppData } from '../lib/useAppData';
 import type { ProgramExerciseTarget, StrengthExerciseEntry, StrengthSet } from '../types';
 import { Button, Card, EmptyState, Input, Label } from '../components/ui';
 import { suggestNextStrength } from '../lib/suggestions';
+import { formatRepRange } from '../lib/records';
 
 function todayIso() {
   return new Date().toISOString().slice(0, 10);
@@ -18,12 +19,13 @@ function emptyExercise(): StrengthExerciseEntry {
 }
 
 function exerciseFromTarget(target: ProgramExerciseTarget): StrengthExerciseEntry {
+  const reps = Math.round((target.targetRepsMin + target.targetRepsMax) / 2);
   return {
     id: uuid(),
     exerciseName: target.exerciseName,
     sets: Array.from({ length: Math.max(target.targetSets, 1) }, () => ({
       id: uuid(),
-      reps: target.targetReps,
+      reps,
       weightKg: target.targetWeight ?? 0,
     })),
   };
@@ -162,7 +164,8 @@ export default function Strength({ appData }: { appData: UseAppData }) {
                           onClick={() => addExerciseFromTarget(t)}
                           className="text-xs px-2 py-1 rounded-full border border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900"
                         >
-                          + {t.exerciseName} ({t.targetSets}×{t.targetReps}
+                          + {t.exerciseName} ({t.targetSets}×
+                          {formatRepRange(t.targetRepsMin, t.targetRepsMax)}
                           {t.targetWeight ? ` @ ${t.targetWeight}kg` : ''})
                         </button>
                       ))}
