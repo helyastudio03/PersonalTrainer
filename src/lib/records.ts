@@ -414,6 +414,54 @@ export function getRecentPRImprovements(
     .sort((a, b) => b.date.localeCompare(a.date));
 }
 
+// Regroupe des séances (triées du plus ancien au plus récent) en "lignes de
+// cycle": les séances consécutives d'un même programme, jusqu'à un maximum
+// égal au nombre de jours de ce programme, avant de repartir sur une
+// nouvelle ligne (nouveau cycle). Les séances sans programme forment leur
+// propre ligne.
+export function groupSessionsIntoCycleRows(
+  sessions: StrengthSession[],
+  programs: Program[],
+): StrengthSession[][] {
+  const rows: StrengthSession[][] = [];
+  let currentRow: StrengthSession[] = [];
+  let currentProgramId: string | undefined;
+  let currentCycleSize = 1;
+
+  for (const s of sessions) {
+    const cycleSize = s.programId
+      ? Math.max(programs.find((p) => p.id === s.programId)?.days.length ?? 1, 1)
+      : 1;
+    if (
+      currentRow.length > 0 &&
+      s.programId === currentProgramId &&
+      currentProgramId !== undefined &&
+      currentRow.length < currentCycleSize
+    ) {
+      currentRow.push(s);
+    } else {
+      if (currentRow.length > 0) rows.push(currentRow);
+      currentRow = [s];
+      currentProgramId = s.programId;
+      currentCycleSize = cycleSize;
+    }
+  }
+  if (currentRow.length > 0) rows.push(currentRow);
+  return rows;
+}
+
+// Clé "aaaa-mm" pour grouper des séances par mois.
+export function monthKey(dateStr: string): string {
+  return dateStr.slice(0, 7);
+}
+
+// Libellé "Mois aaaa" en français, capitalisé (ex: "Août 2026").
+export function formatMonthLabel(dateStr: string): string {
+  const d = new Date(`${dateStr}T00:00:00`);
+  const label = d.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
 export function listStrengthExerciseNames(sessions: StrengthSession[]): string[] {
   const names = new Set<string>();
   for (const session of sessions) {

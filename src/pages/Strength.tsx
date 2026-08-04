@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { v4 as uuid } from 'uuid';
 import type { UseAppData } from '../lib/useAppData';
 import type {
@@ -9,7 +9,14 @@ import type {
   StrengthSet,
 } from '../types';
 import { Button, Card, EmptyState, IconButton, Input, Label } from '../components/ui';
-import { formatRepRange, formatSetsSummary, getLastPerformance } from '../lib/records';
+import {
+  formatMonthLabel,
+  formatRepRange,
+  formatSetsSummary,
+  getLastPerformance,
+  groupSessionsIntoCycleRows,
+  monthKey,
+} from '../lib/records';
 
 function todayIso() {
   return new Date().toISOString().slice(0, 10);
@@ -384,6 +391,24 @@ export default function Strength({ appData }: { appData: UseAppData }) {
   const sortedSessions = [...data.strengthSessions].sort((a, b) => b.date.localeCompare(a.date));
   const selectedProgram = data.programs.find((p) => p.id === programId);
 
+  const monthGroups = useMemo(() => {
+    const chronological = [...data.strengthSessions].sort((a, b) => a.date.localeCompare(b.date));
+    const byMonth = new Map<string, StrengthSession[]>();
+    for (const s of chronological) {
+      const key = monthKey(s.date);
+      const list = byMonth.get(key);
+      if (list) list.push(s);
+      else byMonth.set(key, [s]);
+    }
+    return [...byMonth.entries()]
+      .sort((a, b) => b[0].localeCompare(a[0]))
+      .map(([key, sessions]) => ({
+        key,
+        label: formatMonthLabel(sessions[0].date),
+        rows: groupSessionsIntoCycleRows(sessions, data.programs).reverse(),
+      }));
+  }, [data.strengthSessions, data.programs]);
+
   return (
     <div className="space-y-3">
       <div className="flex justify-between items-center">
@@ -569,16 +594,34 @@ export default function Strength({ appData }: { appData: UseAppData }) {
       ) : (
         <>
           <p className="text-xs text-ash-400">Format des séries : poids (kg) × répétitions</p>
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-start">
-          {sortedSessions.map((s) => (
-            <SessionCard
-              key={s.id}
-              session={s}
-              programs={data.programs}
-              updateStrengthSession={updateStrengthSession}
-              deleteStrengthSession={deleteStrengthSession}
-            />
-          ))}
+          <div className="space-y-4">
+            {monthGroups.map((group) => (
+              <div key={group.key} className="space-y-2">
+                <h2 className="text-sm font-semibold text-ash-300 uppercase tracking-wide border-b border-ash-800 pb-1">
+                  {group.label}
+                </h2>
+                <div className="space-y-2">
+                  {group.rows.map((row) => (
+                    <div key={row[0].id} className="overflow-x-auto pb-1">
+                      <div
+                        className="grid gap-2 items-start"
+                        style={{ gridTemplateColumns: `repeat(${row.length}, minmax(240px, 1fr))` }}
+                      >
+                        {row.map((s) => (
+                          <SessionCard
+                            key={s.id}
+                            session={s}
+                            programs={data.programs}
+                            updateStrengthSession={updateStrengthSession}
+                            deleteStrengthSession={deleteStrengthSession}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         </>
       )}
