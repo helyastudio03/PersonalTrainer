@@ -210,6 +210,7 @@ export default function Programs({ appData }: { appData: UseAppData }) {
                       />
                       <IconButton
                         variant="danger"
+                        hoverOnly={false}
                         onClick={() => removeDay(day.id)}
                         title="Supprimer le jour"
                         aria-label="Supprimer le jour"
@@ -321,7 +322,7 @@ export default function Programs({ appData }: { appData: UseAppData }) {
       ) : (
         <div className="grid md:grid-cols-2 gap-3">
           {data.programs.map((p) => (
-            <Card key={p.id} className="space-y-2">
+            <Card key={p.id} className="group space-y-2">
               <div className="flex justify-between items-start">
                 <div>
                   <h3 className="font-semibold">{p.name}</h3>

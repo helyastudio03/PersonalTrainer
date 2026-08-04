@@ -32,17 +32,22 @@ export function Button({
 export function IconButton({
   className = '',
   variant = 'secondary',
+  hoverOnly = true,
   ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'secondary' | 'danger' }) {
+}: ButtonHTMLAttributes<HTMLButtonElement> & {
+  variant?: 'secondary' | 'danger';
+  hoverOnly?: boolean;
+}) {
   const styles = {
-    secondary:
-      'text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-500 dark:hover:bg-gray-800 dark:hover:text-gray-200',
-    danger:
-      'text-gray-400 hover:bg-red-50 hover:text-red-600 dark:text-gray-500 dark:hover:bg-red-950 dark:hover:text-red-400',
+    secondary: 'text-gray-500 dark:text-gray-400',
+    danger: 'text-red-500 dark:text-red-400',
   };
+  const visibility = hoverOnly
+    ? 'opacity-0 group-hover:opacity-100 focus-visible:opacity-100'
+    : 'opacity-100';
   return (
     <button
-      className={`w-7 h-7 shrink-0 flex items-center justify-center rounded-full text-sm leading-none transition-colors disabled:opacity-50 ${styles[variant]} ${className}`}
+      className={`w-7 h-7 shrink-0 flex items-center justify-center text-sm leading-none transition-opacity disabled:opacity-50 ${styles[variant]} ${visibility} ${className}`}
       {...props}
     />
   );

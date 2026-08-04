@@ -1,15 +1,13 @@
-# Personal Trainer
+# Plus Lourd Que Toi
 
-Application web simple pour suivre ses entrainements de musculation et de course à pied.
+Application web simple pour suivre ses entrainements de musculation.
 
 ## Fonctionnalités
 
-- **Programmes**: créer des programmes d'entrainement (objectifs par exercice en musculation, objectifs de sorties en course à pied).
-- **Musculation**: enregistrer des séances (exercices, séries, répétitions, poids).
-- **Course à pied**: enregistrer des sorties (distance, temps), avec calcul automatique de l'allure et de la vitesse.
-- **Progression**: courbes d'évolution (1RM estimé et poids max par exercice, allure et distance par sortie).
-- **Records personnels**: calcul automatique du 1RM estimé, du poids max levé, de la meilleure allure et de la plus longue distance.
-- **Suggestions**: proposition simple de cible pour la prochaine séance (surcharge progressive en musculation, distance/allure en course), basée sur une règle simple plutôt que du machine learning.
+- **Programmes**: créer des programmes multi-jours (exercices, groupe musculaire, séries, plage de répétitions, RIR optionnel), avec calcul du volume hebdomadaire par groupe musculaire.
+- **Séances**: enregistrer des séances (nom optionnel, exercices, séries, répétitions, poids), avec édition ciblée par exercice et référence à la dernière performance.
+- **Progression**: courbes configurables (poids, reps, poids×reps, volume) par séance ou par semaine, plusieurs exercices sur un même graphique, filtres par groupe musculaire et par plage de dates.
+- **Records personnels**: poids maximal soulevé par couple répétitions/poids, avec indicateur de progression, filtrables par exercice et groupe musculaire.
 
 Toutes les données sont stockées localement dans le navigateur (`localStorage`) — aucun backend n'est nécessaire.
 

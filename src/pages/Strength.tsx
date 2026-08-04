@@ -115,7 +115,7 @@ function SessionCard({
   }
 
   return (
-    <Card>
+    <Card className="group">
       <div className="flex justify-between items-start gap-2">
         {editingMeta ? (
           <div className="flex flex-wrap gap-1.5 items-center">
@@ -143,11 +143,18 @@ function SessionCard({
                 </option>
               ))}
             </select>
-            <IconButton variant="secondary" onClick={saveMeta} title="Valider" aria-label="Valider">
+            <IconButton
+              variant="secondary"
+              hoverOnly={false}
+              onClick={saveMeta}
+              title="Valider"
+              aria-label="Valider"
+            >
               ✓
             </IconButton>
             <IconButton
               variant="secondary"
+              hoverOnly={false}
               onClick={() => setEditingMeta(false)}
               title="Annuler"
               aria-label="Annuler"
@@ -168,7 +175,7 @@ function SessionCard({
               title="Modifier la date / le programme"
               aria-label="Modifier la date ou le programme"
             >
-              📅
+              ✏️
             </IconButton>
           )}
           <IconButton
