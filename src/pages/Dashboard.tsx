@@ -151,39 +151,39 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
         </Card>
       )}
 
-      <Card>
-        <h2 className="font-semibold mb-2 capitalize">Calendrier — {calendarMonthLabel}</h2>
-        <div className="grid grid-cols-7 gap-0.5 text-center max-w-56">
-          {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((d, i) => (
-            <div key={i} className="text-[9px] font-semibold text-ash-500 uppercase">
-              {d}
-            </div>
-          ))}
-          {calendarCells.map((dateStr, i) => {
-            if (!dateStr) return <div key={i} />;
-            const hasSession = sessionDates.has(dateStr);
-            const isToday = dateStr === todayStr;
-            const day = Number(dateStr.slice(-2));
-            return (
-              <div
-                key={i}
-                title={hasSession ? `Séance le ${dateStr}` : dateStr}
-                className={`w-6 h-6 flex items-center justify-center rounded-full text-[11px] ${
-                  hasSession
-                    ? 'bg-ember-600 text-ash-100 font-semibold'
-                    : isToday
-                      ? 'border border-ember-600 text-ash-700'
-                      : 'text-ash-600'
-                }`}
-              >
-                {day}
+      <div className="grid md:grid-cols-3 gap-3">
+        <Card>
+          <h2 className="font-semibold mb-2 capitalize">Calendrier — {calendarMonthLabel}</h2>
+          <div className="grid grid-cols-7 gap-0.5 text-center max-w-56">
+            {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((d, i) => (
+              <div key={i} className="text-[9px] font-semibold text-ash-500 uppercase">
+                {d}
               </div>
-            );
-          })}
-        </div>
-      </Card>
+            ))}
+            {calendarCells.map((dateStr, i) => {
+              if (!dateStr) return <div key={i} />;
+              const hasSession = sessionDates.has(dateStr);
+              const isToday = dateStr === todayStr;
+              const day = Number(dateStr.slice(-2));
+              return (
+                <div
+                  key={i}
+                  title={hasSession ? `Séance le ${dateStr}` : dateStr}
+                  className={`w-6 h-6 flex items-center justify-center rounded-full text-[11px] ${
+                    hasSession
+                      ? 'bg-ember-600 text-ash-100 font-semibold'
+                      : isToday
+                        ? 'border border-ember-600 text-ash-700'
+                        : 'text-ash-600'
+                  }`}
+                >
+                  {day}
+                </div>
+              );
+            })}
+          </div>
+        </Card>
 
-      <div className="grid md:grid-cols-2 gap-3">
         <Card>
           <h2 className="font-semibold mb-2">Records récents</h2>
           {recentPRs.length === 0 ? (
