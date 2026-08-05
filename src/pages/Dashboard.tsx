@@ -154,7 +154,7 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
       <div className="grid md:grid-cols-3 gap-3">
         <Card>
           <h2 className="font-semibold mb-2 capitalize">Calendrier — {calendarMonthLabel}</h2>
-          <div className="grid grid-cols-7 gap-0.5 text-center max-w-56">
+          <div className="grid grid-cols-7 gap-0.5 text-center max-w-56 mx-auto">
             {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((d, i) => (
               <div key={i} className="text-[9px] font-semibold text-ash-500 uppercase">
                 {d}
