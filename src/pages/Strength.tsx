@@ -157,124 +157,117 @@ function SessionCard({
 
   return (
     <Card>
-      <div className="group flex justify-between items-start gap-2">
-        {editingMeta ? (
-          <div className="flex-1 space-y-1.5">
-            <div className="flex flex-wrap gap-1.5 items-center">
-              <Input
-                value={metaName}
-                onChange={(e) => setMetaName(e.target.value)}
-                placeholder="Nom (ex: Upper 1)"
-                className="w-32"
-              />
-              <Input
-                type="date"
-                value={metaDate}
-                onChange={(e) => setMetaDate(e.target.value)}
-                className="w-36"
-              />
-              <select
-                className={selectClassName}
-                value={metaProgramId}
-                onChange={(e) => setMetaProgramId(e.target.value)}
-              >
-                <option value="">Aucun programme</option>
-                {programs.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
-              <IconButton
-                variant="secondary"
-                hoverOnly={false}
-                onClick={saveMeta}
-                title="Valider"
-                aria-label="Valider"
-              >
-                ✓
-              </IconButton>
-              <IconButton
-                variant="secondary"
-                hoverOnly={false}
-                onClick={() => setEditingMeta(false)}
-                title="Annuler"
-                aria-label="Annuler"
-              >
-                ✕
-              </IconButton>
-            </div>
+      {editingMeta ? (
+        <div className="space-y-1.5">
+          <div className="flex flex-wrap gap-1.5 items-center">
             <Input
-              value={metaNotes}
-              onChange={(e) => setMetaNotes(e.target.value)}
-              placeholder="Notes (optionnel): fatigue, douleur, ressenti..."
+              value={metaName}
+              onChange={(e) => setMetaName(e.target.value)}
+              placeholder="Nom (ex: Upper 1)"
+              className="w-32"
             />
+            <Input
+              type="date"
+              value={metaDate}
+              onChange={(e) => setMetaDate(e.target.value)}
+              className="w-36"
+            />
+            <select
+              className={selectClassName}
+              value={metaProgramId}
+              onChange={(e) => setMetaProgramId(e.target.value)}
+            >
+              <option value="">Aucun programme</option>
+              {programs.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+            <IconButton
+              variant="secondary"
+              hoverOnly={false}
+              onClick={saveMeta}
+              title="Valider"
+              aria-label="Valider"
+            >
+              ✓
+            </IconButton>
+            <IconButton
+              variant="secondary"
+              hoverOnly={false}
+              onClick={() => setEditingMeta(false)}
+              title="Annuler"
+              aria-label="Annuler"
+            >
+              ✕
+            </IconButton>
           </div>
-        ) : (
-          (() => {
-            const programName = session.programId
-              ? (programs.find((p) => p.id === session.programId)?.name ?? 'programme supprimé')
-              : undefined;
-            const title = [programName, session.name, session.date]
-              .filter((part): part is string => !!part)
-              .join(' · ');
-            return (
-              <div className="min-w-0 flex-1">
-                <h3 className="font-semibold truncate" title={title}>
-                  {title}
-                </h3>
-                {session.notes && (
-                  <p className="text-xs text-ash-600 italic mt-0.5 truncate">{session.notes}</p>
-                )}
-              </div>
-            );
-          })()
-        )}
-        <div className="flex gap-1.5 shrink-0 items-center">
-          {confirmingDelete ? (
-            <>
-              <span className="text-xs text-ash-600">Supprimer ?</span>
-              <Button variant="danger" onClick={() => deleteStrengthSession(session.id)}>
-                Confirmer
-              </Button>
-              <Button variant="secondary" onClick={() => setConfirmingDelete(false)}>
-                Annuler
-              </Button>
-            </>
-          ) : (
-            <>
-              {!editingMeta && (
-                <>
-                  <IconButton
-                    variant="secondary"
-                    onClick={() => onDuplicate(session)}
-                    title="Dupliquer la séance"
-                    aria-label="Dupliquer la séance"
-                  >
-                    ⧉
-                  </IconButton>
-                  <IconButton
-                    variant="secondary"
-                    onClick={startEditMeta}
-                    title="Modifier la date / le programme / les notes"
-                    aria-label="Modifier la date, le programme ou les notes"
-                  >
-                    ✏️
-                  </IconButton>
-                </>
-              )}
-              <IconButton
-                variant="danger"
-                onClick={() => setConfirmingDelete(true)}
-                title="Supprimer la séance"
-                aria-label="Supprimer la séance"
-              >
-                ✕
-              </IconButton>
-            </>
-          )}
+          <Input
+            value={metaNotes}
+            onChange={(e) => setMetaNotes(e.target.value)}
+            placeholder="Notes (optionnel): fatigue, douleur, ressenti..."
+          />
         </div>
-      </div>
+      ) : confirmingDelete ? (
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-sm text-ash-600">Supprimer cette séance ?</span>
+          <div className="flex gap-1.5 shrink-0">
+            <Button variant="danger" onClick={() => deleteStrengthSession(session.id)}>
+              Confirmer
+            </Button>
+            <Button variant="secondary" onClick={() => setConfirmingDelete(false)}>
+              Annuler
+            </Button>
+          </div>
+        </div>
+      ) : (
+        (() => {
+          const programName = session.programId
+            ? (programs.find((p) => p.id === session.programId)?.name ?? 'programme supprimé')
+            : undefined;
+          const title = [programName, session.name, session.date]
+            .filter((part): part is string => !!part)
+            .join(' · ');
+          return (
+            <div className="group relative">
+              <h3 className="font-semibold" title={title}>
+                {title}
+              </h3>
+              {session.notes && <p className="text-xs text-ash-600 italic mt-0.5">{session.notes}</p>}
+              <div className="absolute top-0 right-0 flex gap-1.5 items-center opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                <IconButton
+                  variant="secondary"
+                  hoverOnly={false}
+                  onClick={() => onDuplicate(session)}
+                  title="Dupliquer la séance"
+                  aria-label="Dupliquer la séance"
+                >
+                  ⧉
+                </IconButton>
+                <IconButton
+                  variant="secondary"
+                  hoverOnly={false}
+                  onClick={startEditMeta}
+                  title="Modifier la date / le programme / les notes"
+                  aria-label="Modifier la date, le programme ou les notes"
+                >
+                  ✏️
+                </IconButton>
+                <IconButton
+                  variant="danger"
+                  hoverOnly={false}
+                  onClick={() => setConfirmingDelete(true)}
+                  title="Supprimer la séance"
+                  aria-label="Supprimer la séance"
+                >
+                  ✕
+                </IconButton>
+              </div>
+            </div>
+          );
+        })()
+      )}
 
       <div className="mt-1.5 grid grid-cols-[auto_minmax(4rem,auto)_1fr_auto] gap-x-2 gap-y-0.5">
         {session.exercises.map((e) =>
