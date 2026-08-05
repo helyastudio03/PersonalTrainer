@@ -47,6 +47,14 @@ function exerciseFromTarget(target: ProgramExerciseTarget): StrengthExerciseEntr
 const selectClassName =
   'px-3 py-1.5 rounded-lg border border-ash-300 bg-white text-sm';
 
+function chipClassName(active: boolean) {
+  return `text-xs px-2 py-1 rounded-full border transition-colors ${
+    active
+      ? 'bg-ember-600 text-ash-100 border-transparent'
+      : 'border-ash-300 text-ash-700 hover:bg-ash-100'
+  }`;
+}
+
 function SessionCard({
   session,
   programs,
@@ -190,6 +198,11 @@ function SessionCard({
           <div>
             <h3 className="font-semibold">
               {session.name ? `${session.name} · ${session.date}` : session.date}
+              {session.programId && (
+                <span className="ml-1.5 text-xs font-normal text-ash-500">
+                  ({programs.find((p) => p.id === session.programId)?.name ?? 'programme supprimé'})
+                </span>
+              )}
             </h3>
             {session.notes && (
               <p className="text-xs text-ash-600 italic mt-0.5">{session.notes}</p>
@@ -329,6 +342,11 @@ export default function Strength({ appData }: { appData: UseAppData }) {
   const [exercises, setExercises] = useState<StrengthExerciseEntry[]>([emptyExercise()]);
   const [showForm, setShowForm] = useState(false);
   const [confirmingClear, setConfirmingClear] = useState(false);
+  const [programFilter, setProgramFilter] = useState<string[]>([]);
+
+  function toggleProgramFilter(id: string) {
+    setProgramFilter((prev) => (prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]));
+  }
 
   function addExercise() {
     setExercises((ex) => [...ex, emptyExercise()]);
@@ -448,8 +466,19 @@ export default function Strength({ appData }: { appData: UseAppData }) {
   const sortedSessions = [...data.strengthSessions].sort((a, b) => b.date.localeCompare(a.date));
   const selectedProgram = data.programs.find((p) => p.id === programId);
 
+  const usedProgramIds = useMemo(
+    () => [...new Set(data.strengthSessions.map((s) => s.programId).filter(Boolean))] as string[],
+    [data.strengthSessions],
+  );
+  const filterablePrograms = data.programs.filter((p) => usedProgramIds.includes(p.id));
+
+  const filteredHistory = useMemo(() => {
+    if (programFilter.length === 0) return data.strengthSessions;
+    return data.strengthSessions.filter((s) => s.programId && programFilter.includes(s.programId));
+  }, [data.strengthSessions, programFilter]);
+
   const monthGroups = useMemo(() => {
-    const chronological = [...data.strengthSessions].sort((a, b) => a.date.localeCompare(b.date));
+    const chronological = [...filteredHistory].sort((a, b) => a.date.localeCompare(b.date));
     const rows = groupSessionsIntoCycleRows(chronological, data.programs);
 
     const byMonth = new Map<string, StrengthSession[][]>();
@@ -466,7 +495,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
         label: formatMonthLabel(monthRows[0][0].date),
         rows: [...monthRows].reverse(),
       }));
-  }, [data.strengthSessions, data.programs]);
+  }, [filteredHistory, data.programs]);
 
   return (
     <div className="space-y-3">
@@ -658,7 +687,34 @@ export default function Strength({ appData }: { appData: UseAppData }) {
         <EmptyState>Aucune séance de musculation enregistrée.</EmptyState>
       ) : (
         <>
+          {filterablePrograms.length > 1 && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-xs font-semibold text-ash-600">Filtrer par programme :</span>
+              {filterablePrograms.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => toggleProgramFilter(p.id)}
+                  className={chipClassName(programFilter.includes(p.id))}
+                >
+                  {p.name}
+                </button>
+              ))}
+              {programFilter.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setProgramFilter([])}
+                  className="text-xs text-ash-500 hover:underline"
+                >
+                  Réinitialiser
+                </button>
+              )}
+            </div>
+          )}
           <p className="text-xs text-ash-500">Format des séries : poids (kg) × répétitions</p>
+          {monthGroups.length === 0 ? (
+            <EmptyState>Aucune séance pour ce filtre.</EmptyState>
+          ) : (
           <div className="space-y-4">
             {monthGroups.map((group) => (
               <div key={group.key} className="space-y-2">
@@ -689,6 +745,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
               </div>
             ))}
           </div>
+          )}
         </>
       )}
     </div>

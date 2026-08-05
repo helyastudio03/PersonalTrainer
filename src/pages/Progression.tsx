@@ -9,6 +9,8 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import type { TooltipContentProps } from 'recharts';
+import type { ValueType, NameType } from 'recharts/types/component/DefaultTooltipContent';
 import type { UseAppData } from '../lib/useAppData';
 import type { MuscleGroup } from '../types';
 import { Card, EmptyState, IconButton, Input, Label } from '../components/ui';
@@ -58,6 +60,30 @@ function renderRecordDot(color: string, exerciseName: string) {
       );
     }
     return <circle key={`dot-${exerciseName}-${index}`} cx={cx} cy={cy} r={3} fill={color} stroke={color} />;
+  };
+}
+
+function renderTooltipContent(metric: ProgressionMetric) {
+  return ({ active, label, payload }: TooltipContentProps<ValueType, NameType>) => {
+    if (!active || !payload || payload.length === 0) return null;
+    const unit = metric === 'weight' || metric === 'weightReps' ? ' kg' : '';
+    return (
+      <div className="bg-white border border-ash-200 rounded-lg shadow-sm px-3 py-2 text-xs space-y-1">
+        <p className="font-semibold text-ash-700">{label}</p>
+        {payload.map((entry) => {
+          const dataKey = typeof entry.dataKey === 'string' ? entry.dataKey : undefined;
+          const point = entry.payload as Record<string, string | number | boolean> | undefined;
+          const reps = dataKey ? point?.[`${dataKey}__reps`] : undefined;
+          return (
+            <p key={dataKey} style={{ color: entry.color }}>
+              <span className="font-medium">{entry.name}</span> : {entry.value}
+              {unit}
+              {typeof reps === 'number' && reps > 0 && ` (${reps} reps)`}
+            </p>
+          );
+        })}
+      </div>
+    );
   };
 }
 
@@ -295,7 +321,7 @@ export default function Progression({ appData }: { appData: UseAppData }) {
               <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
               <XAxis dataKey="label" fontSize={12} />
               <YAxis fontSize={12} allowDecimals={false} />
-              <Tooltip />
+              <Tooltip content={renderTooltipContent(metric)} />
               <Legend wrapperStyle={{ fontSize: 12 }} />
               {activeExercises.map((name, i) => {
                 const color = LINE_COLORS[i % LINE_COLORS.length];

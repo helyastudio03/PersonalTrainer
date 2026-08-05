@@ -236,6 +236,7 @@ export function startOfWeek(dateStr: string): string {
 export interface ProgressionPoint {
   label: string; // date de séance, ou date de début de semaine
   value: number;
+  topReps: number; // répétitions de la meilleure série au point (pour l'info-bulle)
   isRecord: boolean; // nouveau maximum jamais atteint jusqu'à ce point
 }
 
@@ -247,9 +248,13 @@ export function getStrengthMetricSeries(
 ): ProgressionPoint[] {
   const sessionMetrics = computeSessionSetMetrics(sessions, exerciseName);
 
-  let points: { label: string; value: number }[];
+  let points: { label: string; value: number; topReps: number }[];
   if (period === 'session') {
-    points = sessionMetrics.map((m) => ({ label: m.date, value: pickMetric(m, metric) }));
+    points = sessionMetrics.map((m) => ({
+      label: m.date,
+      value: pickMetric(m, metric),
+      topReps: m.topReps,
+    }));
   } else {
     const byWeek = new Map<string, SessionSetMetrics[]>();
     for (const m of sessionMetrics) {
@@ -261,13 +266,17 @@ export function getStrengthMetricSeries(
 
     points = [...byWeek.entries()]
       .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([week, list]) => ({
-        label: week,
-        value:
-          metric === 'volume'
-            ? list.reduce((sum, m) => sum + m.volume, 0)
-            : Math.max(...list.map((m) => pickMetric(m, metric))),
-      }));
+      .map(([week, list]) => {
+        if (metric === 'volume') {
+          return {
+            label: week,
+            value: list.reduce((sum, m) => sum + m.volume, 0),
+            topReps: list.reduce((best, m) => (m.topWeight > best.topWeight ? m : best)).topReps,
+          };
+        }
+        const best = list.reduce((b, m) => (pickMetric(m, metric) > pickMetric(b, metric) ? m : b));
+        return { label: week, value: pickMetric(best, metric), topReps: best.topReps };
+      });
   }
 
   let runningMax = -Infinity;
@@ -302,11 +311,13 @@ export function getMultiExerciseMetricSeries(
       if (existing) {
         existing[name] = point.value;
         existing[`${name}__record`] = point.isRecord;
+        existing[`${name}__reps`] = point.topReps;
       } else {
         byLabel.set(point.label, {
           label: point.label,
           [name]: point.value,
           [`${name}__record`]: point.isRecord,
+          [`${name}__reps`]: point.topReps,
         });
       }
     }

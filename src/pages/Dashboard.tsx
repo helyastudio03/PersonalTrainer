@@ -75,6 +75,23 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
     recordCountByDate.set(r.date, (recordCountByDate.get(r.date) ?? 0) + 1);
   }
 
+  const sessionDates = new Set(data.strengthSessions.map((s) => s.date));
+  const today = new Date();
+  const calendarYear = today.getFullYear();
+  const calendarMonth = today.getMonth();
+  const firstOfMonth = new Date(calendarYear, calendarMonth, 1);
+  const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+  const leadingBlanks = (firstOfMonth.getDay() + 6) % 7; // lundi = 0
+  const todayStr = today.toISOString().slice(0, 10);
+  const calendarCells: (string | null)[] = [
+    ...Array(leadingBlanks).fill(null),
+    ...Array.from({ length: daysInMonth }, (_, i) => {
+      const d = i + 1;
+      return `${calendarYear}-${String(calendarMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    }),
+  ];
+  const calendarMonthLabel = today.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+
   return (
     <div className="space-y-3">
       <h1 className="text-xl font-bold">Accueil</h1>
@@ -133,6 +150,38 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
           </div>
         </Card>
       )}
+
+      <Card>
+        <h2 className="font-semibold mb-2 capitalize">Calendrier — {calendarMonthLabel}</h2>
+        <div className="grid grid-cols-7 gap-1 text-center">
+          {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((d, i) => (
+            <div key={i} className="text-[10px] font-semibold text-ash-500 uppercase">
+              {d}
+            </div>
+          ))}
+          {calendarCells.map((dateStr, i) => {
+            if (!dateStr) return <div key={i} />;
+            const hasSession = sessionDates.has(dateStr);
+            const isToday = dateStr === todayStr;
+            const day = Number(dateStr.slice(-2));
+            return (
+              <div
+                key={i}
+                title={hasSession ? `Séance le ${dateStr}` : dateStr}
+                className={`aspect-square flex items-center justify-center rounded-full text-xs ${
+                  hasSession
+                    ? 'bg-ember-600 text-ash-100 font-semibold'
+                    : isToday
+                      ? 'border border-ember-600 text-ash-700'
+                      : 'text-ash-600'
+                }`}
+              >
+                {day}
+              </div>
+            );
+          })}
+        </div>
+      </Card>
 
       <div className="grid md:grid-cols-2 gap-3">
         <Card>
