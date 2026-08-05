@@ -28,10 +28,6 @@ export default function Help() {
   return (
     <div className="space-y-3">
       <h1 className="text-xl font-bold">Aide</h1>
-      <p className="text-sm text-ash-600">
-        Ce que fait chaque page, et les signes visuels (couleurs, étoiles, flèches) qui reviennent
-        partout.
-      </p>
 
       <Section title="Avant de commencer">
         <p>
