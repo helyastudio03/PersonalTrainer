@@ -11,6 +11,7 @@ const navItems = [
   { to: '/musculation', label: 'Séances' },
   { to: '/progression', label: 'Progression' },
   { to: '/records', label: 'Records' },
+  { to: '/aide', label: 'Aide' },
 ];
 
 export default function Layout() {

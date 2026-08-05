@@ -7,6 +7,7 @@ import Programs from './pages/Programs';
 import Strength from './pages/Strength';
 import Progression from './pages/Progression';
 import Records from './pages/Records';
+import Help from './pages/Help';
 
 function App() {
   const appData = useAppData();
@@ -24,6 +25,7 @@ function App() {
             element={<Progression appData={appData} filters={exerciseFilters} />}
           />
           <Route path="/records" element={<Records appData={appData} filters={exerciseFilters} />} />
+          <Route path="/aide" element={<Help />} />
         </Route>
       </Routes>
     </HashRouter>
