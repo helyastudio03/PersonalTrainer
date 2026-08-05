@@ -12,7 +12,6 @@ import type {
 import { Button, Card, EmptyState, IconButton, Input, Label, RECORD_COLOR, RecordStar } from '../components/ui';
 import {
   formatMonthLabel,
-  formatRepRange,
   formatSetsSummary,
   getExerciseMuscleGroups,
   getLastPerformance,
@@ -44,13 +43,12 @@ function emptyExercise(): StrengthExerciseEntry {
 }
 
 function exerciseFromTarget(target: ProgramExerciseTarget): StrengthExerciseEntry {
-  const reps = Math.round((target.targetRepsMin + target.targetRepsMax) / 2);
   return {
     id: uuid(),
     exerciseName: target.exerciseName,
     sets: Array.from({ length: Math.max(target.targetSets, 1) }, () => ({
       id: uuid(),
-      reps,
+      reps: 0,
       weightKg: 0,
     })),
   };
@@ -666,7 +664,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
                 if (dayTargets.length === 0) return null;
                 return (
                   <div key={day.id}>
-                    <div className="flex justify-between items-center mb-1">
+                    <div className="flex items-center gap-2 mb-1">
                       <p className="text-xs text-ember-600/70">{day.name}</p>
                       <button
                         type="button"
@@ -684,9 +682,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
                           onClick={() => addExerciseFromTarget(t)}
                           className="text-xs px-2 py-1 rounded-full border border-ember-300 text-ember-700 hover:bg-ember-100"
                         >
-                          + {t.exerciseName} ({t.targetSets}×
-                          {formatRepRange(t.targetRepsMin, t.targetRepsMax)}
-                          {t.targetRIR !== undefined ? ` @ RIR ${t.targetRIR}` : ''})
+                          + {t.exerciseName}
                         </button>
                       ))}
                     </div>
