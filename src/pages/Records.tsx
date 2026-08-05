@@ -238,7 +238,7 @@ export default function Records({
                           {r.maxWeight} kg
                           {r.lastWeight < r.maxWeight && (
                             <span
-                              className="ml-1 text-ash-500"
+                              className="ml-1 text-ash-500 inline-block p-1.5 -m-1.5 cursor-help"
                               title={`Dernière perf: ${r.lastWeight} kg le ${r.lastDate}`}
                             >
                               ↘

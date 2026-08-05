@@ -28,6 +28,13 @@ function todayIso() {
   return new Date().toISOString().slice(0, 10);
 }
 
+// Normalise un nom d'exercice pour comparaison (casse, espaces multiples,
+// espaces en bord) afin d'éviter de traiter "développé couché" et
+// "Développé  couché" comme deux exercices différents.
+function normalizeExerciseName(name: string): string {
+  return name.trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
 function emptyExercise(): StrengthExerciseEntry {
   return {
     id: uuid(),
@@ -86,6 +93,7 @@ function SessionCard({
   const [editingExerciseId, setEditingExerciseId] = useState<string | null>(null);
   const [exerciseDraft, setExerciseDraft] = useState<StrengthSet[]>([]);
   const [exerciseNotesDraft, setExerciseNotesDraft] = useState('');
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   function startEditMeta() {
     setMetaDate(session.date);
@@ -221,35 +229,49 @@ function SessionCard({
             )}
           </div>
         )}
-        <div className="flex gap-1.5 shrink-0">
-          {!editingMeta && (
+        <div className="flex gap-1.5 shrink-0 items-center">
+          {confirmingDelete ? (
             <>
+              <span className="text-xs text-ash-600">Supprimer ?</span>
+              <Button variant="danger" onClick={() => deleteStrengthSession(session.id)}>
+                Confirmer
+              </Button>
+              <Button variant="secondary" onClick={() => setConfirmingDelete(false)}>
+                Annuler
+              </Button>
+            </>
+          ) : (
+            <>
+              {!editingMeta && (
+                <>
+                  <IconButton
+                    variant="secondary"
+                    onClick={() => onDuplicate(session)}
+                    title="Dupliquer la séance"
+                    aria-label="Dupliquer la séance"
+                  >
+                    ⧉
+                  </IconButton>
+                  <IconButton
+                    variant="secondary"
+                    onClick={startEditMeta}
+                    title="Modifier la date / le programme / les notes"
+                    aria-label="Modifier la date, le programme ou les notes"
+                  >
+                    ✏️
+                  </IconButton>
+                </>
+              )}
               <IconButton
-                variant="secondary"
-                onClick={() => onDuplicate(session)}
-                title="Dupliquer la séance"
-                aria-label="Dupliquer la séance"
+                variant="danger"
+                onClick={() => setConfirmingDelete(true)}
+                title="Supprimer la séance"
+                aria-label="Supprimer la séance"
               >
-                ⧉
-              </IconButton>
-              <IconButton
-                variant="secondary"
-                onClick={startEditMeta}
-                title="Modifier la date / le programme / les notes"
-                aria-label="Modifier la date, le programme ou les notes"
-              >
-                ✏️
+                ✕
               </IconButton>
             </>
           )}
-          <IconButton
-            variant="danger"
-            onClick={() => deleteStrengthSession(session.id)}
-            title="Supprimer la séance"
-            aria-label="Supprimer la séance"
-          >
-            ✕
-          </IconButton>
         </div>
       </div>
 
@@ -490,12 +512,12 @@ export default function Strength({ appData }: { appData: UseAppData }) {
     if (activeProgram) {
       setProgramId(activeProgram.id);
       const suggested = suggestNextProgramDay(activeProgram, data.strengthSessions);
-      const dayTargets = suggested
-        ? activeProgram.strengthTargets.filter((t) => t.dayId === suggested.id)
-        : [];
-      if (dayTargets.length > 0) {
-        setName(suggested!.name);
-        setExercises(dayTargets.map((t) => exerciseFromTarget(t)));
+      if (suggested) {
+        setName(suggested.name);
+        const dayTargets = activeProgram.strengthTargets.filter((t) => t.dayId === suggested.id);
+        if (dayTargets.length > 0) {
+          setExercises(dayTargets.map((t) => exerciseFromTarget(t)));
+        }
       }
     }
     setShowForm(true);
@@ -694,10 +716,13 @@ export default function Strength({ appData }: { appData: UseAppData }) {
                   ),
                 ];
                 const trimmedName = ex.exerciseName.trim();
+                const normalizedName = normalizeExerciseName(ex.exerciseName);
                 const isOffProgram =
                   !!selectedProgram &&
                   !!trimmedName &&
-                  !selectedProgram.strengthTargets.some((t) => t.exerciseName === trimmedName);
+                  !selectedProgram.strengthTargets.some(
+                    (t) => normalizeExerciseName(t.exerciseName) === normalizedName,
+                  );
                 return (
                   <div key={ex.id} className="border border-ash-200 rounded-lg p-2">
                     <div className="flex gap-2 items-center mb-1.5">

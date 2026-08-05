@@ -67,6 +67,7 @@ function ProgramCard({
   onToggleActive,
   onEdit,
   onDelete,
+  onDuplicate,
   onGenerateFakeHistory,
   onOpenVariantsPopup,
 }: {
@@ -76,10 +77,12 @@ function ProgramCard({
   onToggleActive: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onDuplicate: () => void;
   onGenerateFakeHistory: () => void;
   onOpenVariantsPopup: (exerciseName: string) => void;
 }) {
   const [highlightedGroup, setHighlightedGroup] = useState<MuscleGroup | null>(null);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   function toggleHighlight(mg: MuscleGroup) {
     setHighlightedGroup((prev) => (prev === mg ? null : mg));
@@ -99,22 +102,49 @@ function ProgramCard({
           </h3>
           {program.description && <p className="text-sm text-ash-600">{program.description}</p>}
         </div>
-        <div className="flex gap-1.5 shrink-0">
-          <IconButton
-            variant="secondary"
-            onClick={onToggleActive}
-            hoverOnly={!isActive}
-            title={isActive ? 'Retirer comme programme actif' : 'Définir comme programme actif'}
-            aria-label={isActive ? 'Retirer comme programme actif' : 'Définir comme programme actif'}
-          >
-            {isActive ? '⭐' : '☆'}
-          </IconButton>
-          <IconButton variant="secondary" onClick={onEdit} title="Modifier" aria-label="Modifier">
-            ✏️
-          </IconButton>
-          <IconButton variant="danger" onClick={onDelete} title="Supprimer" aria-label="Supprimer">
-            ✕
-          </IconButton>
+        <div className="flex gap-1.5 shrink-0 items-center">
+          {confirmingDelete ? (
+            <>
+              <span className="text-xs text-ash-600">Supprimer ?</span>
+              <Button variant="danger" onClick={onDelete}>
+                Confirmer
+              </Button>
+              <Button variant="secondary" onClick={() => setConfirmingDelete(false)}>
+                Annuler
+              </Button>
+            </>
+          ) : (
+            <>
+              <IconButton
+                variant="secondary"
+                onClick={onToggleActive}
+                hoverOnly={!isActive}
+                title={isActive ? 'Retirer comme programme actif' : 'Définir comme programme actif'}
+                aria-label={isActive ? 'Retirer comme programme actif' : 'Définir comme programme actif'}
+              >
+                {isActive ? '⭐' : '☆'}
+              </IconButton>
+              <IconButton
+                variant="secondary"
+                onClick={onDuplicate}
+                title="Dupliquer le programme"
+                aria-label="Dupliquer le programme"
+              >
+                ⧉
+              </IconButton>
+              <IconButton variant="secondary" onClick={onEdit} title="Modifier" aria-label="Modifier">
+                ✏️
+              </IconButton>
+              <IconButton
+                variant="danger"
+                onClick={() => setConfirmingDelete(true)}
+                title="Supprimer"
+                aria-label="Supprimer"
+              >
+                ✕
+              </IconButton>
+            </>
+          )}
         </div>
       </div>
 
@@ -232,6 +262,20 @@ export default function Programs({ appData }: { appData: UseAppData }) {
   function generateFakeHistory(program: Program) {
     const sessions = generateFakeSessions(program);
     sessions.forEach((session) => addStrengthSession(session));
+  }
+
+  function duplicateProgram(program: Program) {
+    const dayIdMap = new Map(program.days.map((d) => [d.id, uuid()]));
+    addProgram({
+      name: `${program.name} (copie)`,
+      description: program.description,
+      days: program.days.map((d) => ({ ...d, id: dayIdMap.get(d.id)! })),
+      strengthTargets: program.strengthTargets.map((t) => ({
+        ...t,
+        id: uuid(),
+        dayId: dayIdMap.get(t.dayId)!,
+      })),
+    });
   }
 
   function addDay() {
@@ -472,6 +516,7 @@ export default function Programs({ appData }: { appData: UseAppData }) {
               onToggleActive={() => setActiveProgram(data.activeProgramId === p.id ? undefined : p.id)}
               onEdit={() => startEdit(p)}
               onDelete={() => deleteProgram(p.id)}
+              onDuplicate={() => duplicateProgram(p)}
               onGenerateFakeHistory={() => generateFakeHistory(p)}
               onOpenVariantsPopup={setVariantsPopup}
             />
