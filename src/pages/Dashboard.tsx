@@ -98,21 +98,22 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
 
       <Card>
         <div className="flex justify-between items-center mb-2">
-          <h2 className="font-semibold">Programme actif</h2>
+          <h2 className="font-semibold">
+            Programme actif{activeProgram ? ` : ${activeProgram.name}` : ''}
+          </h2>
           <Link to="/programmes" className="text-xs text-ember-600 hover:underline">
             Gérer les programmes
           </Link>
         </div>
         {activeProgram ? (
           <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="font-medium">{activeProgram.name}</p>
-              {suggestedDay && (
-                <p className="text-sm text-ash-600">
-                  Prochaine séance suggérée : <span className="font-medium">{suggestedDay.name}</span>
-                </p>
-              )}
-            </div>
+            {suggestedDay ? (
+              <p className="text-sm text-ash-600">
+                Prochaine séance suggérée : <span className="font-medium">{suggestedDay.name}</span>
+              </p>
+            ) : (
+              <span />
+            )}
             <Link
               to="/musculation"
               className="text-xs bg-ember-600 text-ash-100 rounded px-3 py-1.5 hover:bg-ember-700 shrink-0"
