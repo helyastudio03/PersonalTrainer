@@ -92,14 +92,7 @@ function ProgramCard({
     <Card className="group space-y-2">
       <div className="flex justify-between items-start">
         <div>
-          <h3 className="font-semibold flex items-center gap-1.5">
-            {program.name}
-            {isActive && (
-              <span className="text-xs font-medium px-1.5 py-0.5 rounded-full bg-ember-100 text-ember-700">
-                Actif
-              </span>
-            )}
-          </h3>
+          <h3 className="font-semibold">{program.name}</h3>
           {program.description && <p className="text-sm text-ash-600">{program.description}</p>}
         </div>
         <div className="flex gap-1.5 shrink-0 items-center">
@@ -118,7 +111,7 @@ function ProgramCard({
               <IconButton
                 variant="secondary"
                 onClick={onToggleActive}
-                hoverOnly={!isActive}
+                hoverOnly={false}
                 title={isActive ? 'Retirer comme programme actif' : 'Définir comme programme actif'}
                 aria-label={isActive ? 'Retirer comme programme actif' : 'Définir comme programme actif'}
               >
