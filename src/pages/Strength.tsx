@@ -211,22 +211,24 @@ function SessionCard({
             />
           </div>
         ) : (
-          <div>
-            <h3 className="font-semibold">
-              {(() => {
-                const programName = session.programId
-                  ? (programs.find((p) => p.id === session.programId)?.name ?? 'programme supprimé')
-                  : undefined;
-                const parts = [programName, session.name, session.date].filter(
-                  (part): part is string => !!part,
-                );
-                return parts.join(' · ');
-              })()}
-            </h3>
-            {session.notes && (
-              <p className="text-xs text-ash-600 italic mt-0.5">{session.notes}</p>
-            )}
-          </div>
+          (() => {
+            const programName = session.programId
+              ? (programs.find((p) => p.id === session.programId)?.name ?? 'programme supprimé')
+              : undefined;
+            const title = [programName, session.name, session.date]
+              .filter((part): part is string => !!part)
+              .join(' · ');
+            return (
+              <div className="min-w-0 flex-1">
+                <h3 className="font-semibold truncate" title={title}>
+                  {title}
+                </h3>
+                {session.notes && (
+                  <p className="text-xs text-ash-600 italic mt-0.5 truncate">{session.notes}</p>
+                )}
+              </div>
+            );
+          })()
         )}
         <div className="flex gap-1.5 shrink-0 items-center">
           {confirmingDelete ? (
