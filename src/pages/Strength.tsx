@@ -52,11 +52,13 @@ function SessionCard({
   programs,
   updateStrengthSession,
   deleteStrengthSession,
+  onDuplicate,
 }: {
   session: StrengthSession;
   programs: Program[];
   updateStrengthSession: UseAppData['updateStrengthSession'];
   deleteStrengthSession: UseAppData['deleteStrengthSession'];
+  onDuplicate: (session: StrengthSession) => void;
 }) {
   const [editingMeta, setEditingMeta] = useState(false);
   const [metaDate, setMetaDate] = useState(session.date);
@@ -196,14 +198,24 @@ function SessionCard({
         )}
         <div className="flex gap-1.5 shrink-0">
           {!editingMeta && (
-            <IconButton
-              variant="secondary"
-              onClick={startEditMeta}
-              title="Modifier la date / le programme / les notes"
-              aria-label="Modifier la date, le programme ou les notes"
-            >
-              ✏️
-            </IconButton>
+            <>
+              <IconButton
+                variant="secondary"
+                onClick={() => onDuplicate(session)}
+                title="Dupliquer la séance"
+                aria-label="Dupliquer la séance"
+              >
+                ⧉
+              </IconButton>
+              <IconButton
+                variant="secondary"
+                onClick={startEditMeta}
+                title="Modifier la date / le programme / les notes"
+                aria-label="Modifier la date, le programme ou les notes"
+              >
+                ✏️
+              </IconButton>
+            </>
           )}
           <IconButton
             variant="danger"
@@ -216,12 +228,12 @@ function SessionCard({
         </div>
       </div>
 
-      <div className="mt-1.5 space-y-0.5">
+      <div className="mt-1.5 grid grid-cols-[minmax(4rem,auto)_1fr] gap-x-3 gap-y-0.5">
         {session.exercises.map((e) =>
           editingExerciseId === e.id ? (
             <div
               key={e.id}
-              className="border border-ember-300 rounded-lg p-2 space-y-1"
+              className="col-span-2 border border-ember-300 rounded-lg p-2 space-y-1"
             >
               <p className="text-sm font-medium">{e.exerciseName}</p>
               {exerciseDraft.map((s, i) => (
@@ -270,31 +282,34 @@ function SessionCard({
               </div>
             </div>
           ) : (
-            <div key={e.id} className="group relative text-sm">
-              <div
-                className="whitespace-nowrap overflow-hidden text-ellipsis pr-0 group-hover:pr-14 transition-[padding-right]"
-                title={`${e.exerciseName}: ${formatSetsSummary(e.sets)}${e.notes ? ` — ${e.notes}` : ''}`}
-              >
-                <span className="text-ash-500">{e.exerciseName}</span>: {formatSetsSummary(e.sets)}
-                {e.notes && <span className="text-ash-500 italic"> — {e.notes}</span>}
-              </div>
-              <div className="absolute right-0 top-0 flex gap-1">
-                <IconButton
-                  variant="secondary"
-                  onClick={() => startEditExercise(e)}
-                  title={`Modifier ${e.exerciseName}`}
-                  aria-label={`Modifier ${e.exerciseName}`}
+            <div key={e.id} className="contents group">
+              <span className="text-sm text-ash-500 truncate">{e.exerciseName}</span>
+              <div className="relative text-sm">
+                <div
+                  className="whitespace-nowrap overflow-hidden text-ellipsis pr-0 group-hover:pr-14 transition-[padding-right]"
+                  title={`${e.exerciseName}: ${formatSetsSummary(e.sets)}${e.notes ? ` — ${e.notes}` : ''}`}
                 >
-                  ✏️
-                </IconButton>
-                <IconButton
-                  variant="danger"
-                  onClick={() => removeExerciseFromSession(e.id)}
-                  title={`Retirer ${e.exerciseName}`}
-                  aria-label={`Retirer ${e.exerciseName}`}
-                >
-                  ✕
-                </IconButton>
+                  {formatSetsSummary(e.sets)}
+                  {e.notes && <span className="text-ash-500 italic"> — {e.notes}</span>}
+                </div>
+                <div className="absolute right-0 top-0 flex gap-1">
+                  <IconButton
+                    variant="secondary"
+                    onClick={() => startEditExercise(e)}
+                    title={`Modifier ${e.exerciseName}`}
+                    aria-label={`Modifier ${e.exerciseName}`}
+                  >
+                    ✏️
+                  </IconButton>
+                  <IconButton
+                    variant="danger"
+                    onClick={() => removeExerciseFromSession(e.id)}
+                    title={`Retirer ${e.exerciseName}`}
+                    aria-label={`Retirer ${e.exerciseName}`}
+                  >
+                    ✕
+                  </IconButton>
+                </div>
               </div>
             </div>
           ),
@@ -412,6 +427,22 @@ export default function Strength({ appData }: { appData: UseAppData }) {
   function clearHistory() {
     clearStrengthSessions();
     setConfirmingClear(false);
+  }
+
+  function duplicateSession(session: StrengthSession) {
+    setDate(todayIso());
+    setName(session.name ?? '');
+    setNotes('');
+    setProgramId(session.programId ?? '');
+    setExercises(
+      session.exercises.map((e) => ({
+        id: uuid(),
+        exerciseName: e.exerciseName,
+        sets: e.sets.map((s) => ({ id: uuid(), reps: s.reps, weightKg: s.weightKg })),
+      })),
+    );
+    setShowForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   const sortedSessions = [...data.strengthSessions].sort((a, b) => b.date.localeCompare(a.date));
@@ -648,6 +679,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
                             programs={data.programs}
                             updateStrengthSession={updateStrengthSession}
                             deleteStrengthSession={deleteStrengthSession}
+                            onDuplicate={duplicateSession}
                           />
                         ))}
                       </div>

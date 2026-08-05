@@ -367,12 +367,16 @@ export default function Programs({ appData }: { appData: UseAppData }) {
                       className="border border-ash-200 rounded-lg p-2"
                     >
                       <p className="text-xs font-semibold text-ash-600 mb-1">{day.name}</p>
-                      <ul className="text-sm space-y-0.5">
+                      <ul className="text-sm grid grid-cols-[1fr_auto] gap-x-3 gap-y-0.5">
                         {dayTargets.map((t) => (
-                          <li key={t.id}>
-                            <span className="text-ash-500">{t.exerciseName} ({t.muscleGroup})</span>: {t.targetSets}×
-                            {formatRepRange(t.targetRepsMin, t.targetRepsMax)}
-                            {t.targetRIR !== undefined ? ` @ RIR ${t.targetRIR}` : ''}
+                          <li key={t.id} className="contents">
+                            <span className="text-ash-500 truncate">
+                              {t.exerciseName} ({t.muscleGroup})
+                            </span>
+                            <span className="whitespace-nowrap">
+                              {t.targetSets}×{formatRepRange(t.targetRepsMin, t.targetRepsMax)}
+                              {t.targetRIR !== undefined ? ` @ RIR ${t.targetRIR}` : ''}
+                            </span>
                           </li>
                         ))}
                       </ul>
