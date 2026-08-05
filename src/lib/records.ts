@@ -220,66 +220,18 @@ export function getLastPerformance(
   return { date: last.date, sets: entry.sets };
 }
 
-// Courbes de progression configurables (poids, reps, poids×reps, volume),
+// Courbes de progression : volume total, ou détail par poids/répétitions
+// (une courbe par poids réalisé, ou par nombre de répétitions réalisé),
 // par séance ou agrégées par semaine. Pas d'estimation de 1RM ici.
 
-export type ProgressionMetric = 'weight' | 'reps' | 'weightReps' | 'volume';
+export type ProgressionMetric = 'volume' | 'reps' | 'weight';
 export type ProgressionPeriod = 'session' | 'week';
 
 export const PROGRESSION_METRIC_LABELS: Record<ProgressionMetric, string> = {
-  weight: 'Poids (meilleure série)',
-  reps: 'Répétitions (meilleure série)',
-  weightReps: 'Poids × Reps (meilleure série)',
   volume: 'Volume (poids × reps cumulé)',
+  reps: 'Répétitions, par poids réalisé',
+  weight: 'Poids, par répétitions réalisées',
 };
-
-interface SessionSetMetrics {
-  date: string;
-  topWeight: number;
-  topReps: number;
-  weightReps: number;
-  volume: number;
-}
-
-function computeSessionSetMetrics(
-  sessions: StrengthSession[],
-  exerciseName: string,
-): SessionSetMetrics[] {
-  const points: SessionSetMetrics[] = [];
-
-  for (const session of sessions) {
-    const entry = session.exercises.find((e) => e.exerciseName === exerciseName);
-    if (!entry || entry.sets.length === 0) continue;
-
-    let topWeight = 0;
-    let topReps = 0;
-    let volume = 0;
-    for (const set of entry.sets) {
-      volume += set.weightKg * set.reps;
-      if (set.weightKg > topWeight || (set.weightKg === topWeight && set.reps > topReps)) {
-        topWeight = set.weightKg;
-        topReps = set.reps;
-      }
-    }
-
-    points.push({ date: session.date, topWeight, topReps, weightReps: topWeight * topReps, volume });
-  }
-
-  return points.sort((a, b) => a.date.localeCompare(b.date));
-}
-
-function pickMetric(m: SessionSetMetrics, metric: ProgressionMetric): number {
-  switch (metric) {
-    case 'weight':
-      return m.topWeight;
-    case 'reps':
-      return m.topReps;
-    case 'weightReps':
-      return m.weightReps;
-    case 'volume':
-      return m.volume;
-  }
-}
 
 // Lundi de la semaine contenant la date donnée (yyyy-mm-dd).
 export function startOfWeek(dateStr: string): string {
@@ -293,49 +245,19 @@ export function startOfWeek(dateStr: string): string {
 export interface ProgressionPoint {
   label: string; // date de séance, ou date de début de semaine
   value: number;
-  topReps: number; // répétitions de la meilleure série au point (pour l'info-bulle)
   isRecord: boolean; // nouveau maximum jamais atteint jusqu'à ce point
 }
 
-export function getStrengthMetricSeries(
-  sessions: StrengthSession[],
-  exerciseName: string,
-  metric: ProgressionMetric,
-  period: ProgressionPeriod,
-): ProgressionPoint[] {
-  const sessionMetrics = computeSessionSetMetrics(sessions, exerciseName);
+// Une courbe du graphique de progression: soit le volume total d'un
+// exercice, soit un exercice décomposé par poids (courbe des reps à ce
+// poids) ou par répétitions (courbe du poids à ce nombre de reps).
+export interface ProgressionLine {
+  key: string; // clé unique (dataKey du graphique)
+  label: string; // libellé affiché (légende, info-bulle)
+  points: ProgressionPoint[];
+}
 
-  let points: { label: string; value: number; topReps: number }[];
-  if (period === 'session') {
-    points = sessionMetrics.map((m) => ({
-      label: m.date,
-      value: pickMetric(m, metric),
-      topReps: m.topReps,
-    }));
-  } else {
-    const byWeek = new Map<string, SessionSetMetrics[]>();
-    for (const m of sessionMetrics) {
-      const week = startOfWeek(m.date);
-      const list = byWeek.get(week);
-      if (list) list.push(m);
-      else byWeek.set(week, [m]);
-    }
-
-    points = [...byWeek.entries()]
-      .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([week, list]) => {
-        if (metric === 'volume') {
-          return {
-            label: week,
-            value: list.reduce((sum, m) => sum + m.volume, 0),
-            topReps: list.reduce((best, m) => (m.topWeight > best.topWeight ? m : best)).topReps,
-          };
-        }
-        const best = list.reduce((b, m) => (pickMetric(m, metric) > pickMetric(b, metric) ? m : b));
-        return { label: week, value: pickMetric(best, metric), topReps: best.topReps };
-      });
-  }
-
+function withRunningRecord(points: { label: string; value: number }[]): ProgressionPoint[] {
   let runningMax = -Infinity;
   return points.map((p) => {
     const isRecord = p.value > runningMax;
@@ -344,37 +266,143 @@ export function getStrengthMetricSeries(
   });
 }
 
-export interface MultiExerciseProgressionPoint {
-  label: string;
-  [key: string]: string | number | boolean;
+function groupPointsByPeriod(
+  points: { date: string; value: number }[],
+  period: ProgressionPeriod,
+  aggregate: (values: number[]) => number,
+): { label: string; value: number }[] {
+  const byKey = new Map<string, number[]>();
+  for (const p of points) {
+    const key = period === 'session' ? p.date : startOfWeek(p.date);
+    const list = byKey.get(key);
+    if (list) list.push(p.value);
+    else byKey.set(key, [p.value]);
+  }
+  return [...byKey.entries()]
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([label, values]) => ({ label, value: aggregate(values) }));
 }
 
-// Fusionne les séries de plusieurs exercices sur un même axe (une clé par
-// exercice), pour afficher plusieurs courbes sur un seul graphique. Le
-// record de chaque exercice à un point donné est stocké sous la clé
-// "<exercice>__record" pour marquer les records sur le graphique.
-export function getMultiExerciseMetricSeries(
+// Courbe de volume total (poids × reps cumulé sur toutes les séries) d'un
+// exercice, par séance ou par semaine.
+function getVolumeLine(
+  sessions: StrengthSession[],
+  exerciseName: string,
+  period: ProgressionPeriod,
+): ProgressionLine {
+  const perSession: { date: string; value: number }[] = [];
+  for (const session of sessions) {
+    const entry = session.exercises.find((e) => e.exerciseName === exerciseName);
+    if (!entry || entry.sets.length === 0) continue;
+    const volume = entry.sets.reduce((sum, s) => sum + s.weightKg * s.reps, 0);
+    perSession.push({ date: session.date, value: volume });
+  }
+  const points = groupPointsByPeriod(perSession, period, (values) =>
+    values.reduce((a, b) => a + b, 0),
+  );
+  return { key: exerciseName, label: exerciseName, points: withRunningRecord(points) };
+}
+
+// Décompose un exercice en une courbe par valeur fixée d'une dimension
+// (poids ou reps), l'autre dimension étant la valeur tracée. Ex: pour
+// "reps par poids", une courbe par poids réalisé, traçant les reps max
+// atteintes à ce poids au fil du temps.
+function getDecomposedLines(
+  sessions: StrengthSession[],
+  exerciseName: string,
+  period: ProgressionPeriod,
+  bucketOf: (weightKg: number, reps: number) => number,
+  valueOf: (weightKg: number, reps: number) => number,
+  labelSuffix: (bucket: number) => string,
+): ProgressionLine[] {
+  const byBucket = new Map<number, { date: string; value: number }[]>();
+  for (const session of sessions) {
+    const entry = session.exercises.find((e) => e.exerciseName === exerciseName);
+    if (!entry) continue;
+    for (const set of entry.sets) {
+      const bucket = bucketOf(set.weightKg, set.reps);
+      const value = valueOf(set.weightKg, set.reps);
+      const list = byBucket.get(bucket);
+      if (list) list.push({ date: session.date, value });
+      else byBucket.set(bucket, [{ date: session.date, value }]);
+    }
+  }
+
+  return [...byBucket.entries()]
+    .sort((a, b) => a[0] - b[0])
+    .map(([bucket, rawPoints]) => {
+      const points = groupPointsByPeriod(rawPoints, period, (values) => Math.max(...values));
+      return {
+        key: `${exerciseName}__${bucket}`,
+        label: `${exerciseName} ${labelSuffix(bucket)}`,
+        points: withRunningRecord(points),
+      };
+    });
+}
+
+// Calcule les courbes de progression pour une liste d'exercices, selon la
+// métrique choisie: "volume" donne une courbe par exercice, "reps" et
+// "weight" décomposent chaque exercice en une courbe par poids (resp. par
+// nombre de reps) réalisé dans l'historique.
+export function getProgressionLines(
   sessions: StrengthSession[],
   exerciseNames: string[],
   metric: ProgressionMetric,
   period: ProgressionPeriod,
-): MultiExerciseProgressionPoint[] {
-  const byLabel = new Map<string, MultiExerciseProgressionPoint>();
-
+): ProgressionLine[] {
+  const lines: ProgressionLine[] = [];
   for (const name of exerciseNames) {
-    const series = getStrengthMetricSeries(sessions, name, metric, period);
-    for (const point of series) {
+    if (metric === 'volume') {
+      lines.push(getVolumeLine(sessions, name, period));
+    } else if (metric === 'reps') {
+      lines.push(
+        ...getDecomposedLines(
+          sessions,
+          name,
+          period,
+          (weightKg) => weightKg,
+          (_weightKg, reps) => reps,
+          (weightKg) => `${weightKg}kg`,
+        ),
+      );
+    } else {
+      lines.push(
+        ...getDecomposedLines(
+          sessions,
+          name,
+          period,
+          (_weightKg, reps) => reps,
+          (weightKg) => weightKg,
+          (reps) => `${reps} reps`,
+        ),
+      );
+    }
+  }
+  return lines;
+}
+
+export interface MultiLineProgressionPoint {
+  label: string;
+  [key: string]: string | number | boolean;
+}
+
+// Fusionne plusieurs courbes sur un même axe (une clé par courbe), pour les
+// afficher sur un seul graphique. Le record de chaque courbe à un point
+// donné est stocké sous la clé "<clé>__record" pour marquer les records.
+export function mergeProgressionLines(lines: ProgressionLine[]): MultiLineProgressionPoint[] {
+  const byLabel = new Map<string, MultiLineProgressionPoint>();
+
+  for (const line of lines) {
+    for (const point of line.points) {
       const existing = byLabel.get(point.label);
       if (existing) {
-        existing[name] = point.value;
-        existing[`${name}__record`] = point.isRecord;
-        existing[`${name}__reps`] = point.topReps;
+        existing[line.key] = point.value;
+        existing[`${line.key}__record`] = point.isRecord;
       } else {
         byLabel.set(point.label, {
           label: point.label,
-          [name]: point.value,
-          [`${name}__record`]: point.isRecord,
-          [`${name}__reps`]: point.topReps,
+          [line.key]: point.value,
+          [`${line.key}__record`]: point.isRecord,
         });
       }
     }

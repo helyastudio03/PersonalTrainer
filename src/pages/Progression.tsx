@@ -17,14 +17,15 @@ import type { MuscleGroup } from '../types';
 import { Card, EmptyState, IconButton, Input, Label, RECORD_COLOR } from '../components/ui';
 import {
   getExerciseMuscleGroups,
-  getMultiExerciseMetricSeries,
+  getProgressionLines,
   listStrengthExerciseNames,
+  mergeProgressionLines,
   PROGRESSION_METRIC_LABELS,
 } from '../lib/records';
 import type { ProgressionMetric, ProgressionPeriod } from '../lib/records';
 import { getMuscleGroupColor } from '../lib/muscleColors';
 
-const METRICS: ProgressionMetric[] = ['weight', 'reps', 'weightReps', 'volume'];
+const METRICS: ProgressionMetric[] = ['volume', 'reps', 'weight'];
 
 const periodLabel: Record<ProgressionPeriod, string> = {
   session: 'Par séance',
@@ -37,7 +38,7 @@ function selectClassName() {
   return 'px-3 py-1.5 rounded-lg border border-ash-300 bg-white text-sm';
 }
 
-function renderRecordDot(color: string, exerciseName: string) {
+function renderRecordDot(color: string, lineKey: string) {
   return (props: {
     cx?: number;
     cy?: number;
@@ -45,11 +46,11 @@ function renderRecordDot(color: string, exerciseName: string) {
     payload?: Record<string, string | number | boolean>;
   }) => {
     const { cx, cy, index, payload } = props;
-    if (cx == null || cy == null) return <g key={`dot-${exerciseName}-${index}`} />;
-    const isRecord = payload?.[`${exerciseName}__record`];
+    if (cx == null || cy == null) return <g key={`dot-${lineKey}-${index}`} />;
+    const isRecord = payload?.[`${lineKey}__record`];
     if (isRecord) {
       return (
-        <g key={`dot-${exerciseName}-${index}`} transform={`translate(${cx - 6}, ${cy - 6}) scale(0.5)`}>
+        <g key={`dot-${lineKey}-${index}`} transform={`translate(${cx - 6}, ${cy - 6}) scale(0.5)`}>
           <path
             d="M12 2 14.9 8.6 22 9.3 16.5 14 18.2 21 12 17.3 5.8 21 7.5 14 2 9.3 9.1 8.6 12 2Z"
             fill={RECORD_COLOR}
@@ -57,29 +58,23 @@ function renderRecordDot(color: string, exerciseName: string) {
         </g>
       );
     }
-    return <circle key={`dot-${exerciseName}-${index}`} cx={cx} cy={cy} r={3} fill={color} stroke={color} />;
+    return <circle key={`dot-${lineKey}-${index}`} cx={cx} cy={cy} r={3} fill={color} stroke={color} />;
   };
 }
 
 function renderTooltipContent(metric: ProgressionMetric) {
+  const unit = metric === 'reps' ? ' reps' : ' kg';
   return ({ active, label, payload }: TooltipContentProps<ValueType, NameType>) => {
     if (!active || !payload || payload.length === 0) return null;
-    const unit = metric === 'weight' || metric === 'weightReps' ? ' kg' : '';
     return (
       <div className="bg-white border border-ash-200 rounded-lg shadow-sm px-3 py-2 text-xs space-y-1">
         <p className="font-semibold text-ash-700">{label}</p>
-        {payload.map((entry) => {
-          const dataKey = typeof entry.dataKey === 'string' ? entry.dataKey : undefined;
-          const point = entry.payload as Record<string, string | number | boolean> | undefined;
-          const reps = dataKey ? point?.[`${dataKey}__reps`] : undefined;
-          return (
-            <p key={dataKey} style={{ color: entry.color }}>
-              <span className="font-medium">{entry.name}</span> : {entry.value}
-              {unit}
-              {typeof reps === 'number' && reps > 0 && ` (${reps} reps)`}
-            </p>
-          );
-        })}
+        {payload.map((entry, i) => (
+          <p key={typeof entry.dataKey === 'string' ? entry.dataKey : i} style={{ color: entry.color }}>
+            <span className="font-medium">{entry.name}</span> : {entry.value}
+            {unit}
+          </p>
+        ))}
       </div>
     );
   };
@@ -120,7 +115,7 @@ export default function Progression({
     return [...set].sort();
   }, [allExerciseNames, exerciseMuscleGroups]);
 
-  const [metric, setMetric] = useState<ProgressionMetric>('weight');
+  const [metric, setMetric] = useState<ProgressionMetric>('volume');
   const [period, setPeriod] = useState<ProgressionPeriod>('session');
 
   const activeExercises = selectedExercises.filter((name) => allExerciseNames.includes(name));
@@ -150,10 +145,11 @@ export default function Progression({
     });
   }, [data.strengthSessions, dateFrom, dateTo]);
 
-  const series = useMemo(
-    () => getMultiExerciseMetricSeries(filteredSessions, activeExercises, metric, period),
+  const lines = useMemo(
+    () => getProgressionLines(filteredSessions, activeExercises, metric, period),
     [filteredSessions, activeExercises, metric, period],
   );
+  const series = useMemo(() => mergeProgressionLines(lines), [lines]);
 
   function toggleExercise(name: string) {
     setSelectedExercises((prev) =>
@@ -327,19 +323,19 @@ export default function Progression({
               <YAxis fontSize={12} allowDecimals={false} />
               <Tooltip content={renderTooltipContent(metric)} />
               <Legend wrapperStyle={{ fontSize: 12 }} />
-              {activeExercises.map((name, i) => {
+              {lines.map((line, i) => {
                 const color = LINE_COLORS[i % LINE_COLORS.length];
                 return (
                   <Line
-                    key={name}
+                    key={line.key}
                     type="monotone"
-                    dataKey={name}
-                    name={name}
+                    dataKey={line.key}
+                    name={line.label}
                     stroke={color}
                     strokeWidth={2}
                     connectNulls
                     isAnimationActive={false}
-                    dot={renderRecordDot(color, name)}
+                    dot={renderRecordDot(color, line.key)}
                   />
                 );
               })}
