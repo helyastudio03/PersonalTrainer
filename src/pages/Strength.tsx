@@ -352,6 +352,8 @@ export default function Strength({ appData }: { appData: UseAppData }) {
   const [showForm, setShowForm] = useState(false);
   const [confirmingClear, setConfirmingClear] = useState(false);
   const [programFilter, setProgramFilter] = useState<string[]>([]);
+  const [variantPromptId, setVariantPromptId] = useState<string | null>(null);
+  const [variantSelectDraft, setVariantSelectDraft] = useState('');
 
   function toggleProgramFilter(id: string) {
     setProgramFilter((prev) => (prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]));
@@ -378,6 +380,11 @@ export default function Strength({ appData }: { appData: UseAppData }) {
 
   function updateExerciseVariantOf(id: string, variantOf: string | undefined) {
     setExercises((ex) => ex.map((e) => (e.id === id ? { ...e, variantOf } : e)));
+  }
+
+  function openVariantPrompt(exerciseId: string, defaultValue: string) {
+    setVariantPromptId(exerciseId);
+    setVariantSelectDraft(defaultValue);
   }
 
   function removeExercise(id: string) {
@@ -633,6 +640,11 @@ export default function Strength({ appData }: { appData: UseAppData }) {
                       .map((other) => other.exerciseName),
                   ),
                 ];
+                const trimmedName = ex.exerciseName.trim();
+                const isOffProgram =
+                  !!selectedProgram &&
+                  !!trimmedName &&
+                  !selectedProgram.strengthTargets.some((t) => t.exerciseName === trimmedName);
                 return (
                   <div key={ex.id} className="border border-ash-200 rounded-lg p-2">
                     <div className="flex gap-2 items-center mb-1.5">
@@ -646,30 +658,29 @@ export default function Strength({ appData }: { appData: UseAppData }) {
                       </button>
                     </div>
 
-                    {otherNames.length > 0 && (
-                      <div className="flex items-center gap-1.5 mb-1.5 text-xs text-ash-600">
-                        <label className="flex items-center gap-1">
-                          <input
-                            type="checkbox"
-                            checked={ex.variantOf !== undefined}
-                            onChange={(e) =>
-                              updateExerciseVariantOf(ex.id, e.target.checked ? otherNames[0] : undefined)
-                            }
-                          />
-                          Variante de
-                        </label>
-                        {ex.variantOf !== undefined && (
-                          <select
-                            className="px-1.5 py-0.5 rounded border border-ash-300 bg-white text-xs"
-                            value={ex.variantOf}
-                            onChange={(e) => updateExerciseVariantOf(ex.id, e.target.value)}
+                    {isOffProgram && otherNames.length > 0 && (
+                      <div className="mb-1.5 text-xs">
+                        {ex.variantOf ? (
+                          <div className="flex items-center gap-1.5 text-ash-600">
+                            <span>
+                              ↳ Variante de <span className="font-medium">{ex.variantOf}</span>
+                            </span>
+                            <button
+                              type="button"
+                              className="text-ember-600 hover:underline"
+                              onClick={() => openVariantPrompt(ex.id, ex.variantOf!)}
+                            >
+                              modifier
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => openVariantPrompt(ex.id, otherNames[0])}
+                            className="text-amber-700 bg-amber-100 rounded px-1.5 py-0.5 hover:bg-amber-200"
                           >
-                            {otherNames.map((n) => (
-                              <option key={n} value={n}>
-                                {n}
-                              </option>
-                            ))}
-                          </select>
+                            ⚠️ Hors programme — variante ?
+                          </button>
                         )}
                       </div>
                     )}
@@ -797,6 +808,65 @@ export default function Strength({ appData }: { appData: UseAppData }) {
           )}
         </>
       )}
+
+      {variantPromptId &&
+        (() => {
+          const ex = exercises.find((e) => e.id === variantPromptId);
+          if (!ex) return null;
+          const otherNames = [
+            ...new Set(
+              exercises
+                .filter((other) => other.id !== ex.id && other.exerciseName.trim())
+                .map((other) => other.exerciseName),
+            ),
+          ];
+          return (
+            <div
+              className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4"
+              onClick={() => setVariantPromptId(null)}
+            >
+              <div
+                className="bg-white rounded-lg p-3 max-w-sm w-full shadow-lg space-y-2"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <h3 className="text-sm font-semibold">
+                  "{ex.exerciseName}" n'est pas dans le programme
+                </h3>
+                <p className="text-xs text-ash-600">Est-ce une variante d'un exercice prévu ?</p>
+                <select
+                  className="w-full px-2 py-1.5 rounded-lg border border-ash-300 bg-white text-sm"
+                  value={variantSelectDraft}
+                  onChange={(e) => setVariantSelectDraft(e.target.value)}
+                >
+                  {otherNames.map((n) => (
+                    <option key={n} value={n}>
+                      {n}
+                    </option>
+                  ))}
+                </select>
+                <div className="flex gap-2 pt-1">
+                  <Button
+                    onClick={() => {
+                      updateExerciseVariantOf(ex.id, variantSelectDraft);
+                      setVariantPromptId(null);
+                    }}
+                  >
+                    Valider
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      updateExerciseVariantOf(ex.id, undefined);
+                      setVariantPromptId(null);
+                    }}
+                  >
+                    Ce n'est pas une variante
+                  </Button>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
     </div>
   );
 }
