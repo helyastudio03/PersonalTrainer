@@ -79,11 +79,12 @@ export default function Help() {
 
       <Section title="Progression">
         <p>
-          Trois façons de suivre un exercice, par séance ou par semaine : <strong>Volume</strong> (une
-          courbe par exercice, poids × reps cumulé), <strong>Répétitions</strong> (une courbe par poids
-          réalisé, pour voir les reps progresser à charge fixe) et <strong>Poids</strong> (une courbe par
-          nombre de répétitions réalisé, pour voir la charge progresser à reps fixes). Dans les filtres,
-          cliquer sur un groupe musculaire sélectionne tous ses exercices d'un coup.
+          Trois façons de suivre un exercice, par séance ou par semaine : <strong>Reps</strong> (une
+          courbe par poids réalisé, pour voir les reps progresser à charge fixe),{' '}
+          <strong>Poids</strong> (une courbe par nombre de répétitions réalisé, pour voir la charge
+          progresser à reps fixes) et <strong>Poids x reps</strong> (une courbe par exercice, sur la
+          meilleure série de chaque séance). Dans les filtres, cliquer sur un groupe musculaire
+          sélectionne tous ses exercices d'un coup.
         </p>
         <p>Une étoile sur la courbe marque un nouveau record ; survole un point pour son détail.</p>
       </Section>

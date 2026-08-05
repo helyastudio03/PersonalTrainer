@@ -25,7 +25,7 @@ import {
 import type { ProgressionMetric, ProgressionPeriod } from '../lib/records';
 import { getMuscleGroupColor } from '../lib/muscleColors';
 
-const METRICS: ProgressionMetric[] = ['volume', 'reps', 'weight'];
+const METRICS: ProgressionMetric[] = ['reps', 'weight', 'volume'];
 
 const periodLabel: Record<ProgressionPeriod, string> = {
   session: 'Par séance',
@@ -63,7 +63,7 @@ function renderRecordDot(color: string, lineKey: string) {
 }
 
 function renderTooltipContent(metric: ProgressionMetric) {
-  const unit = metric === 'reps' ? ' reps' : ' kg';
+  const unit = metric === 'reps' ? ' reps' : metric === 'weight' ? ' kg' : '';
   return ({ active, label, payload }: TooltipContentProps<ValueType, NameType>) => {
     if (!active || !payload || payload.length === 0) return null;
     return (

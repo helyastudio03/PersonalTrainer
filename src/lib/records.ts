@@ -220,17 +220,18 @@ export function getLastPerformance(
   return { date: last.date, sets: entry.sets };
 }
 
-// Courbes de progression : volume total, ou détail par poids/répétitions
-// (une courbe par poids réalisé, ou par nombre de répétitions réalisé),
-// par séance ou agrégées par semaine. Pas d'estimation de 1RM ici.
+// Courbes de progression : poids × reps de la meilleure série, ou détail
+// par poids/répétitions (une courbe par poids réalisé, ou par nombre de
+// répétitions réalisé), par séance ou agrégées par semaine. Pas
+// d'estimation de 1RM ici.
 
 export type ProgressionMetric = 'volume' | 'reps' | 'weight';
 export type ProgressionPeriod = 'session' | 'week';
 
 export const PROGRESSION_METRIC_LABELS: Record<ProgressionMetric, string> = {
-  volume: 'Volume (poids × reps cumulé)',
-  reps: 'Répétitions, par poids réalisé',
-  weight: 'Poids, par répétitions réalisées',
+  volume: 'Poids x reps',
+  weight: 'Poids',
+  reps: 'Reps',
 };
 
 // Lundi de la semaine contenant la date donnée (yyyy-mm-dd).
@@ -283,8 +284,8 @@ function groupPointsByPeriod(
     .map(([label, values]) => ({ label, value: aggregate(values) }));
 }
 
-// Courbe de volume total (poids × reps cumulé sur toutes les séries) d'un
-// exercice, par séance ou par semaine.
+// Courbe poids × reps de la meilleure série d'un exercice (celle au produit
+// poids × reps le plus élevé), par séance ou par semaine.
 function getVolumeLine(
   sessions: StrengthSession[],
   exerciseName: string,
@@ -294,12 +295,10 @@ function getVolumeLine(
   for (const session of sessions) {
     const entry = session.exercises.find((e) => e.exerciseName === exerciseName);
     if (!entry || entry.sets.length === 0) continue;
-    const volume = entry.sets.reduce((sum, s) => sum + s.weightKg * s.reps, 0);
-    perSession.push({ date: session.date, value: volume });
+    const bestSet = Math.max(...entry.sets.map((s) => s.weightKg * s.reps));
+    perSession.push({ date: session.date, value: bestSet });
   }
-  const points = groupPointsByPeriod(perSession, period, (values) =>
-    values.reduce((a, b) => a + b, 0),
-  );
+  const points = groupPointsByPeriod(perSession, period, (values) => Math.max(...values));
   return { key: exerciseName, label: exerciseName, points: withRunningRecord(points) };
 }
 
