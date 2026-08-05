@@ -221,6 +221,7 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
             <ul className="space-y-1">
               {recentStrength.map((s) => {
                 const recordCount = recordCountByDate.get(s.date) ?? 0;
+                const setCount = s.exercises.reduce((sum, e) => sum + e.sets.length, 0);
                 return (
                   <li
                     key={s.id}
@@ -235,7 +236,8 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
                       )}
                     </span>
                     <span className="text-ash-600">
-                      {s.exercises.length} exercice{s.exercises.length > 1 ? 's' : ''}
+                      {s.exercises.length} exercice{s.exercises.length > 1 ? 's' : ''} -{' '}
+                      {setCount} série{setCount > 1 ? 's' : ''}
                     </span>
                   </li>
                 );
