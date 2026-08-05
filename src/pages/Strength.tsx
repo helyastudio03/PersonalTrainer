@@ -16,10 +16,12 @@ import {
   formatSetsSummary,
   getExerciseMuscleGroups,
   getLastPerformance,
+  getRecordsByExerciseDate,
   groupSessionsIntoCycleRows,
   monthKey,
   suggestNextProgramDay,
 } from '../lib/records';
+import type { WeightRepsRecord } from '../lib/records';
 import { getMuscleGroupColor } from '../lib/muscleColors';
 
 function todayIso() {
@@ -62,6 +64,7 @@ function SessionCard({
   session,
   programs,
   exerciseMuscleGroups,
+  recordsByExerciseDate,
   updateStrengthSession,
   deleteStrengthSession,
   onDuplicate,
@@ -69,6 +72,7 @@ function SessionCard({
   session: StrengthSession;
   programs: Program[];
   exerciseMuscleGroups: Record<string, MuscleGroup>;
+  recordsByExerciseDate: Map<string, WeightRepsRecord[]>;
   updateStrengthSession: UseAppData['updateStrengthSession'];
   deleteStrengthSession: UseAppData['deleteStrengthSession'];
   onDuplicate: (session: StrengthSession) => void;
@@ -249,12 +253,12 @@ function SessionCard({
         </div>
       </div>
 
-      <div className="mt-1.5 grid grid-cols-[auto_minmax(4rem,auto)_1fr] gap-x-2 gap-y-0.5">
+      <div className="mt-1.5 grid grid-cols-[auto_minmax(4rem,auto)_1fr_auto] gap-x-2 gap-y-0.5">
         {session.exercises.map((e) =>
           editingExerciseId === e.id ? (
             <div
               key={e.id}
-              className="col-span-3 border border-ember-300 rounded-lg p-2 space-y-1"
+              className="col-span-4 border border-ember-300 rounded-lg p-2 space-y-1"
             >
               <p className="text-sm font-medium">{e.exerciseName}</p>
               {exerciseDraft.map((s, i) => (
@@ -342,6 +346,18 @@ function SessionCard({
                   </IconButton>
                 </div>
               </div>
+              {(() => {
+                const records = recordsByExerciseDate.get(`${e.exerciseName}__${session.date}`) ?? [];
+                if (records.length === 0) return <span />;
+                const tooltip = records
+                  .map((r) => `${r.weightKg}kg : ${r.previousMaxReps}→${r.maxReps} reps`)
+                  .join('\n');
+                return (
+                  <span className="text-sm text-amber-600 shrink-0" title={tooltip}>
+                    {records.length > 1 ? records.length : ''}⭐
+                  </span>
+                );
+              })()}
             </div>
           ),
         )}
@@ -363,6 +379,10 @@ export default function Strength({ appData }: { appData: UseAppData }) {
   const exerciseMuscleGroups = useMemo(
     () => getExerciseMuscleGroups(data.programs),
     [data.programs],
+  );
+  const recordsByExerciseDate = useMemo(
+    () => getRecordsByExerciseDate(data.strengthSessions),
+    [data.strengthSessions],
   );
   const [programFilter, setProgramFilter] = useState<string[]>([]);
   const [variantPromptId, setVariantPromptId] = useState<string | null>(null);
@@ -822,6 +842,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
                             session={s}
                             programs={data.programs}
                             exerciseMuscleGroups={exerciseMuscleGroups}
+                            recordsByExerciseDate={recordsByExerciseDate}
                             updateStrengthSession={updateStrengthSession}
                             deleteStrengthSession={deleteStrengthSession}
                             onDuplicate={duplicateSession}

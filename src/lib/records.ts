@@ -141,6 +141,35 @@ export function getStrengthPRsByWeightReps(sessions: StrengthSession[]): WeightR
   });
 }
 
+// Regroupe les records (poids, reps) effectivement battus (progression par
+// rapport au précédent record, donc previousMaxReps non nul) par exercice et
+// par date, pour afficher une étoile sur les séries concernées et détailler
+// quel(s) record(s) ont été battus ce jour-là (page Séances, Accueil).
+export function getRecordsByExerciseDate(sessions: StrengthSession[]): Map<string, WeightRepsRecord[]> {
+  const map = new Map<string, WeightRepsRecord[]>();
+  for (const r of getStrengthPRsByWeightReps(sessions)) {
+    if (r.previousMaxReps === null) continue;
+    const key = `${r.exerciseName}__${r.date}`;
+    const list = map.get(key);
+    if (list) list.push(r);
+    else map.set(key, [r]);
+  }
+  return map;
+}
+
+// Même regroupement, mais uniquement par date (tous exercices confondus),
+// pour le résumé "records récents" de l'accueil.
+export function getRecordsByDate(sessions: StrengthSession[]): Map<string, WeightRepsRecord[]> {
+  const map = new Map<string, WeightRepsRecord[]>();
+  for (const r of getStrengthPRsByWeightReps(sessions)) {
+    if (r.previousMaxReps === null) continue;
+    const list = map.get(r.date);
+    if (list) list.push(r);
+    else map.set(r.date, [r]);
+  }
+  return map;
+}
+
 export interface ExerciseVariantRecord {
   variantName: string;
   date: string;

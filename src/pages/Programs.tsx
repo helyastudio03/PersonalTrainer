@@ -34,7 +34,7 @@ function VolumeChart({
   if (volumes.length === 0) return null;
   return (
     <div>
-      <p className="text-xs font-semibold text-ash-600 mb-1.5">Séries par semaine et par groupe musculaire</p>
+      <p className="text-xs font-semibold text-ash-600 mb-1.5">Nombre de séries par semaine</p>
       <div className="flex flex-wrap gap-1.5">
         {volumes.map((v) => {
           const active = highlightedGroup === v.muscleGroup;

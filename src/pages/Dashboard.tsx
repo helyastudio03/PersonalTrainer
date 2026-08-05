@@ -7,7 +7,7 @@ import {
   getActualWeeklySetsByMuscleGroup,
   getExerciseMuscleGroups,
   getRecentPRImprovements,
-  getStrengthPRsByWeightReps,
+  getRecordsByDate,
   getWeeklySetsByMuscleGroup,
   suggestNextProgramDay,
 } from '../lib/records';
@@ -69,11 +69,7 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
 
   const recentPRs = getRecentPRImprovements(data.strengthSessions, 14).slice(0, 5);
 
-  const recordCountByDate = new Map<string, number>();
-  for (const r of getStrengthPRsByWeightReps(data.strengthSessions)) {
-    if (r.previousMaxReps === null) continue;
-    recordCountByDate.set(r.date, (recordCountByDate.get(r.date) ?? 0) + 1);
-  }
+  const recordsByDate = getRecordsByDate(data.strengthSessions);
 
   const sessionDates = new Set(data.strengthSessions.map((s) => s.date));
   const today = new Date();
@@ -225,8 +221,11 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
           ) : (
             <ul className="space-y-1">
               {recentStrength.map((s) => {
-                const recordCount = recordCountByDate.get(s.date) ?? 0;
+                const records = recordsByDate.get(s.date) ?? [];
                 const setCount = s.exercises.reduce((sum, e) => sum + e.sets.length, 0);
+                const recordsTooltip = records
+                  .map((r) => `${r.exerciseName} ${r.weightKg}kg : ${r.previousMaxReps}→${r.maxReps} reps`)
+                  .join('\n');
                 return (
                   <li
                     key={s.id}
@@ -234,9 +233,9 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
                   >
                     <span>
                       {s.name ? `${s.name} · ${s.date}` : s.date}
-                      {recordCount > 0 && (
-                        <span className="ml-1.5 text-amber-600">
-                          {recordCount > 1 ? recordCount : ''}⭐
+                      {records.length > 0 && (
+                        <span className="ml-1.5 text-amber-600" title={recordsTooltip}>
+                          {records.length > 1 ? records.length : ''}⭐
                         </span>
                       )}
                     </span>
