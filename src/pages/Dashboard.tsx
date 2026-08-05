@@ -186,7 +186,12 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
         </Card>
 
         <Card>
-          <h2 className="font-semibold mb-2">Records récents</h2>
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="font-semibold">Records récents</h2>
+            <Link to="/records" className="text-xs text-ember-600 hover:underline">
+              Voir tout
+            </Link>
+          </div>
           {recentPRs.length === 0 ? (
             <EmptyState>Aucun record battu ces 14 derniers jours.</EmptyState>
           ) : (

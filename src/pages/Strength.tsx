@@ -201,11 +201,10 @@ function SessionCard({
                 const programName = session.programId
                   ? (programs.find((p) => p.id === session.programId)?.name ?? 'programme supprimé')
                   : undefined;
-                const label =
-                  programName && session.name
-                    ? `${programName} - ${session.name}`
-                    : programName ?? session.name;
-                return label ? `${label} · ${session.date}` : session.date;
+                const parts = [programName, session.name, session.date].filter(
+                  (part): part is string => !!part,
+                );
+                return parts.join(' · ');
               })()}
             </h3>
             {session.notes && (
