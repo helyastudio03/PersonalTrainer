@@ -15,6 +15,17 @@ function SubHeading({ children }: { children: React.ReactNode }) {
   return <h3 className="text-sm font-semibold text-ash-700 mt-3 first:mt-0">{children}</h3>;
 }
 
+function GroupDivider({ label }: { label: string }) {
+  return (
+    <div className="flex items-center gap-3 pt-2">
+      <span className="text-xs font-semibold uppercase tracking-wide text-ash-500 whitespace-nowrap">
+        {label}
+      </span>
+      <div className="h-px bg-ash-300 flex-1" />
+    </div>
+  );
+}
+
 function Star({ n }: { n?: number }) {
   return (
     <span className="inline-flex items-center gap-0.5 font-medium" style={{ color: RECORD_COLOR }}>
@@ -36,6 +47,8 @@ export default function Help() {
           exporter tes données en JSON, et les réimporter au besoin.
         </p>
       </Section>
+
+      <GroupDivider label="Les pages" />
 
       <Section title="Programmes">
         <p>
@@ -109,6 +122,8 @@ export default function Help() {
           exporter/importer les données.
         </p>
       </Section>
+
+      <GroupDivider label="Éléments transversaux" />
 
       <Section title="Le code couleur par groupe musculaire">
         <p>
