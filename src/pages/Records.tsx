@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import type { UseAppData } from '../lib/useAppData';
+import type { SharedExerciseFilters } from '../lib/useSharedFilters';
 import type { MuscleGroup } from '../types';
 import { Card, EmptyState, IconButton, Input, Label } from '../components/ui';
 import {
@@ -16,8 +17,15 @@ function chipClassName(active: boolean) {
   }`;
 }
 
-export default function Records({ appData }: { appData: UseAppData }) {
+export default function Records({
+  appData,
+  filters,
+}: {
+  appData: UseAppData;
+  filters: SharedExerciseFilters;
+}) {
   const { data } = appData;
+  const { selectedExercises, setSelectedExercises, dateFrom, setDateFrom, dateTo, setDateTo } = filters;
 
   const exerciseMuscleGroups = useMemo(
     () => getExerciseMuscleGroups(data.programs),
@@ -31,10 +39,6 @@ export default function Records({ appData }: { appData: UseAppData }) {
     });
     return [...set].sort();
   }, [data.strengthSessions, exerciseMuscleGroups]);
-
-  const [selectedExercises, setSelectedExercises] = useState<string[]>([]);
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
 
   const filteredSessions = useMemo(() => {
     if (!dateFrom && !dateTo) return data.strengthSessions;

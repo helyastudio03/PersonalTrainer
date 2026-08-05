@@ -12,6 +12,7 @@ import {
 import type { TooltipContentProps } from 'recharts';
 import type { ValueType, NameType } from 'recharts/types/component/DefaultTooltipContent';
 import type { UseAppData } from '../lib/useAppData';
+import type { SharedExerciseFilters } from '../lib/useSharedFilters';
 import type { MuscleGroup } from '../types';
 import { Card, EmptyState, IconButton, Input, Label } from '../components/ui';
 import {
@@ -95,8 +96,15 @@ function chipClassName(active: boolean) {
   }`;
 }
 
-export default function Progression({ appData }: { appData: UseAppData }) {
+export default function Progression({
+  appData,
+  filters,
+}: {
+  appData: UseAppData;
+  filters: SharedExerciseFilters;
+}) {
   const { data } = appData;
+  const { selectedExercises, setSelectedExercises, dateFrom, setDateFrom, dateTo, setDateTo } = filters;
 
   const allExerciseNames = useMemo(
     () => listStrengthExerciseNames(data.strengthSessions),
@@ -115,13 +123,8 @@ export default function Progression({ appData }: { appData: UseAppData }) {
     return [...set].sort();
   }, [allExerciseNames, exerciseMuscleGroups]);
 
-  const [selectedExercises, setSelectedExercises] = useState<string[]>(() =>
-    allExerciseNames[0] ? [allExerciseNames[0]] : [],
-  );
   const [metric, setMetric] = useState<ProgressionMetric>('weight');
   const [period, setPeriod] = useState<ProgressionPeriod>('session');
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
 
   const activeExercises = selectedExercises.filter((name) => allExerciseNames.includes(name));
 
