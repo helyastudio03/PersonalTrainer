@@ -141,6 +141,34 @@ export function getStrengthPRsByWeightReps(sessions: StrengthSession[]): WeightR
   });
 }
 
+export interface ExerciseVariantRecord {
+  variantName: string;
+  date: string;
+  sets: StrengthSet[];
+}
+
+// Regroupe, pour chaque exercice du programme, les variantes réalisées à sa
+// place (StrengthExerciseEntry.variantOf), pour l'afficher sur la page
+// Programmes (popup "variantes réalisées").
+export function getExerciseVariants(sessions: StrengthSession[]): Map<string, ExerciseVariantRecord[]> {
+  const map = new Map<string, ExerciseVariantRecord[]>();
+  for (const session of sessions) {
+    for (const entry of session.exercises) {
+      if (!entry.variantOf) continue;
+      const record: ExerciseVariantRecord = {
+        variantName: entry.exerciseName,
+        date: session.date,
+        sets: entry.sets,
+      };
+      const list = map.get(entry.variantOf);
+      if (list) list.push(record);
+      else map.set(entry.variantOf, [record]);
+    }
+  }
+  for (const list of map.values()) list.sort((a, b) => b.date.localeCompare(a.date));
+  return map;
+}
+
 export interface LastPerformance {
   date: string;
   sets: StrengthSet[];

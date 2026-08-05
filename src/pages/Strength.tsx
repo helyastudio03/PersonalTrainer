@@ -300,7 +300,12 @@ function SessionCard({
             </div>
           ) : (
             <div key={e.id} className="contents group">
-              <span className="text-sm text-ash-500 truncate">{e.exerciseName}</span>
+              <span className="text-sm text-ash-500 truncate">
+                {e.exerciseName}
+                {e.variantOf && (
+                  <span className="text-ash-400 italic"> (var. de {e.variantOf})</span>
+                )}
+              </span>
               <div className="relative text-sm">
                 <div
                   className="whitespace-nowrap overflow-hidden text-ellipsis pr-0 group-hover:pr-14 transition-[padding-right]"
@@ -369,6 +374,10 @@ export default function Strength({ appData }: { appData: UseAppData }) {
 
   function updateExerciseNotes(id: string, notes: string) {
     setExercises((ex) => ex.map((e) => (e.id === id ? { ...e, notes } : e)));
+  }
+
+  function updateExerciseVariantOf(id: string, variantOf: string | undefined) {
+    setExercises((ex) => ex.map((e) => (e.id === id ? { ...e, variantOf } : e)));
   }
 
   function removeExercise(id: string) {
@@ -461,6 +470,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
         id: uuid(),
         exerciseName: e.exerciseName,
         sets: e.sets.map((s) => ({ id: uuid(), reps: s.reps, weightKg: s.weightKg })),
+        variantOf: e.variantOf,
       })),
     );
     setShowForm(true);
@@ -616,6 +626,13 @@ export default function Strength({ appData }: { appData: UseAppData }) {
                 const lastPerformance = ex.exerciseName
                   ? getLastPerformance(data.strengthSessions, ex.exerciseName)
                   : null;
+                const otherNames = [
+                  ...new Set(
+                    exercises
+                      .filter((other) => other.id !== ex.id && other.exerciseName.trim())
+                      .map((other) => other.exerciseName),
+                  ),
+                ];
                 return (
                   <div key={ex.id} className="border border-ash-200 rounded-lg p-2">
                     <div className="flex gap-2 items-center mb-1.5">
@@ -628,6 +645,34 @@ export default function Strength({ appData }: { appData: UseAppData }) {
                         ✕
                       </button>
                     </div>
+
+                    {otherNames.length > 0 && (
+                      <div className="flex items-center gap-1.5 mb-1.5 text-xs text-ash-600">
+                        <label className="flex items-center gap-1">
+                          <input
+                            type="checkbox"
+                            checked={ex.variantOf !== undefined}
+                            onChange={(e) =>
+                              updateExerciseVariantOf(ex.id, e.target.checked ? otherNames[0] : undefined)
+                            }
+                          />
+                          Variante de
+                        </label>
+                        {ex.variantOf !== undefined && (
+                          <select
+                            className="px-1.5 py-0.5 rounded border border-ash-300 bg-white text-xs"
+                            value={ex.variantOf}
+                            onChange={(e) => updateExerciseVariantOf(ex.id, e.target.value)}
+                          >
+                            {otherNames.map((n) => (
+                              <option key={n} value={n}>
+                                {n}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                      </div>
+                    )}
 
                     <div className="space-y-1">
                       {ex.sets.map((s, i) => {

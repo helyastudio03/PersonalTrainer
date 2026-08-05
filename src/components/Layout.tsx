@@ -45,7 +45,7 @@ export default function Layout() {
                 </linearGradient>
               </defs>
             </svg>
-            Plus Lourd Que Toi
+            Training Tracker
           </h1>
           <nav className="flex gap-1 overflow-x-auto">
             {navItems.map((item) => (

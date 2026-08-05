@@ -1,4 +1,4 @@
-# Plus Lourd Que Toi
+# Training Tracker
 
 Application web simple pour suivre ses entrainements de musculation.
 

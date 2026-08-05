@@ -53,6 +53,7 @@ export interface StrengthExerciseEntry {
   exerciseName: string;
   sets: StrengthSet[];
   notes?: string;
+  variantOf?: string; // nom de l'exercice du programme que celui-ci remplace, si variante
 }
 
 export interface StrengthSession {

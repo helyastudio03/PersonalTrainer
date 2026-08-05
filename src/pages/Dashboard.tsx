@@ -23,7 +23,7 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `plus-lourd-que-toi-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `training-tracker-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
   }

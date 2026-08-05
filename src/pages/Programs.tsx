@@ -4,7 +4,13 @@ import type { UseAppData } from '../lib/useAppData';
 import type { MuscleGroup, Program, ProgramDay, ProgramExerciseTarget } from '../types';
 import { MUSCLE_GROUPS } from '../types';
 import { Button, Card, EmptyState, IconButton, Input, Label } from '../components/ui';
-import { formatRepRange, getWeeklySetsByMuscleGroup, listAllExerciseNames } from '../lib/records';
+import {
+  formatRepRange,
+  formatSetsSummary,
+  getExerciseVariants,
+  getWeeklySetsByMuscleGroup,
+  listAllExerciseNames,
+} from '../lib/records';
 import { generateFakeSessions } from '../lib/fakeData';
 
 const EXERCISE_DATALIST_ID = 'known-exercise-names';
@@ -39,10 +45,15 @@ export default function Programs({ appData }: { appData: UseAppData }) {
   const [draft, setDraft] = useState(emptyDraft());
   const [showForm, setShowForm] = useState(false);
   const [editingProgram, setEditingProgram] = useState<Program | null>(null);
+  const [variantsPopup, setVariantsPopup] = useState<string | null>(null);
 
   const knownExerciseNames = useMemo(
     () => listAllExerciseNames(data.programs, data.strengthSessions),
     [data.programs, data.strengthSessions],
+  );
+  const exerciseVariants = useMemo(
+    () => getExerciseVariants(data.strengthSessions),
+    [data.strengthSessions],
   );
 
   function startCreate() {
@@ -368,17 +379,32 @@ export default function Programs({ appData }: { appData: UseAppData }) {
                     >
                       <p className="text-xs font-semibold text-ash-600 mb-1">{day.name}</p>
                       <ul className="text-sm grid grid-cols-[1fr_auto] gap-x-3 gap-y-0.5">
-                        {dayTargets.map((t) => (
-                          <li key={t.id} className="contents">
-                            <span className="text-ash-500 truncate">
-                              {t.exerciseName} ({t.muscleGroup})
-                            </span>
-                            <span className="whitespace-nowrap">
-                              {t.targetSets}×{formatRepRange(t.targetRepsMin, t.targetRepsMax)}
-                              {t.targetRIR !== undefined ? ` @ RIR ${t.targetRIR}` : ''}
-                            </span>
-                          </li>
-                        ))}
+                        {dayTargets.map((t) => {
+                          const variants = exerciseVariants.get(t.exerciseName);
+                          return (
+                            <li key={t.id} className="contents">
+                              <span className="text-ash-500 min-w-0 flex items-center gap-1">
+                                <span className="truncate">
+                                  {t.exerciseName} ({t.muscleGroup})
+                                </span>
+                                {variants && variants.length > 0 && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setVariantsPopup(t.exerciseName)}
+                                    title="Voir les variantes réalisées"
+                                    className="shrink-0 text-ember-600"
+                                  >
+                                    🔀 {variants.length}
+                                  </button>
+                                )}
+                              </span>
+                              <span className="whitespace-nowrap">
+                                {t.targetSets}×{formatRepRange(t.targetRepsMin, t.targetRepsMax)}
+                                {t.targetRIR !== undefined ? ` @ RIR ${t.targetRIR}` : ''}
+                              </span>
+                            </li>
+                          );
+                        })}
                       </ul>
                     </div>
                   );
@@ -388,6 +414,43 @@ export default function Programs({ appData }: { appData: UseAppData }) {
               <VolumeChart strengthTargets={p.strengthTargets} />
             </Card>
           ))}
+        </div>
+      )}
+
+      {variantsPopup && (
+        <div
+          className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4"
+          onClick={() => setVariantsPopup(null)}
+        >
+          <div
+            className="bg-white rounded-lg p-3 max-w-sm w-full shadow-lg space-y-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center">
+              <h3 className="text-sm font-semibold">Variantes réalisées : {variantsPopup}</h3>
+              <button
+                type="button"
+                onClick={() => setVariantsPopup(null)}
+                className="text-ash-500 hover:text-ash-700 text-sm"
+                aria-label="Fermer"
+              >
+                ✕
+              </button>
+            </div>
+            <ul className="text-sm space-y-1 max-h-64 overflow-y-auto">
+              {(exerciseVariants.get(variantsPopup) ?? []).map((v, i) => (
+                <li
+                  key={i}
+                  className="flex justify-between gap-2 border-b border-ash-100 py-1"
+                >
+                  <span className="text-ash-700">{v.variantName}</span>
+                  <span className="text-ash-500 text-xs text-right">
+                    {formatSetsSummary(v.sets)} · {v.date}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       )}
     </div>
