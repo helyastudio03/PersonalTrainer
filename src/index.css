@@ -27,7 +27,7 @@
 }
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 body {
@@ -48,10 +48,10 @@ body {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    #7a6152 15%,
-    #efe4d8 50%,
-    #7a6152 85%,
+    #a88972 15%,
+    #554234 50%,
+    #a88972 85%,
     transparent 100%
   );
-  opacity: 0.6;
+  opacity: 0.5;
 }

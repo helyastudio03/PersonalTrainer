@@ -19,12 +19,12 @@ function VolumeChart({ strengthTargets }: { strengthTargets: ProgramExerciseTarg
   if (volumes.length === 0) return null;
   return (
     <div>
-      <p className="text-xs font-semibold text-ash-300 mb-1.5">Séries par semaine et par groupe musculaire</p>
+      <p className="text-xs font-semibold text-ash-600 mb-1.5">Séries par semaine et par groupe musculaire</p>
       <div className="flex flex-wrap gap-1.5">
         {volumes.map((v) => (
           <span
             key={v.muscleGroup}
-            className="text-xs rounded-full px-2 py-1 bg-ash-800 text-ash-200"
+            className="text-xs rounded-full px-2 py-1 bg-ash-200 text-ash-700"
           >
             {v.muscleGroup} <span className="font-semibold">{v.weeklySets}</span>
           </span>
@@ -148,7 +148,7 @@ export default function Programs({ appData }: { appData: UseAppData }) {
 
       {showForm && (
         <Card className="space-y-3">
-          <h2 className="text-sm font-semibold text-ash-300">
+          <h2 className="text-sm font-semibold text-ash-600">
             {editingProgram ? `Modifier "${editingProgram.name}"` : 'Nouveau programme'}
           </h2>
           <div>
@@ -177,12 +177,12 @@ export default function Programs({ appData }: { appData: UseAppData }) {
             </div>
 
             {draft.days.length === 0 ? (
-              <p className="text-xs text-ash-300">Ajoute un jour pour pouvoir y placer des exercices.</p>
+              <p className="text-xs text-ash-600">Ajoute un jour pour pouvoir y placer des exercices.</p>
             ) : (
               draft.days.map((day) => {
                 const dayTargets = draft.strengthTargets.filter((t) => t.dayId === day.id);
                 return (
-                  <div key={day.id} className="border border-ash-700 rounded-lg p-2 space-y-2">
+                  <div key={day.id} className="border border-ash-200 rounded-lg p-2 space-y-2">
                     <div className="flex gap-2 items-center">
                       <Input
                         value={day.name}
@@ -211,7 +211,7 @@ export default function Programs({ appData }: { appData: UseAppData }) {
                             onChange={(e) => updateStrengthTarget(t.id, { exerciseName: e.target.value })}
                           />
                           <select
-                            className="col-span-2 px-3 py-1.5 rounded-lg border border-ash-600 bg-ash-950 text-sm"
+                            className="col-span-2 px-3 py-1.5 rounded-lg border border-ash-300 bg-white text-sm"
                             value={t.muscleGroup}
                             onChange={(e) =>
                               updateStrengthTarget(t.id, { muscleGroup: e.target.value as MuscleGroup })
@@ -267,7 +267,7 @@ export default function Programs({ appData }: { appData: UseAppData }) {
                             }
                           />
                           <button
-                            className="col-span-1 text-red-400 text-sm"
+                            className="col-span-1 text-red-600 text-sm"
                             onClick={() => removeStrengthTarget(t.id)}
                           >
                             ✕
@@ -309,12 +309,12 @@ export default function Programs({ appData }: { appData: UseAppData }) {
                   <h3 className="font-semibold flex items-center gap-1.5">
                     {p.name}
                     {data.activeProgramId === p.id && (
-                      <span className="text-xs font-medium px-1.5 py-0.5 rounded-full bg-ember-950 text-ember-300">
+                      <span className="text-xs font-medium px-1.5 py-0.5 rounded-full bg-ember-100 text-ember-700">
                         Actif
                       </span>
                     )}
                   </h3>
-                  {p.description && <p className="text-sm text-ash-300">{p.description}</p>}
+                  {p.description && <p className="text-sm text-ash-600">{p.description}</p>}
                 </div>
                 <div className="flex gap-1.5 shrink-0">
                   <IconButton
@@ -351,7 +351,7 @@ export default function Programs({ appData }: { appData: UseAppData }) {
                 <button
                   type="button"
                   onClick={() => generateFakeHistory(p)}
-                  className="text-xs text-ember-400 hover:underline"
+                  className="text-xs text-ember-600 hover:underline"
                 >
                   🧪 Générer un historique fictif (test des visualisations)
                 </button>
@@ -364,13 +364,13 @@ export default function Programs({ appData }: { appData: UseAppData }) {
                   return (
                     <div
                       key={day.id}
-                      className="border border-ash-700 rounded-lg p-2"
+                      className="border border-ash-200 rounded-lg p-2"
                     >
-                      <p className="text-xs font-semibold text-ash-300 mb-1">{day.name}</p>
+                      <p className="text-xs font-semibold text-ash-600 mb-1">{day.name}</p>
                       <ul className="text-sm space-y-0.5">
                         {dayTargets.map((t) => (
                           <li key={t.id}>
-                            <span className="text-ash-400">{t.exerciseName} ({t.muscleGroup})</span>: {t.targetSets}×
+                            <span className="text-ash-500">{t.exerciseName} ({t.muscleGroup})</span>: {t.targetSets}×
                             {formatRepRange(t.targetRepsMin, t.targetRepsMax)}
                             {t.targetRIR !== undefined ? ` @ RIR ${t.targetRIR}` : ''}
                           </li>

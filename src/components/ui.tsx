@@ -2,7 +2,7 @@ import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode } from 'react
 
 export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
-    <div className={`bg-ash-900 border border-ash-700 rounded-xl p-3 shadow-sm ${className}`}>
+    <div className={`bg-white border border-ash-200 rounded-xl p-3 shadow-sm ${className}`}>
       {children}
     </div>
   );
@@ -14,9 +14,9 @@ export function Button({
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' | 'danger' }) {
   const styles = {
-    primary: 'bg-ember-600 text-ash-200 hover:bg-ember-700',
-    secondary: 'bg-ash-800 text-ash-100 hover:bg-ash-700',
-    danger: 'bg-red-950 text-red-400 hover:bg-red-900',
+    primary: 'bg-ember-600 text-ash-100 hover:bg-ember-700',
+    secondary: 'bg-ash-200 text-ash-800 hover:bg-ash-300',
+    danger: 'bg-red-100 text-red-700 hover:bg-red-200',
   };
   return (
     <button
@@ -36,8 +36,8 @@ export function IconButton({
   hoverOnly?: boolean;
 }) {
   const styles = {
-    secondary: 'text-ash-300',
-    danger: 'text-red-400',
+    secondary: 'text-ash-600',
+    danger: 'text-red-600',
   };
   const visibility = hoverOnly
     ? 'opacity-0 group-hover:opacity-100 focus-visible:opacity-100'
@@ -54,18 +54,18 @@ export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
       {...props}
-      className={`w-full px-3 py-1.5 rounded-lg border border-ash-600 bg-ash-950 text-sm focus:outline-none focus:ring-2 focus:ring-ember-500 ${props.className ?? ''}`}
+      className={`w-full px-3 py-1.5 rounded-lg border border-ash-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-ember-500 ${props.className ?? ''}`}
     />
   );
 }
 
 export function Label({ children }: { children: ReactNode }) {
-  return <label className="block text-xs font-medium text-ash-300 mb-1">{children}</label>;
+  return <label className="block text-xs font-medium text-ash-600 mb-1">{children}</label>;
 }
 
 export function EmptyState({ children }: { children: ReactNode }) {
   return (
-    <div className="text-center py-6 text-sm text-ash-300 border border-dashed border-ash-600 rounded-xl">
+    <div className="text-center py-6 text-sm text-ash-500 border border-dashed border-ash-300 rounded-xl">
       {children}
     </div>
   );

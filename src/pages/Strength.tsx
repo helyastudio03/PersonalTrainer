@@ -45,7 +45,7 @@ function exerciseFromTarget(target: ProgramExerciseTarget): StrengthExerciseEntr
 }
 
 const selectClassName =
-  'px-3 py-1.5 rounded-lg border border-ash-600 bg-ash-950 text-sm';
+  'px-3 py-1.5 rounded-lg border border-ash-300 bg-white text-sm';
 
 function SessionCard({
   session,
@@ -190,7 +190,7 @@ function SessionCard({
               {session.name ? `${session.name} · ${session.date}` : session.date}
             </h3>
             {session.notes && (
-              <p className="text-xs text-ash-300 italic mt-0.5">{session.notes}</p>
+              <p className="text-xs text-ash-600 italic mt-0.5">{session.notes}</p>
             )}
           </div>
         )}
@@ -221,12 +221,12 @@ function SessionCard({
           editingExerciseId === e.id ? (
             <div
               key={e.id}
-              className="border border-ember-800 rounded-lg p-2 space-y-1"
+              className="border border-ember-300 rounded-lg p-2 space-y-1"
             >
               <p className="text-sm font-medium">{e.exerciseName}</p>
               {exerciseDraft.map((s, i) => (
                 <div key={s.id} className="flex items-center gap-2">
-                  <span className="w-5 shrink-0 text-xs text-ash-400">#{i + 1}</span>
+                  <span className="w-5 shrink-0 text-xs text-ash-500">#{i + 1}</span>
                   <Input
                     type="number"
                     min={0}
@@ -247,7 +247,7 @@ function SessionCard({
                     }
                   />
                   <button
-                    className="shrink-0 text-red-400 text-sm"
+                    className="shrink-0 text-red-600 text-sm"
                     onClick={() => removeDraftSet(s.id)}
                   >
                     ✕
@@ -275,8 +275,8 @@ function SessionCard({
                 className="whitespace-nowrap overflow-hidden text-ellipsis pr-0 group-hover:pr-14 transition-[padding-right]"
                 title={`${e.exerciseName}: ${formatSetsSummary(e.sets)}${e.notes ? ` — ${e.notes}` : ''}`}
               >
-                <span className="text-ash-400">{e.exerciseName}</span>: {formatSetsSummary(e.sets)}
-                {e.notes && <span className="text-ash-400 italic"> — {e.notes}</span>}
+                <span className="text-ash-500">{e.exerciseName}</span>: {formatSetsSummary(e.sets)}
+                {e.notes && <span className="text-ash-500 italic"> — {e.notes}</span>}
               </div>
               <div className="absolute right-0 top-0 flex gap-1">
                 <IconButton
@@ -445,7 +445,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
           {sortedSessions.length > 0 &&
             (confirmingClear ? (
               <>
-                <span className="text-sm text-ash-300 self-center">Tout supprimer ?</span>
+                <span className="text-sm text-ash-600 self-center">Tout supprimer ?</span>
                 <Button variant="danger" onClick={clearHistory}>
                   Confirmer
                 </Button>
@@ -464,7 +464,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
 
       {showForm && (
         <Card className="space-y-3">
-          <h2 className="text-sm font-semibold text-ash-300">Nouvelle séance</h2>
+          <h2 className="text-sm font-semibold text-ash-600">Nouvelle séance</h2>
           <div className="grid grid-cols-3 gap-2">
             <div>
               <Label>Date</Label>
@@ -477,7 +477,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
             <div>
               <Label>Programme (optionnel)</Label>
               <select
-                className="w-full px-3 py-1.5 rounded-lg border border-ash-600 bg-ash-950 text-sm"
+                className="w-full px-3 py-1.5 rounded-lg border border-ash-300 bg-white text-sm"
                 value={programId}
                 onChange={(e) => setProgramId(e.target.value)}
               >
@@ -501,8 +501,8 @@ export default function Strength({ appData }: { appData: UseAppData }) {
           </div>
 
           {selectedProgram && selectedProgram.strengthTargets.length > 0 && (
-            <div className="border border-ember-900 bg-ember-950/40 rounded-lg p-2 space-y-2">
-              <p className="text-xs font-semibold text-ember-300">
+            <div className="border border-ember-200 bg-ember-50 rounded-lg p-2 space-y-2">
+              <p className="text-xs font-semibold text-ember-700">
                 Exercices de "{selectedProgram.name}"
               </p>
               {selectedProgram.days.map((day) => {
@@ -511,10 +511,10 @@ export default function Strength({ appData }: { appData: UseAppData }) {
                 return (
                   <div key={day.id}>
                     <div className="flex justify-between items-center mb-1">
-                      <p className="text-xs text-ember-400/70">{day.name}</p>
+                      <p className="text-xs text-ember-600/70">{day.name}</p>
                       <button
                         type="button"
-                        className="text-xs text-ember-400 hover:underline"
+                        className="text-xs text-ember-600 hover:underline"
                         onClick={() => dayTargets.forEach((t) => addExerciseFromTarget(t))}
                       >
                         + Tout ajouter
@@ -526,7 +526,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
                           key={t.id}
                           type="button"
                           onClick={() => addExerciseFromTarget(t)}
-                          className="text-xs px-2 py-1 rounded-full border border-ember-700 text-ember-300 hover:bg-ember-900"
+                          className="text-xs px-2 py-1 rounded-full border border-ember-300 text-ember-700 hover:bg-ember-100"
                         >
                           + {t.exerciseName} ({t.targetSets}×
                           {formatRepRange(t.targetRepsMin, t.targetRepsMax)}
@@ -553,14 +553,14 @@ export default function Strength({ appData }: { appData: UseAppData }) {
                   ? getLastPerformance(data.strengthSessions, ex.exerciseName)
                   : null;
                 return (
-                  <div key={ex.id} className="border border-ash-700 rounded-lg p-2">
+                  <div key={ex.id} className="border border-ash-200 rounded-lg p-2">
                     <div className="flex gap-2 items-center mb-1.5">
                       <Input
                         placeholder="Nom de l'exercice (ex: Squat)"
                         value={ex.exerciseName}
                         onChange={(e) => updateExercise(ex.id, e.target.value)}
                       />
-                      <button className="text-red-400 text-sm shrink-0" onClick={() => removeExercise(ex.id)}>
+                      <button className="text-red-600 text-sm shrink-0" onClick={() => removeExercise(ex.id)}>
                         ✕
                       </button>
                     </div>
@@ -570,7 +570,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
                         const lastSet = lastPerformance?.sets[i];
                         return (
                           <div key={s.id} className="flex items-center gap-2">
-                            <span className="w-5 shrink-0 text-xs text-ash-400">#{i + 1}</span>
+                            <span className="w-5 shrink-0 text-xs text-ash-500">#{i + 1}</span>
                             <Input
                               type="number"
                               min={0}
@@ -595,7 +595,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
                               }
                             />
                             <button
-                              className="shrink-0 text-red-400 text-sm"
+                              className="shrink-0 text-red-600 text-sm"
                               onClick={() => removeSet(ex.id, s.id)}
                             >
                               ✕
@@ -627,11 +627,11 @@ export default function Strength({ appData }: { appData: UseAppData }) {
         <EmptyState>Aucune séance de musculation enregistrée.</EmptyState>
       ) : (
         <>
-          <p className="text-xs text-ash-400">Format des séries : poids (kg) × répétitions</p>
+          <p className="text-xs text-ash-500">Format des séries : poids (kg) × répétitions</p>
           <div className="space-y-4">
             {monthGroups.map((group) => (
               <div key={group.key} className="space-y-2">
-                <h2 className="text-sm font-semibold text-ash-300 uppercase tracking-wide border-b border-ash-800 pb-1">
+                <h2 className="text-sm font-semibold text-ash-600 uppercase tracking-wide border-b border-ash-200 pb-1">
                   {group.label}
                 </h2>
                 <div className="space-y-2">

@@ -91,14 +91,14 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
             <div>
               <p className="font-medium">{activeProgram.name}</p>
               {suggestedDay && (
-                <p className="text-sm text-ash-300">
+                <p className="text-sm text-ash-600">
                   Prochaine séance suggérée : <span className="font-medium">{suggestedDay.name}</span>
                 </p>
               )}
             </div>
             <Link
               to="/musculation"
-              className="text-xs bg-ember-600 text-ash-200 rounded px-3 py-1.5 hover:bg-ember-700 shrink-0"
+              className="text-xs bg-ember-600 text-ash-100 rounded px-3 py-1.5 hover:bg-ember-700 shrink-0"
             >
               Démarrer une séance
             </Link>
@@ -122,8 +122,8 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
                   key={t.muscleGroup}
                   className={`text-xs rounded-full px-2 py-1 ${
                     met
-                      ? 'bg-amber-950 text-amber-400'
-                      : 'bg-ash-800 text-ash-200'
+                      ? 'bg-amber-100 text-amber-700'
+                      : 'bg-ash-200 text-ash-700'
                   }`}
                 >
                   {t.muscleGroup} <span className="font-semibold">{actual}/{t.weeklySets}</span>
@@ -144,12 +144,12 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
               {recentPRs.map((r) => (
                 <li
                   key={`${r.exerciseName}-${r.weightKg}`}
-                  className="text-sm flex justify-between border-b border-ash-800 py-1"
+                  className="text-sm flex justify-between border-b border-ash-200 py-1"
                 >
                   <span>
-                    {r.exerciseName} <span className="text-ash-300">({r.weightKg} kg)</span>
+                    {r.exerciseName} <span className="text-ash-600">({r.weightKg} kg)</span>
                   </span>
-                  <span className="text-amber-400 font-medium">
+                  <span className="text-amber-600 font-medium">
                     {r.previousMaxReps}→{r.maxReps} reps
                   </span>
                 </li>
@@ -174,17 +174,17 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
                 return (
                   <li
                     key={s.id}
-                    className="text-sm flex justify-between border-b border-ash-800 py-1"
+                    className="text-sm flex justify-between border-b border-ash-200 py-1"
                   >
                     <span>
                       {s.name ? `${s.name} · ${s.date}` : s.date}
                       {recordCount > 0 && (
-                        <span className="ml-1.5 text-amber-400">
+                        <span className="ml-1.5 text-amber-600">
                           {recordCount > 1 ? recordCount : ''}⭐
                         </span>
                       )}
                     </span>
-                    <span className="text-ash-300">
+                    <span className="text-ash-600">
                       {s.exercises.length} exercice{s.exercises.length > 1 ? 's' : ''}
                     </span>
                   </li>
@@ -197,7 +197,7 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
 
       <Card>
         <h2 className="font-semibold mb-2">Sauvegarde</h2>
-        <p className="text-xs text-ash-300 mb-2">
+        <p className="text-xs text-ash-600 mb-2">
           Exporte tes données (programmes, séances) dans un fichier pour les sauvegarder ailleurs,
           ou importe un fichier exporté précédemment.
         </p>
@@ -216,10 +216,10 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
             onChange={handleFileChange}
           />
         </div>
-        {importError && <p className="text-xs text-red-400 mt-2">{importError}</p>}
+        {importError && <p className="text-xs text-red-600 mt-2">{importError}</p>}
         {pendingImport && (
           <div className="mt-2 flex flex-wrap items-center gap-2">
-            <span className="text-xs text-ash-300">
+            <span className="text-xs text-ash-600">
               Remplacer toutes les données actuelles par ce fichier ({pendingImport.programs.length}{' '}
               programme{pendingImport.programs.length > 1 ? 's' : ''},{' '}
               {pendingImport.strengthSessions.length} séance

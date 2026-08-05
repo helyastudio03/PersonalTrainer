@@ -2,8 +2,8 @@ import { NavLink, Outlet } from 'react-router-dom';
 
 const linkBase =
   'px-3 py-2 rounded-lg text-sm font-semibold uppercase tracking-wide transition-colors whitespace-nowrap';
-const linkInactive = 'text-ash-200/70 hover:text-ash-100 hover:bg-white/5';
-const linkActive = 'bg-ember-600 text-ash-200 shadow-[0_0_12px_rgba(242,84,31,0.55)]';
+const linkInactive = 'text-ash-500 hover:text-ash-800 hover:bg-ash-100';
+const linkActive = 'bg-ember-600 text-ash-100 shadow-[0_0_12px_rgba(242,84,31,0.35)]';
 
 const navItems = [
   { to: '/', label: 'Accueil', end: true },
@@ -15,10 +15,10 @@ const navItems = [
 
 export default function Layout() {
   return (
-    <div className="min-h-svh bg-ash-950 text-ash-200">
-      <header className="sticky top-0 z-10 relative overflow-hidden bg-gradient-to-b from-ash-950 via-ash-900 to-ash-950">
+    <div className="min-h-svh bg-ash-100 text-ash-800">
+      <header className="sticky top-0 z-10 relative overflow-hidden bg-white">
         <svg
-          className="absolute inset-0 w-full h-full opacity-30 pointer-events-none"
+          className="absolute inset-0 w-full h-full opacity-10 pointer-events-none"
           preserveAspectRatio="none"
           viewBox="0 0 800 100"
         >

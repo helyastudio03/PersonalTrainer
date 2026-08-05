@@ -11,8 +11,8 @@ import {
 function chipClassName(active: boolean) {
   return `text-xs px-2 py-1 rounded-full border transition-colors ${
     active
-      ? 'bg-ember-600 text-ash-200 border-transparent'
-      : 'border-ash-600 text-ash-200 hover:bg-ash-800'
+      ? 'bg-ember-600 text-ash-100 border-transparent'
+      : 'border-ash-300 text-ash-700 hover:bg-ash-100'
   }`;
 }
 
@@ -111,7 +111,7 @@ export default function Records({ appData }: { appData: UseAppData }) {
 
       <Card className="space-y-3">
         <div className="flex justify-between items-center">
-          <h2 className="text-sm font-semibold text-ash-300">Filtres</h2>
+          <h2 className="text-sm font-semibold text-ash-600">Filtres</h2>
           <IconButton
             variant="secondary"
             hoverOnly={false}
@@ -125,7 +125,7 @@ export default function Records({ appData }: { appData: UseAppData }) {
 
         {availableExerciseNames.length > 0 && (
           <div>
-            <p className="text-xs font-semibold text-ash-300 mb-1.5">Exercice</p>
+            <p className="text-xs font-semibold text-ash-600 mb-1.5">Exercice</p>
             <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {availableMuscleGroups.map((mg) => {
                 const names = exercisesByGroup.map.get(mg);
@@ -134,7 +134,7 @@ export default function Records({ appData }: { appData: UseAppData }) {
                 return (
                   <div
                     key={mg}
-                    className="border border-ash-700 rounded-lg p-2 space-y-1.5"
+                    className="border border-ash-200 rounded-lg p-2 space-y-1.5"
                   >
                     <button
                       type="button"
@@ -142,8 +142,8 @@ export default function Records({ appData }: { appData: UseAppData }) {
                       title="Sélectionner/désélectionner tous les exercices de ce groupe"
                       className={`w-full text-left text-xs font-semibold uppercase tracking-wide ${
                         groupActive
-                          ? 'text-ember-400'
-                          : 'text-ash-300 hover:text-ash-100'
+                          ? 'text-ember-600'
+                          : 'text-ash-600 hover:text-ash-800'
                       }`}
                     >
                       {mg}
@@ -164,8 +164,8 @@ export default function Records({ appData }: { appData: UseAppData }) {
                 );
               })}
               {exercisesByGroup.ungrouped.length > 0 && (
-                <div className="border border-ash-700 rounded-lg p-2 space-y-1.5">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-ash-400">
+                <div className="border border-ash-200 rounded-lg p-2 space-y-1.5">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-ash-500">
                     Sans groupe
                   </p>
                   <div className="flex flex-wrap gap-1.5">
@@ -208,7 +208,7 @@ export default function Records({ appData }: { appData: UseAppData }) {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-left text-ash-300 border-b border-ash-800">
+                    <tr className="text-left text-ash-600 border-b border-ash-200">
                       <th className="py-1 pr-3">Reps</th>
                       <th className="py-1 pr-3">Poids</th>
                       <th className="py-1">Date</th>
@@ -216,20 +216,20 @@ export default function Records({ appData }: { appData: UseAppData }) {
                   </thead>
                   <tbody>
                     {exerciseRecords.map((r) => (
-                      <tr key={r.reps} className="border-b border-ash-900">
+                      <tr key={r.reps} className="border-b border-ash-100">
                         <td className="py-1 pr-3 font-medium">{r.reps}</td>
                         <td className="py-1 pr-3">
                           {r.maxWeight} kg
                           {r.lastWeight < r.maxWeight && (
                             <span
-                              className="ml-1 text-ash-400"
+                              className="ml-1 text-ash-500"
                               title={`Dernière perf: ${r.lastWeight} kg le ${r.lastDate}`}
                             >
                               ↘
                             </span>
                           )}
                         </td>
-                        <td className="py-1 text-ash-300">{r.date}</td>
+                        <td className="py-1 text-ash-600">{r.date}</td>
                       </tr>
                     ))}
                   </tbody>
