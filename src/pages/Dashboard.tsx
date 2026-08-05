@@ -21,24 +21,13 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
   const [exportJson, setExportJson] = useState<string | null>(null);
   const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'error'>('idle');
 
-  // Le téléchargement direct (lien <a download>) ne fonctionne pas dans
-  // certains contextes restreints (ex: iframe sandboxée d'un artefact
-  // publié) : on ouvre systématiquement une popup avec le JSON, copiable
-  // manuellement, en plus de tenter le téléchargement.
+  // Le téléchargement direct (lien <a download>) est bloqué dans certains
+  // contextes restreints (ex: iframe sandboxée d'un artefact publié), sans
+  // erreur visible : on affiche donc le JSON dans une popup copiable plutôt
+  // que de dépendre du téléchargement.
   function handleExport() {
     setExportJson(JSON.stringify(data, null, 2));
     setCopyStatus('idle');
-  }
-
-  function downloadExportFile() {
-    if (!exportJson) return;
-    const blob = new Blob([exportJson], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `training-tracker-${new Date().toISOString().slice(0, 10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
   }
 
   async function copyExportJson() {
@@ -391,8 +380,8 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
               </button>
             </div>
             <p className="text-xs text-ash-600">
-              Copie ce texte dans un fichier .json pour le sauvegarder, ou essaie le téléchargement
-              direct (peut ne pas fonctionner selon l'endroit où l'app est ouverte).
+              Copie ce texte (bouton ou sélection manuelle), colle-le dans un nouveau fichier texte, et
+              enregistre-le avec l'extension .json pour le conserver.
             </p>
             <textarea
               readOnly
@@ -407,9 +396,6 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
                   : copyStatus === 'error'
                     ? 'Échec — sélectionne le texte et copie-le manuellement'
                     : '📋 Copier'}
-              </Button>
-              <Button variant="secondary" onClick={downloadExportFile}>
-                ⬇️ Télécharger le fichier
               </Button>
               <Button variant="secondary" onClick={() => setExportJson(null)}>
                 Fermer
