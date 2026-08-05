@@ -14,7 +14,7 @@ import type { ValueType, NameType } from 'recharts/types/component/DefaultToolti
 import type { UseAppData } from '../lib/useAppData';
 import type { SharedExerciseFilters } from '../lib/useSharedFilters';
 import type { MuscleGroup } from '../types';
-import { Card, EmptyState, IconButton, Input, Label } from '../components/ui';
+import { Card, EmptyState, IconButton, Input, Label, RECORD_COLOR } from '../components/ui';
 import {
   getExerciseMuscleGroups,
   getMultiExerciseMetricSeries,
@@ -49,16 +49,12 @@ function renderRecordDot(color: string, exerciseName: string) {
     const isRecord = payload?.[`${exerciseName}__record`];
     if (isRecord) {
       return (
-        <text
-          key={`dot-${exerciseName}-${index}`}
-          x={cx}
-          y={cy}
-          textAnchor="middle"
-          dominantBaseline="central"
-          fontSize={14}
-        >
-          ⭐
-        </text>
+        <g key={`dot-${exerciseName}-${index}`} transform={`translate(${cx - 6}, ${cy - 6}) scale(0.5)`}>
+          <path
+            d="M12 2 14.9 8.6 22 9.3 16.5 14 18.2 21 12 17.3 5.8 21 7.5 14 2 9.3 9.1 8.6 12 2Z"
+            fill={RECORD_COLOR}
+          />
+        </g>
       );
     }
     return <circle key={`dot-${exerciseName}-${index}`} cx={cx} cy={cy} r={3} fill={color} stroke={color} />;

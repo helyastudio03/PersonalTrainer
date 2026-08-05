@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { UseAppData } from '../lib/useAppData';
 import type { AppData } from '../types';
-import { Button, Card, EmptyState } from '../components/ui';
+import { Button, Card, EmptyState, RECORD_COLOR, RecordStar } from '../components/ui';
 import {
   getActualWeeklySetsByMuscleGroup,
   getExerciseMuscleGroups,
@@ -126,7 +126,7 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
 
       {activeProgram && targetVolume.length > 0 && (
         <Card>
-          <h2 className="font-semibold mb-2">Volume hebdomadaire (cette semaine)</h2>
+          <h2 className="font-semibold mb-2">Volume hebdomadaire</h2>
           <div className="flex flex-wrap gap-1.5">
             {targetVolume.map((t) => {
               const actual = actualByGroup.get(t.muscleGroup) ?? 0;
@@ -200,8 +200,11 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
                   <span>
                     {r.exerciseName} <span className="text-ash-600">({r.weightKg} kg)</span>
                   </span>
-                  <span className="text-amber-600 font-medium">
-                    {r.previousMaxReps}→{r.maxReps} reps
+                  <span className="text-right">
+                    <span className="text-amber-600 font-medium">
+                      {r.previousMaxReps}→{r.maxReps} reps
+                    </span>
+                    <span className="block text-xs text-ash-500">{r.date}</span>
                   </span>
                 </li>
               ))}
@@ -234,8 +237,13 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
                     <span>
                       {s.name ? `${s.name} · ${s.date}` : s.date}
                       {records.length > 0 && (
-                        <span className="ml-1.5 text-amber-600" title={recordsTooltip}>
-                          {records.length > 1 ? records.length : ''}⭐
+                        <span
+                          className="ml-1.5 text-xs inline-flex items-center gap-0.5"
+                          style={{ color: RECORD_COLOR }}
+                          title={recordsTooltip}
+                        >
+                          {records.length > 1 ? records.length : ''}
+                          <RecordStar />
                         </span>
                       )}
                     </span>

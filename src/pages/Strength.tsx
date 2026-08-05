@@ -9,7 +9,7 @@ import type {
   StrengthSession,
   StrengthSet,
 } from '../types';
-import { Button, Card, EmptyState, IconButton, Input, Label } from '../components/ui';
+import { Button, Card, EmptyState, IconButton, Input, Label, RECORD_COLOR, RecordStar } from '../components/ui';
 import {
   formatMonthLabel,
   formatRepRange,
@@ -321,7 +321,7 @@ function SessionCard({
               </span>
               <div className="relative text-sm">
                 <div
-                  className="whitespace-nowrap overflow-hidden text-ellipsis pr-0 group-hover:pr-14 transition-[padding-right]"
+                  className="whitespace-nowrap overflow-hidden text-ellipsis pr-14"
                   title={`${e.exerciseName}: ${formatSetsSummary(e.sets)}${e.notes ? ` — ${e.notes}` : ''}`}
                 >
                   {formatSetsSummary(e.sets)}
@@ -353,8 +353,13 @@ function SessionCard({
                   .map((r) => `${r.weightKg}kg : ${r.previousMaxReps}→${r.maxReps} reps`)
                   .join('\n');
                 return (
-                  <span className="text-sm text-amber-600 shrink-0" title={tooltip}>
-                    {records.length > 1 ? records.length : ''}⭐
+                  <span
+                    className="text-xs shrink-0 flex items-center gap-0.5"
+                    style={{ color: RECORD_COLOR }}
+                    title={tooltip}
+                  >
+                    {records.length > 1 ? records.length : ''}
+                    <RecordStar />
                   </span>
                 );
               })()}

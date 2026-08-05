@@ -70,3 +70,25 @@ export function EmptyState({ children }: { children: ReactNode }) {
     </div>
   );
 }
+
+// Couleur sobre/pastel utilisée pour toutes les indications de record
+// (étoile plate), volontairement en dehors de la palette ember/ash pour
+// rester discrète sans être criarde comme l'emoji ⭐.
+export const RECORD_COLOR = '#a3823f';
+
+// Étoile plate (path SVG, pas d'emoji) pour indiquer un record personnel,
+// en flat design sobre plutôt que l'emoji ⭐ (trop voyant/glossy).
+export function RecordStar({ className = '' }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="0.85em"
+      height="0.85em"
+      fill="currentColor"
+      className={`inline-block align-[-0.05em] ${className}`}
+      aria-hidden="true"
+    >
+      <path d="M12 2 14.9 8.6 22 9.3 16.5 14 18.2 21 12 17.3 5.8 21 7.5 14 2 9.3 9.1 8.6 12 2Z" />
+    </svg>
+  );
+}
