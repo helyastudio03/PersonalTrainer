@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { UseAppData } from '../lib/useAppData';
-import type { AppData } from '../types';
+import type { AppData, StrengthSession } from '../types';
 import { Button, Card, EmptyState, RECORD_COLOR, RecordStar } from '../components/ui';
 import {
   getActualWeeklySetsByMuscleGroup,
@@ -17,6 +17,7 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [pendingImport, setPendingImport] = useState<AppData | null>(null);
   const [importError, setImportError] = useState('');
+  const [monthOffset, setMonthOffset] = useState(0);
 
   function handleExport() {
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -71,10 +72,25 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
 
   const recordsByDate = getRecordsByDate(data.strengthSessions);
 
-  const sessionDates = new Set(data.strengthSessions.map((s) => s.date));
+  const sessionsByDate = new Map<string, StrengthSession[]>();
+  for (const s of data.strengthSessions) {
+    const list = sessionsByDate.get(s.date);
+    if (list) list.push(s);
+    else sessionsByDate.set(s.date, [s]);
+  }
+
+  function sessionLabel(s: StrengthSession): string {
+    const programName = s.programId
+      ? data.programs.find((p) => p.id === s.programId)?.name
+      : undefined;
+    const parts = [programName, s.name].filter((p): p is string => !!p);
+    return parts.length > 0 ? parts.join(' · ') : 'Séance';
+  }
+
   const today = new Date();
-  const calendarYear = today.getFullYear();
-  const calendarMonth = today.getMonth();
+  const baseMonthDate = new Date(today.getFullYear(), today.getMonth() + monthOffset, 1);
+  const calendarYear = baseMonthDate.getFullYear();
+  const calendarMonth = baseMonthDate.getMonth();
   const firstOfMonth = new Date(calendarYear, calendarMonth, 1);
   const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
   const leadingBlanks = (firstOfMonth.getDay() + 6) % 7; // lundi = 0
@@ -86,7 +102,7 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
       return `${calendarYear}-${String(calendarMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
     }),
   ];
-  const calendarMonthLabel = today.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+  const calendarMonthLabel = baseMonthDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
 
   return (
     <div className="space-y-3">
@@ -150,7 +166,39 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
 
       <div className="grid md:grid-cols-3 gap-3">
         <Card>
-          <h2 className="font-semibold mb-2 capitalize">Calendrier — {calendarMonthLabel}</h2>
+          <div className="flex items-center justify-between mb-2">
+            <button
+              type="button"
+              onClick={() => setMonthOffset((o) => o - 1)}
+              className="text-ash-500 hover:text-ash-800 w-6 h-6 flex items-center justify-center rounded"
+              title="Mois précédent"
+              aria-label="Mois précédent"
+            >
+              ‹
+            </button>
+            <h2 className="font-semibold capitalize text-sm flex items-center gap-1.5">
+              Calendrier — {calendarMonthLabel}
+              {monthOffset !== 0 && (
+                <button
+                  type="button"
+                  onClick={() => setMonthOffset(0)}
+                  className="text-xs font-normal text-ember-600 hover:underline normal-case"
+                >
+                  aujourd'hui
+                </button>
+              )}
+            </h2>
+            <button
+              type="button"
+              onClick={() => setMonthOffset((o) => Math.min(0, o + 1))}
+              disabled={monthOffset >= 0}
+              className="text-ash-500 hover:text-ash-800 w-6 h-6 flex items-center justify-center rounded disabled:opacity-30 disabled:cursor-not-allowed"
+              title="Mois suivant"
+              aria-label="Mois suivant"
+            >
+              ›
+            </button>
+          </div>
           <div className="grid grid-cols-7 gap-0.5 text-center max-w-56 mx-auto">
             {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((d, i) => (
               <div key={i} className="text-[9px] font-semibold text-ash-500 uppercase">
@@ -159,14 +207,15 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
             ))}
             {calendarCells.map((dateStr, i) => {
               if (!dateStr) return <div key={i} />;
-              const hasSession = sessionDates.has(dateStr);
+              const daySessions = sessionsByDate.get(dateStr) ?? [];
+              const hasSession = daySessions.length > 0;
               const isToday = dateStr === todayStr;
               const day = Number(dateStr.slice(-2));
               return (
                 <div
                   key={i}
-                  title={hasSession ? `Séance le ${dateStr}` : dateStr}
-                  className={`w-6 h-6 flex items-center justify-center rounded-full text-[11px] ${
+                  title={hasSession ? daySessions.map(sessionLabel).join(', ') : dateStr}
+                  className={`w-6 h-6 flex items-center justify-center rounded-full text-[11px] cursor-default ${
                     hasSession
                       ? 'bg-ember-600 text-ash-100 font-semibold'
                       : isToday
