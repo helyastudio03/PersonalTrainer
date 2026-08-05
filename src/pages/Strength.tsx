@@ -354,7 +354,7 @@ function SessionCard({
                   .join('\n');
                 return (
                   <span
-                    className="text-xs shrink-0 flex items-center gap-0.5"
+                    className="text-xs shrink-0 flex items-center gap-0.5 p-1.5 -m-1.5 cursor-help"
                     style={{ color: RECORD_COLOR }}
                     title={tooltip}
                   >

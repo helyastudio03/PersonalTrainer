@@ -200,11 +200,11 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
                   <span>
                     {r.exerciseName} <span className="text-ash-600">({r.weightKg} kg)</span>
                   </span>
-                  <span className="text-right">
+                  <span className="text-right whitespace-nowrap">
                     <span className="text-amber-600 font-medium">
                       {r.previousMaxReps}→{r.maxReps} reps
-                    </span>
-                    <span className="block text-xs text-ash-500">{r.date}</span>
+                    </span>{' '}
+                    <span className="text-xs text-ash-500">{r.date}</span>
                   </span>
                 </li>
               ))}
@@ -238,7 +238,7 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
                       {s.name ? `${s.name} · ${s.date}` : s.date}
                       {records.length > 0 && (
                         <span
-                          className="ml-1.5 text-xs inline-flex items-center gap-0.5"
+                          className="ml-1.5 text-xs inline-flex items-center gap-0.5 p-1.5 -m-1.5 cursor-help"
                           style={{ color: RECORD_COLOR }}
                           title={recordsTooltip}
                         >
