@@ -1,6 +1,8 @@
+import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { UseAppData } from '../lib/useAppData';
-import { Card, EmptyState } from '../components/ui';
+import type { AppData } from '../types';
+import { Button, Card, EmptyState } from '../components/ui';
 import {
   getActualWeeklySetsByMuscleGroup,
   getExerciseMuscleGroups,
@@ -11,7 +13,45 @@ import {
 } from '../lib/records';
 
 export default function Dashboard({ appData }: { appData: UseAppData }) {
-  const { data } = appData;
+  const { data, replaceData } = appData;
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [pendingImport, setPendingImport] = useState<AppData | null>(null);
+  const [importError, setImportError] = useState('');
+
+  function handleExport() {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `plus-lourd-que-toi-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setImportError('');
+    try {
+      const parsed = JSON.parse(await file.text());
+      if (!Array.isArray(parsed.programs) || !Array.isArray(parsed.strengthSessions)) {
+        throw new Error('Format invalide');
+      }
+      setPendingImport({
+        programs: parsed.programs,
+        strengthSessions: parsed.strengthSessions,
+        activeProgramId: parsed.activeProgramId,
+      });
+    } catch {
+      setImportError("Fichier invalide : impossible d'importer ces données.");
+    }
+  }
+
+  function confirmImport() {
+    if (pendingImport) replaceData(pendingImport);
+    setPendingImport(null);
+  }
 
   const recentStrength = [...data.strengthSessions]
     .sort((a, b) => b.date.localeCompare(a.date))
@@ -154,6 +194,46 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
           )}
         </Card>
       </div>
+
+      <Card>
+        <h2 className="font-semibold mb-2">Sauvegarde</h2>
+        <p className="text-xs text-ash-300 mb-2">
+          Exporte tes données (programmes, séances) dans un fichier pour les sauvegarder ailleurs,
+          ou importe un fichier exporté précédemment.
+        </p>
+        <div className="flex flex-wrap gap-2 items-center">
+          <Button variant="secondary" onClick={handleExport}>
+            ⬇️ Exporter
+          </Button>
+          <Button variant="secondary" onClick={() => fileInputRef.current?.click()}>
+            ⬆️ Importer
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/json"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+        </div>
+        {importError && <p className="text-xs text-red-400 mt-2">{importError}</p>}
+        {pendingImport && (
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <span className="text-xs text-ash-300">
+              Remplacer toutes les données actuelles par ce fichier ({pendingImport.programs.length}{' '}
+              programme{pendingImport.programs.length > 1 ? 's' : ''},{' '}
+              {pendingImport.strengthSessions.length} séance
+              {pendingImport.strengthSessions.length > 1 ? 's' : ''}) ?
+            </span>
+            <Button variant="danger" onClick={confirmImport}>
+              Confirmer
+            </Button>
+            <Button variant="secondary" onClick={() => setPendingImport(null)}>
+              Annuler
+            </Button>
+          </div>
+        )}
+      </Card>
     </div>
   );
 }

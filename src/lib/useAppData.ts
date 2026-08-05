@@ -64,6 +64,10 @@ export function useAppData() {
     setData((d) => ({ ...d, strengthSessions: [] }));
   }, []);
 
+  const replaceData = useCallback((newData: AppData) => {
+    setData(newData);
+  }, []);
+
   return {
     data,
     addProgram,
@@ -74,6 +78,7 @@ export function useAppData() {
     updateStrengthSession,
     deleteStrengthSession,
     clearStrengthSessions,
+    replaceData,
   };
 }
 
