@@ -109,7 +109,7 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
           <div className="flex items-center justify-between gap-3">
             {suggestedDay ? (
               <p className="text-sm text-ash-600">
-                Prochaine séance suggérée : <span className="font-medium">{suggestedDay.name}</span>
+                Prochaine séance : <span className="font-medium">{suggestedDay.name}</span>
               </p>
             ) : (
               <span />

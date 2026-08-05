@@ -12,6 +12,7 @@ import {
   listAllExerciseNames,
 } from '../lib/records';
 import { generateFakeSessions } from '../lib/fakeData';
+import { getMuscleGroupColor } from '../lib/muscleColors';
 
 const EXERCISE_DATALIST_ID = 'known-exercise-names';
 
@@ -20,23 +21,172 @@ function emptyDraft(): Omit<Program, 'id' | 'createdAt'> {
   return { name: '', description: '', days: [firstDay], strengthTargets: [] };
 }
 
-function VolumeChart({ strengthTargets }: { strengthTargets: ProgramExerciseTarget[] }) {
+function VolumeChart({
+  strengthTargets,
+  highlightedGroup,
+  onToggleGroup,
+}: {
+  strengthTargets: ProgramExerciseTarget[];
+  highlightedGroup?: MuscleGroup | null;
+  onToggleGroup?: (mg: MuscleGroup) => void;
+}) {
   const volumes = getWeeklySetsByMuscleGroup(strengthTargets);
   if (volumes.length === 0) return null;
   return (
     <div>
       <p className="text-xs font-semibold text-ash-600 mb-1.5">Séries par semaine et par groupe musculaire</p>
       <div className="flex flex-wrap gap-1.5">
-        {volumes.map((v) => (
-          <span
-            key={v.muscleGroup}
-            className="text-xs rounded-full px-2 py-1 bg-ash-200 text-ash-700"
-          >
-            {v.muscleGroup} <span className="font-semibold">{v.weeklySets}</span>
-          </span>
-        ))}
+        {volumes.map((v) => {
+          const active = highlightedGroup === v.muscleGroup;
+          return (
+            <button
+              key={v.muscleGroup}
+              type="button"
+              onClick={() => onToggleGroup?.(v.muscleGroup)}
+              className={`text-xs rounded-full pl-1.5 pr-2 py-1 flex items-center gap-1.5 transition-colors ${
+                active ? 'bg-ash-300 text-ash-800' : 'bg-ash-200 text-ash-700 hover:bg-ash-300'
+              }`}
+            >
+              <span
+                className="w-1.5 h-1.5 rounded-full shrink-0"
+                style={{ backgroundColor: getMuscleGroupColor(v.muscleGroup) }}
+              />
+              {v.muscleGroup} <span className="font-semibold">{v.weeklySets}</span>
+            </button>
+          );
+        })}
       </div>
     </div>
+  );
+}
+
+function ProgramCard({
+  program,
+  isActive,
+  exerciseVariants,
+  onToggleActive,
+  onEdit,
+  onDelete,
+  onGenerateFakeHistory,
+  onOpenVariantsPopup,
+}: {
+  program: Program;
+  isActive: boolean;
+  exerciseVariants: Map<string, { variantName: string; date: string; sets: { reps: number; weightKg: number }[] }[]>;
+  onToggleActive: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+  onGenerateFakeHistory: () => void;
+  onOpenVariantsPopup: (exerciseName: string) => void;
+}) {
+  const [highlightedGroup, setHighlightedGroup] = useState<MuscleGroup | null>(null);
+
+  function toggleHighlight(mg: MuscleGroup) {
+    setHighlightedGroup((prev) => (prev === mg ? null : mg));
+  }
+
+  return (
+    <Card className="group space-y-2">
+      <div className="flex justify-between items-start">
+        <div>
+          <h3 className="font-semibold flex items-center gap-1.5">
+            {program.name}
+            {isActive && (
+              <span className="text-xs font-medium px-1.5 py-0.5 rounded-full bg-ember-100 text-ember-700">
+                Actif
+              </span>
+            )}
+          </h3>
+          {program.description && <p className="text-sm text-ash-600">{program.description}</p>}
+        </div>
+        <div className="flex gap-1.5 shrink-0">
+          <IconButton
+            variant="secondary"
+            onClick={onToggleActive}
+            hoverOnly={!isActive}
+            title={isActive ? 'Retirer comme programme actif' : 'Définir comme programme actif'}
+            aria-label={isActive ? 'Retirer comme programme actif' : 'Définir comme programme actif'}
+          >
+            {isActive ? '⭐' : '☆'}
+          </IconButton>
+          <IconButton variant="secondary" onClick={onEdit} title="Modifier" aria-label="Modifier">
+            ✏️
+          </IconButton>
+          <IconButton variant="danger" onClick={onDelete} title="Supprimer" aria-label="Supprimer">
+            ✕
+          </IconButton>
+        </div>
+      </div>
+
+      {program.strengthTargets.length > 0 && (
+        <button
+          type="button"
+          onClick={onGenerateFakeHistory}
+          className="text-xs text-ember-600 hover:underline"
+        >
+          🧪 Générer un historique fictif (test des visualisations)
+        </button>
+      )}
+
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-start">
+        {program.days.map((day) => {
+          const dayTargets = program.strengthTargets.filter((t) => t.dayId === day.id);
+          if (dayTargets.length === 0) return null;
+          return (
+            <div key={day.id} className="border border-ash-200 rounded-lg p-2">
+              <p className="text-xs font-semibold text-ash-600 mb-1">{day.name}</p>
+              <ul className="text-sm grid grid-cols-[auto_1fr_auto] gap-x-2 gap-y-0.5">
+                {dayTargets.map((t) => {
+                  const variants = exerciseVariants.get(t.exerciseName);
+                  const dimmed = highlightedGroup !== null && highlightedGroup !== t.muscleGroup;
+                  return (
+                    <li key={t.id} className="contents">
+                      <span
+                        className="w-1 rounded-full self-stretch shrink-0 transition-opacity"
+                        style={{
+                          backgroundColor: getMuscleGroupColor(t.muscleGroup),
+                          opacity: dimmed ? 0.25 : 1,
+                        }}
+                        title={t.muscleGroup}
+                      />
+                      <span
+                        className={`min-w-0 flex items-center gap-1 transition-opacity ${
+                          dimmed ? 'opacity-40' : ''
+                        } text-ash-500`}
+                      >
+                        <span className="truncate">{t.exerciseName}</span>
+                        {variants && variants.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => onOpenVariantsPopup(t.exerciseName)}
+                            title="Voir les variantes réalisées"
+                            className="shrink-0 text-ember-600"
+                          >
+                            🔀 {variants.length}
+                          </button>
+                        )}
+                      </span>
+                      <span
+                        className={`whitespace-nowrap transition-opacity ${dimmed ? 'opacity-40' : ''}`}
+                      >
+                        {t.targetSets}×{formatRepRange(t.targetRepsMin, t.targetRepsMax)}
+                        {t.targetRIR !== undefined ? ` @ RIR ${t.targetRIR}` : ''}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          );
+        })}
+      </div>
+
+      <VolumeChart
+        strengthTargets={program.strengthTargets}
+        highlightedGroup={highlightedGroup}
+        onToggleGroup={toggleHighlight}
+      />
+    </Card>
   );
 }
 
@@ -314,105 +464,17 @@ export default function Programs({ appData }: { appData: UseAppData }) {
       ) : (
         <div className="space-y-3">
           {data.programs.map((p) => (
-            <Card key={p.id} className="group space-y-2">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="font-semibold flex items-center gap-1.5">
-                    {p.name}
-                    {data.activeProgramId === p.id && (
-                      <span className="text-xs font-medium px-1.5 py-0.5 rounded-full bg-ember-100 text-ember-700">
-                        Actif
-                      </span>
-                    )}
-                  </h3>
-                  {p.description && <p className="text-sm text-ash-600">{p.description}</p>}
-                </div>
-                <div className="flex gap-1.5 shrink-0">
-                  <IconButton
-                    variant="secondary"
-                    onClick={() =>
-                      setActiveProgram(data.activeProgramId === p.id ? undefined : p.id)
-                    }
-                    hoverOnly={data.activeProgramId === p.id ? false : true}
-                    title={data.activeProgramId === p.id ? 'Retirer comme programme actif' : 'Définir comme programme actif'}
-                    aria-label={data.activeProgramId === p.id ? 'Retirer comme programme actif' : 'Définir comme programme actif'}
-                  >
-                    {data.activeProgramId === p.id ? '⭐' : '☆'}
-                  </IconButton>
-                  <IconButton
-                    variant="secondary"
-                    onClick={() => startEdit(p)}
-                    title="Modifier"
-                    aria-label="Modifier"
-                  >
-                    ✏️
-                  </IconButton>
-                  <IconButton
-                    variant="danger"
-                    onClick={() => deleteProgram(p.id)}
-                    title="Supprimer"
-                    aria-label="Supprimer"
-                  >
-                    ✕
-                  </IconButton>
-                </div>
-              </div>
-
-              {p.strengthTargets.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => generateFakeHistory(p)}
-                  className="text-xs text-ember-600 hover:underline"
-                >
-                  🧪 Générer un historique fictif (test des visualisations)
-                </button>
-              )}
-
-              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-start">
-                {p.days.map((day) => {
-                  const dayTargets = p.strengthTargets.filter((t) => t.dayId === day.id);
-                  if (dayTargets.length === 0) return null;
-                  return (
-                    <div
-                      key={day.id}
-                      className="border border-ash-200 rounded-lg p-2"
-                    >
-                      <p className="text-xs font-semibold text-ash-600 mb-1">{day.name}</p>
-                      <ul className="text-sm grid grid-cols-[1fr_auto] gap-x-3 gap-y-0.5">
-                        {dayTargets.map((t) => {
-                          const variants = exerciseVariants.get(t.exerciseName);
-                          return (
-                            <li key={t.id} className="contents">
-                              <span className="text-ash-500 min-w-0 flex items-center gap-1">
-                                <span className="truncate">
-                                  {t.exerciseName} ({t.muscleGroup})
-                                </span>
-                                {variants && variants.length > 0 && (
-                                  <button
-                                    type="button"
-                                    onClick={() => setVariantsPopup(t.exerciseName)}
-                                    title="Voir les variantes réalisées"
-                                    className="shrink-0 text-ember-600"
-                                  >
-                                    🔀 {variants.length}
-                                  </button>
-                                )}
-                              </span>
-                              <span className="whitespace-nowrap">
-                                {t.targetSets}×{formatRepRange(t.targetRepsMin, t.targetRepsMax)}
-                                {t.targetRIR !== undefined ? ` @ RIR ${t.targetRIR}` : ''}
-                              </span>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <VolumeChart strengthTargets={p.strengthTargets} />
-            </Card>
+            <ProgramCard
+              key={p.id}
+              program={p}
+              isActive={data.activeProgramId === p.id}
+              exerciseVariants={exerciseVariants}
+              onToggleActive={() => setActiveProgram(data.activeProgramId === p.id ? undefined : p.id)}
+              onEdit={() => startEdit(p)}
+              onDelete={() => deleteProgram(p.id)}
+              onGenerateFakeHistory={() => generateFakeHistory(p)}
+              onOpenVariantsPopup={setVariantsPopup}
+            />
           ))}
         </div>
       )}

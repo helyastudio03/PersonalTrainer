@@ -22,6 +22,7 @@ import {
   PROGRESSION_METRIC_LABELS,
 } from '../lib/records';
 import type { ProgressionMetric, ProgressionPeriod } from '../lib/records';
+import { getMuscleGroupColor } from '../lib/muscleColors';
 
 const METRICS: ProgressionMetric[] = ['weight', 'reps', 'weightReps', 'volume'];
 
@@ -216,12 +217,16 @@ export default function Progression({
                       type="button"
                       onClick={() => toggleMuscleGroup(mg)}
                       title="Sélectionner/désélectionner tous les exercices de ce groupe"
-                      className={`w-full text-left text-xs font-semibold uppercase tracking-wide ${
+                      className={`w-full flex items-center gap-1.5 text-left text-xs font-semibold uppercase tracking-wide ${
                         groupActive
                           ? 'text-ember-600'
                           : 'text-ash-600 hover:text-ash-800'
                       }`}
                     >
+                      <span
+                        className="w-1.5 h-1.5 rounded-full shrink-0"
+                        style={{ backgroundColor: getMuscleGroupColor(mg) }}
+                      />
                       {mg}
                     </button>
                     <div className="flex flex-wrap gap-1.5">

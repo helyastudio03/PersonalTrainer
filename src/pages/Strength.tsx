@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { v4 as uuid } from 'uuid';
 import type { UseAppData } from '../lib/useAppData';
 import type {
+  MuscleGroup,
   Program,
   ProgramExerciseTarget,
   StrengthExerciseEntry,
@@ -13,11 +14,13 @@ import {
   formatMonthLabel,
   formatRepRange,
   formatSetsSummary,
+  getExerciseMuscleGroups,
   getLastPerformance,
   groupSessionsIntoCycleRows,
   monthKey,
   suggestNextProgramDay,
 } from '../lib/records';
+import { getMuscleGroupColor } from '../lib/muscleColors';
 
 function todayIso() {
   return new Date().toISOString().slice(0, 10);
@@ -58,12 +61,14 @@ function chipClassName(active: boolean) {
 function SessionCard({
   session,
   programs,
+  exerciseMuscleGroups,
   updateStrengthSession,
   deleteStrengthSession,
   onDuplicate,
 }: {
   session: StrengthSession;
   programs: Program[];
+  exerciseMuscleGroups: Record<string, MuscleGroup>;
   updateStrengthSession: UseAppData['updateStrengthSession'];
   deleteStrengthSession: UseAppData['deleteStrengthSession'];
   onDuplicate: (session: StrengthSession) => void;
@@ -244,12 +249,12 @@ function SessionCard({
         </div>
       </div>
 
-      <div className="mt-1.5 grid grid-cols-[minmax(4rem,auto)_1fr] gap-x-3 gap-y-0.5">
+      <div className="mt-1.5 grid grid-cols-[auto_minmax(4rem,auto)_1fr] gap-x-2 gap-y-0.5">
         {session.exercises.map((e) =>
           editingExerciseId === e.id ? (
             <div
               key={e.id}
-              className="col-span-2 border border-ember-300 rounded-lg p-2 space-y-1"
+              className="col-span-3 border border-ember-300 rounded-lg p-2 space-y-1"
             >
               <p className="text-sm font-medium">{e.exerciseName}</p>
               {exerciseDraft.map((s, i) => (
@@ -299,6 +304,11 @@ function SessionCard({
             </div>
           ) : (
             <div key={e.id} className="contents group">
+              <span
+                className="w-1 rounded-full self-stretch shrink-0"
+                style={{ backgroundColor: getMuscleGroupColor(exerciseMuscleGroups[e.exerciseName]) }}
+                title={exerciseMuscleGroups[e.exerciseName]}
+              />
               <span className="text-sm text-ash-500 truncate">
                 {e.exerciseName}
                 {e.variantOf && (
@@ -350,6 +360,10 @@ export default function Strength({ appData }: { appData: UseAppData }) {
   const [exercises, setExercises] = useState<StrengthExerciseEntry[]>([emptyExercise()]);
   const [showForm, setShowForm] = useState(false);
   const [confirmingClear, setConfirmingClear] = useState(false);
+  const exerciseMuscleGroups = useMemo(
+    () => getExerciseMuscleGroups(data.programs),
+    [data.programs],
+  );
   const [programFilter, setProgramFilter] = useState<string[]>([]);
   const [variantPromptId, setVariantPromptId] = useState<string | null>(null);
   const [variantSelectDraft, setVariantSelectDraft] = useState('');
@@ -807,6 +821,7 @@ export default function Strength({ appData }: { appData: UseAppData }) {
                             key={s.id}
                             session={s}
                             programs={data.programs}
+                            exerciseMuscleGroups={exerciseMuscleGroups}
                             updateStrengthSession={updateStrengthSession}
                             deleteStrengthSession={deleteStrengthSession}
                             onDuplicate={duplicateSession}

@@ -8,6 +8,7 @@ import {
   getStrengthPRsByRepWeight,
   listStrengthExerciseNames,
 } from '../lib/records';
+import { getMuscleGroupColor } from '../lib/muscleColors';
 
 function chipClassName(active: boolean) {
   return `text-xs px-2 py-1 rounded-full border transition-colors ${
@@ -144,12 +145,16 @@ export default function Records({
                       type="button"
                       onClick={() => toggleMuscleGroup(mg)}
                       title="Sélectionner/désélectionner tous les exercices de ce groupe"
-                      className={`w-full text-left text-xs font-semibold uppercase tracking-wide ${
+                      className={`w-full flex items-center gap-1.5 text-left text-xs font-semibold uppercase tracking-wide ${
                         groupActive
                           ? 'text-ember-600'
                           : 'text-ash-600 hover:text-ash-800'
                       }`}
                     >
+                      <span
+                        className="w-1.5 h-1.5 rounded-full shrink-0"
+                        style={{ backgroundColor: getMuscleGroupColor(mg) }}
+                      />
                       {mg}
                     </button>
                     <div className="flex flex-wrap gap-1.5">
@@ -208,7 +213,14 @@ export default function Records({
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {[...byExercise.entries()].map(([exerciseName, exerciseRecords]) => (
             <Card key={exerciseName}>
-              <h2 className="font-semibold mb-2">{exerciseName}</h2>
+              <h2 className="font-semibold mb-2 flex items-center gap-2">
+                <span
+                  className="w-1 self-stretch rounded-full shrink-0"
+                  style={{ backgroundColor: getMuscleGroupColor(exerciseMuscleGroups[exerciseName]) }}
+                  title={exerciseMuscleGroups[exerciseName]}
+                />
+                {exerciseName}
+              </h2>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
