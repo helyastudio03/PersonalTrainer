@@ -441,25 +441,31 @@ export default function Strength({ appData }: { appData: UseAppData }) {
     setShowForm(false);
   }
 
-  function toggleForm() {
-    if (showForm) {
-      resetDraft();
-      setShowForm(false);
-    } else {
-      const activeProgram = data.programs.find((p) => p.id === data.activeProgramId);
-      if (activeProgram) {
-        setProgramId(activeProgram.id);
-        const suggested = suggestNextProgramDay(activeProgram, data.strengthSessions);
-        const dayTargets = suggested
-          ? activeProgram.strengthTargets.filter((t) => t.dayId === suggested.id)
-          : [];
-        if (dayTargets.length > 0) {
-          setName(suggested!.name);
-          setExercises(dayTargets.map((t) => exerciseFromTarget(t)));
-        }
+  function cancelForm() {
+    resetDraft();
+    setShowForm(false);
+  }
+
+  function startSuggestedSession() {
+    resetDraft();
+    const activeProgram = data.programs.find((p) => p.id === data.activeProgramId);
+    if (activeProgram) {
+      setProgramId(activeProgram.id);
+      const suggested = suggestNextProgramDay(activeProgram, data.strengthSessions);
+      const dayTargets = suggested
+        ? activeProgram.strengthTargets.filter((t) => t.dayId === suggested.id)
+        : [];
+      if (dayTargets.length > 0) {
+        setName(suggested!.name);
+        setExercises(dayTargets.map((t) => exerciseFromTarget(t)));
       }
-      setShowForm(true);
     }
+    setShowForm(true);
+  }
+
+  function startBlankSession() {
+    resetDraft();
+    setShowForm(true);
   }
 
   function clearHistory() {
@@ -539,7 +545,16 @@ export default function Strength({ appData }: { appData: UseAppData }) {
                 Supprimer l'historique
               </Button>
             ))}
-          <Button onClick={toggleForm}>{showForm ? 'Annuler' : '+ Nouvelle séance'}</Button>
+          {showForm ? (
+            <Button onClick={cancelForm}>Annuler</Button>
+          ) : (
+            <>
+              <Button variant="secondary" onClick={startBlankSession}>
+                + Séance vierge
+              </Button>
+              <Button onClick={startSuggestedSession}>+ Nouvelle séance</Button>
+            </>
+          )}
         </div>
       </div>
 
