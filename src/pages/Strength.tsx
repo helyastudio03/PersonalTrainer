@@ -197,12 +197,16 @@ function SessionCard({
         ) : (
           <div>
             <h3 className="font-semibold">
-              {session.name ? `${session.name} · ${session.date}` : session.date}
-              {session.programId && (
-                <span className="ml-1.5 text-xs font-normal text-ash-500">
-                  ({programs.find((p) => p.id === session.programId)?.name ?? 'programme supprimé'})
-                </span>
-              )}
+              {(() => {
+                const programName = session.programId
+                  ? (programs.find((p) => p.id === session.programId)?.name ?? 'programme supprimé')
+                  : undefined;
+                const label =
+                  programName && session.name
+                    ? `${programName} - ${session.name}`
+                    : programName ?? session.name;
+                return label ? `${label} · ${session.date}` : session.date;
+              })()}
             </h3>
             {session.notes && (
               <p className="text-xs text-ash-600 italic mt-0.5">{session.notes}</p>
