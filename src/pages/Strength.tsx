@@ -131,12 +131,13 @@ function SessionCard({
   }
 
   function saveExercise() {
-    if (exerciseDraft.length === 0) return;
+    const filledSets = exerciseDraft.filter((s) => s.reps !== 0 || s.weightKg !== 0);
+    if (filledSets.length === 0) return;
     updateStrengthSession({
       ...session,
       exercises: session.exercises.map((e) =>
         e.id === editingExerciseId
-          ? { ...e, sets: exerciseDraft, notes: exerciseNotesDraft.trim() || undefined }
+          ? { ...e, sets: filledSets, notes: exerciseNotesDraft.trim() || undefined }
           : e,
       ),
     });
@@ -486,7 +487,9 @@ export default function Strength({ appData }: { appData: UseAppData }) {
   }
 
   function submit() {
-    const validExercises = exercises.filter((e) => e.exerciseName.trim() && e.sets.length > 0);
+    const validExercises = exercises
+      .map((e) => ({ ...e, sets: e.sets.filter((s) => s.reps !== 0 || s.weightKg !== 0) }))
+      .filter((e) => e.exerciseName.trim() && e.sets.length > 0);
     if (validExercises.length === 0) return;
     addStrengthSession({
       date,

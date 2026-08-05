@@ -54,7 +54,7 @@ export function generateFakeSessions(
         return { id: uuid(), exerciseName: target.exerciseName, sets };
       });
 
-      sessions.push({ date: dateStr, programId: program.id, exercises });
+      sessions.push({ date: dateStr, programId: program.id, name: day.name, exercises });
     });
   }
 
