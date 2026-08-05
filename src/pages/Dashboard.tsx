@@ -18,15 +18,37 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
   const [pendingImport, setPendingImport] = useState<AppData | null>(null);
   const [importError, setImportError] = useState('');
   const [monthOffset, setMonthOffset] = useState(0);
+  const [exportJson, setExportJson] = useState<string | null>(null);
+  const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'error'>('idle');
 
+  // Le téléchargement direct (lien <a download>) ne fonctionne pas dans
+  // certains contextes restreints (ex: iframe sandboxée d'un artefact
+  // publié) : on ouvre systématiquement une popup avec le JSON, copiable
+  // manuellement, en plus de tenter le téléchargement.
   function handleExport() {
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    setExportJson(JSON.stringify(data, null, 2));
+    setCopyStatus('idle');
+  }
+
+  function downloadExportFile() {
+    if (!exportJson) return;
+    const blob = new Blob([exportJson], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = `training-tracker-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  async function copyExportJson() {
+    if (!exportJson) return;
+    try {
+      await navigator.clipboard.writeText(exportJson);
+      setCopyStatus('copied');
+    } catch {
+      setCopyStatus('error');
+    }
   }
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -347,6 +369,55 @@ export default function Dashboard({ appData }: { appData: UseAppData }) {
           </div>
         )}
       </Card>
+
+      {exportJson !== null && (
+        <div
+          className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4"
+          onClick={() => setExportJson(null)}
+        >
+          <div
+            className="bg-white rounded-lg p-4 max-w-lg w-full shadow-lg space-y-3"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center">
+              <h3 className="font-semibold text-sm">Exporter les données</h3>
+              <button
+                type="button"
+                onClick={() => setExportJson(null)}
+                className="text-ash-500 hover:text-ash-700 text-sm"
+                aria-label="Fermer"
+              >
+                ✕
+              </button>
+            </div>
+            <p className="text-xs text-ash-600">
+              Copie ce texte dans un fichier .json pour le sauvegarder, ou essaie le téléchargement
+              direct (peut ne pas fonctionner selon l'endroit où l'app est ouverte).
+            </p>
+            <textarea
+              readOnly
+              value={exportJson}
+              onFocus={(e) => e.target.select()}
+              className="w-full h-48 text-xs font-mono border border-ash-300 rounded p-2 bg-ash-50 resize-none"
+            />
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={copyExportJson}>
+                {copyStatus === 'copied'
+                  ? '✓ Copié'
+                  : copyStatus === 'error'
+                    ? 'Échec — sélectionne le texte et copie-le manuellement'
+                    : '📋 Copier'}
+              </Button>
+              <Button variant="secondary" onClick={downloadExportFile}>
+                ⬇️ Télécharger le fichier
+              </Button>
+              <Button variant="secondary" onClick={() => setExportJson(null)}>
+                Fermer
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
