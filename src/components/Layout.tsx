@@ -31,8 +31,8 @@ export default function Layout() {
           </defs>
           <rect x="0" y="0" width="800" height="100" fill="url(#glow1)" />
         </svg>
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4 relative">
-          <h1 className="text-xl font-black uppercase flame-text shrink-0 flex items-center gap-2">
+        <div className="max-w-7xl mx-auto px-4 py-3 relative space-y-2">
+          <h1 className="text-xl font-black uppercase flame-text flex items-center gap-2">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="shrink-0">
               <path
                 d="M12 2c1 3-2 4-2 7a3 3 0 0 0 6 0c1.5 1.5 2 3.5 2 5a6 6 0 1 1-12 0c0-4 3-5 3-8 0-1.5-1-2.5 3-4Z"
@@ -48,7 +48,7 @@ export default function Layout() {
             </svg>
             Training Tracker
           </h1>
-          <nav className="flex gap-1 overflow-x-auto">
+          <nav className="flex flex-wrap gap-1">
             {navItems.map((item) => (
               <NavLink
                 key={item.to}
