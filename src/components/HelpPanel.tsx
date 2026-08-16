@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { AppData } from '../types';
 import { getSuggestions, isNewUser } from '../lib/suggestions';
@@ -7,6 +7,20 @@ export default function HelpPanel({ data }: { data: AppData }) {
   const [open, setOpen] = useState(false);
   const [suggestions] = useState(() => getSuggestions(data));
   const newUser = isNewUser(data);
+
+  useEffect(() => {
+    if (!open) return;
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Enter' || e.key === 'Escape') {
+        // Empêche l'activation du bouton "?" toujours focus (Enter y déclencherait
+        // un nouveau clic après la fermeture, ce qui rouvrirait le panneau).
+        e.preventDefault();
+        setOpen(false);
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [open]);
 
   return (
     <>
@@ -64,6 +78,13 @@ export default function HelpPanel({ data }: { data: AppData }) {
                 </li>
               ))}
             </ul>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="w-full text-center text-sm font-semibold text-ash-600 hover:text-ash-800 bg-ash-100 hover:bg-ash-200 rounded-lg py-2 transition-colors"
+            >
+              Fermer
+            </button>
           </div>
         </div>
       )}
