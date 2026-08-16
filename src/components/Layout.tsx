@@ -1,4 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom';
+import HelpPanel from './HelpPanel';
+import type { AppData } from '../types';
 
 const linkBase =
   'px-3 py-2 rounded-lg text-sm font-semibold uppercase tracking-wide transition-colors whitespace-nowrap';
@@ -14,7 +16,7 @@ const navItems = [
   { to: '/aide', label: 'Aide' },
 ];
 
-export default function Layout() {
+export default function Layout({ data }: { data: AppData }) {
   return (
     <div className="min-h-svh bg-ash-100 text-ash-800">
       <header className="sticky top-0 z-10 relative overflow-hidden bg-white">
@@ -32,22 +34,25 @@ export default function Layout() {
           <rect x="0" y="0" width="800" height="100" fill="url(#glow1)" />
         </svg>
         <div className="max-w-7xl mx-auto px-4 py-3 relative space-y-2">
-          <h1 className="text-xl font-black uppercase flame-text flex items-center gap-2">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="shrink-0">
-              <path
-                d="M12 2c1 3-2 4-2 7a3 3 0 0 0 6 0c1.5 1.5 2 3.5 2 5a6 6 0 1 1-12 0c0-4 3-5 3-8 0-1.5-1-2.5 3-4Z"
-                fill="url(#flameGrad)"
-              />
-              <defs>
-                <linearGradient id="flameGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#ffb347" />
-                  <stop offset="60%" stopColor="#f2541f" />
-                  <stop offset="100%" stopColor="#8f240f" />
-                </linearGradient>
-              </defs>
-            </svg>
-            Training Tracker
-          </h1>
+          <div className="flex items-center justify-between gap-2">
+            <h1 className="text-xl font-black uppercase flame-text flex items-center gap-2">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="shrink-0">
+                <path
+                  d="M12 2c1 3-2 4-2 7a3 3 0 0 0 6 0c1.5 1.5 2 3.5 2 5a6 6 0 1 1-12 0c0-4 3-5 3-8 0-1.5-1-2.5 3-4Z"
+                  fill="url(#flameGrad)"
+                />
+                <defs>
+                  <linearGradient id="flameGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#ffb347" />
+                    <stop offset="60%" stopColor="#f2541f" />
+                    <stop offset="100%" stopColor="#8f240f" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              Training Tracker
+            </h1>
+            <HelpPanel data={data} />
+          </div>
           <nav className="flex flex-wrap gap-1">
             {navItems.map((item) => (
               <NavLink

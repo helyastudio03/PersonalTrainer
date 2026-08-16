@@ -16,7 +16,7 @@ function App() {
   return (
     <HashRouter>
       <Routes>
-        <Route element={<Layout />}>
+        <Route element={<Layout data={appData.data} />}>
           <Route path="/" element={<Dashboard appData={appData} />} />
           <Route path="/programmes" element={<Programs appData={appData} />} />
           <Route path="/musculation" element={<Strength appData={appData} />} />
